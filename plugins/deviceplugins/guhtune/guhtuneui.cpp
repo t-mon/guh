@@ -15,8 +15,8 @@ GuhTuneUi::GuhTuneUi(QObject *parent) :
     m_view->engine()->rootContext()->setContextProperty("controller", this);
     m_view->setSource(QUrl(QLatin1String("qrc:///guhtune-ui/main.qml")));
     m_view->setResizeMode(QQuickView::SizeRootObjectToView);
-    m_view->showFullScreen();
-    //m_view->show();
+    //m_view->showFullScreen();
+    m_view->show();
 }
 
 GuhTuneUi::~GuhTuneUi()
