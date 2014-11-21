@@ -3,12 +3,12 @@
 
 #include <QObject>
 
-class QQuickView;
+#include <QtWidgets>
+#include <QDebug>
 
-class GuhTuneUi : public QObject
+class GuhTuneUi : public QMainWindow
 {
     Q_OBJECT
-    Q_ENUMS(GuhTuneUi)
 
 public:
     enum Rotation {
@@ -32,7 +32,9 @@ signals:
     void wakeup();
 
 private:
-    QQuickView *m_view;
+    QGraphicsView *m_view;
+    void paintEvent(QPaintEvent *e);
+    void drawSpashScreen();
 };
 
 #endif // GUHTUNEUI_H

@@ -2,7 +2,7 @@ include(../../plugins.pri)
 
 TARGET = $$qtLibraryTarget(guh_devicepluginguhtune)
 
-QT += quick qml
+QT += widgets
 
 SOURCES +=                  \
     devicepluginguhtune.cpp \
@@ -18,6 +18,5 @@ HEADERS +=                  \
     guhtuneui.h             \
     guhtouch.h              \
 
-RESOURCES += qml.qrc \
-            images.qrc
+RESOURCES += images.qrc     \
 
