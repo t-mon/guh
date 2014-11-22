@@ -21,7 +21,7 @@ void ItemOne::tickLeft()
         m_value = 0;
     }
     //emit valueChaged(1,m_value);
-    qDebug() << "value" << m_value;
+    qDebug() << "item 1 value" << m_value;
     update();
 }
 
@@ -35,7 +35,7 @@ void ItemOne::tickRight()
         m_value = 100;
     }
     //emit valueChaged(1,m_value);
-    qDebug() << "value" << m_value;
+    qDebug() << "item 1 value" << m_value;
     update();
 }
 

@@ -12,8 +12,11 @@ class Clock : public QGraphicsWidget
 public:
     explicit Clock(QGraphicsWidget *parent = 0);
 
-    QRectF boundingRect() const;
+protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *);
+
+signals:
+    void clockChanged();
 
 private slots:
     void timeClick();

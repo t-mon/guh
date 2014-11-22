@@ -8,20 +8,14 @@ Clock::Clock(QGraphicsWidget *parent) :
     timer->start(1000);
 }
 
-QRectF Clock::boundingRect() const
-{
-    return QRectF(-640, -640, 1280, 1280);
-}
-
 void Clock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
     Q_UNUSED(option);
 
-
     static const QPoint hourHand[3] = {
         QPoint(7, 8),
         QPoint(-7, 8),
-        QPoint(0, -40)
+        QPoint(0, -50)
     };
     static const QPoint minuteHand[3] = {
         QPoint(7, 8),
@@ -32,15 +26,20 @@ void Clock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     QColor hourColor(105, 147, 140);
     QColor minuteColor(140, 193, 182, 190);
 
-    painter->setPen(Qt::black);
+    QPen pen;
+    pen.setWidth(4);
+    pen.setColor(hourColor);
+    painter->setPen(pen);
+    painter->setRenderHint(QPainter::Antialiasing);
     painter->setBrush(Qt::black);
-    painter->drawRect(QRect(0, 0, boundingRect().width(), boundingRect().height()));
+    painter->drawEllipse(QRect(0,0, rect().width(), rect().height()));
 
-    int side = qMin(boundingRect().width(), boundingRect().height());
+
+    int side = qMin(rect().width(), rect().height());
     QTime time = QTime::currentTime();
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->translate(boundingRect().width() / 2, boundingRect().height() / 2);
+    painter->translate(rect().width() / 2, rect().height() / 2);
     painter->scale(side / 200.0, side / 200.0);
 
     painter->setPen(Qt::NoPen);
@@ -77,5 +76,6 @@ void Clock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
 void Clock::timeClick()
 {
+    emit clockChanged();
     update();
 }

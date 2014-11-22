@@ -21,7 +21,7 @@ void ItemTwo::tickLeft()
         m_value = 0;
     }
     //emit valueChaged(1,m_value);
-    qDebug() << "value" << m_value;
+    qDebug() << "item 2 value" << m_value;
     update();
 }
 
@@ -35,7 +35,7 @@ void ItemTwo::tickRight()
         m_value = 100;
     }
     //emit valueChaged(1,m_value);
-    qDebug() << "value" << m_value;
+    qDebug() << "item 2 value" << m_value;
     update();
 }
 
@@ -46,8 +46,8 @@ void ItemTwo::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawPixmap(-rect().width()/2, -rect().height()/2, rect().width(), rect().height(), QPixmap(":/images/work.svg"));
 
-    QColor patternColor(205,226,216);
-    QColor valueColor(105,147,140);
+    QColor patternColor(205, 226, 216);
+    QColor valueColor(105, 147, 140);
 
     QPen pen;
     pen.setWidth(rect().width() / 103);

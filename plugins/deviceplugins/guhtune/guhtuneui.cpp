@@ -9,7 +9,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_scene = new QGraphicsScene(this);
     m_scene->setSceneRect(0, 0, width(), height());
 
-    qDebug() << width() << "x" << height();
+    qDebug() << "UI size =" << width() << "x" << height();
 
     m_view = new QGraphicsView(m_scene);
     m_view->setCacheMode(QGraphicsView::CacheBackground);
@@ -20,9 +20,6 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_splashItem->setPixmap(QPixmap(":/images/logo.png"));
     m_splashItem->setOffset(-m_splashItem->pixmap().width() / 2, -m_splashItem->pixmap().height() / 2);
     m_splashItem->setPos(width() / 2, height() / 2);
-
-    m_clock = new Clock();
-    m_clock->setPos(width() / 2 - m_clock->boundingRect().width() / 2, height() / 2 - m_clock->boundingRect().height() / 2);
 
     QGraphicsEllipseItem *displayCircle = new QGraphicsEllipseItem();
     displayCircle->setRect(QRect(QPoint(-width()/2, -width()/2), QPoint(width()/2, width()/2)));
@@ -45,6 +42,20 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
 
     QRect geometryFullScreen(width()/2 , height()/2, displayCircle->rect().width(), displayCircle->rect().height());
 
+    // CLOCK ##################################################################
+    m_clock = new Clock();
+    //m_clock->setPos(width() / 2, height() / 2);
+    m_clock->setZValue(1);
+    m_clock->setGeometry(QRect(QPoint(0,0), QPoint(width(), width())));
+    m_clock->setVisible(false);
+    connect(m_clock,SIGNAL(clockChanged()),m_view,SLOT(update()));
+
+    m_sleepTimer = new QTimer(this);
+    m_sleepTimer->setInterval(5000);
+    m_sleepTimer->setSingleShot(true);
+    connect(m_sleepTimer, SIGNAL(timeout()),this, SLOT(sleep()));
+
+    // ITEMS ##################################################################
     m_itemOne = new ItemOne();
     m_itemOne->setGeometry(itemRect);
     m_itemOne->setPos(position1);
@@ -55,12 +66,12 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_itemTwo->setPos(position2);
     connect(m_itemTwo,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
 
-    m_itemThree = new ItemWidget(0,Qt::red,3);
+    m_itemThree = new ItemThree();
     m_itemThree->setGeometry(itemRect);
     m_itemThree->setPos(position3);
     connect(m_itemThree,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
 
-    m_itemFour = new ItemWidget(0,Qt::cyan,4);
+    m_itemFour = new ItemFour();
     m_itemFour->setGeometry(itemRect);
     m_itemFour->setPos(position4);
     connect(m_itemFour,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
@@ -70,16 +81,14 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_itemThree->setZValue(-2);
     m_itemFour->setZValue(-3);
 
-    //m_scene->addItem(m_splashItem);
-    //m_scene->addItem(m_clock);
+    m_scene->addItem(m_clock);
     //m_scene->addItem(displayCircle);
     m_scene->addItem(m_itemOne);
     m_scene->addItem(m_itemTwo);
     m_scene->addItem(m_itemThree);
     m_scene->addItem(m_itemFour);
 
-
-    // = new QStateMachine(this);
+    // STATE MACHINE ##################################################################
     m_machine = new QStateMachine(this);
     m_state1 = new QState(m_machine);
     m_state2 = new QState(m_machine);
@@ -98,8 +107,6 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     connect(m_state2FullScreen,SIGNAL(entered()),this,SLOT(onState2FullScreen()));
     connect(m_state3FullScreen,SIGNAL(entered()),this,SLOT(onState3FullScreen()));
     connect(m_state4FullScreen,SIGNAL(entered()),this,SLOT(onState4FullScreen()));
-
-
 
     m_state1->assignProperty(m_itemOne,   "geometry", geometry1);
     m_state1->assignProperty(m_itemTwo,   "geometry", geometry2);
@@ -141,6 +148,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_state4FullScreen->assignProperty(m_itemThree, "geometry", geometry4);
     m_state4FullScreen->assignProperty(m_itemFour,  "geometry", geometryFullScreen);
 
+    // TRANSITIONS ######################################################################
     // ONE ##############################################################################
     // transition 1->2
     QAbstractTransition *transition12 = m_state1->addTransition(this, SIGNAL(navigationRight()), m_state2);
@@ -293,10 +301,10 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     animationGroup->addAnimation(new QPropertyAnimation(m_itemFour,  "geometry"));
     transitionO4->addAnimation(animationGroup);
 
-
     m_currentState = m_state1FullScreen;
     m_machine->setInitialState(m_state1FullScreen);
     m_machine->start();
+    m_sleepTimer->start();
     setCentralWidget(m_view);
 }
 
@@ -309,34 +317,37 @@ void GuhTuneUi::keyPressEvent(QKeyEvent *keyEvent)
     switch (keyEvent->key()) {
     case Qt::Key_A:
         qDebug() << "navigate left";
+        wakeup();
         emit navigationLeft();
         break;
     case Qt::Key_D:
         qDebug() << "navigate right";
+        wakeup();
         emit navigationRight();
         break;
     case Qt::Key_W:
         qDebug() << "overview";
+        wakeup();
         emit enterOverview();
         break;
     case Qt::Key_S:
         qDebug() << "exit overview";
+        wakeup();
         emit exitOverview();
         break;
     case Qt::Key_2:
+        wakeup();
         tickRight();
         break;
     case Qt::Key_1:
+        wakeup();
         tickLeft();
         break;
-    case Qt::Key_Space:
-        m_scene->update();
+    case Qt::Key_Q:
+        wakeup();
         break;
-    default:
-        qDebug() << keyEvent->text() << "key pressed";
     }
     keyEvent->ignore();
-
 }
 
 void GuhTuneUi::onState1()
@@ -448,7 +459,16 @@ void GuhTuneUi::buttonLongPressed()
 
 void GuhTuneUi::wakeup()
 {
+    m_sleepTimer->start();
+    m_clock->setVisible(false);
+    m_view->update();
+}
 
+void GuhTuneUi::sleep()
+{
+    m_sleepTimer->start();
+    m_clock->setVisible(true);
+    m_view->update();
 }
 
 

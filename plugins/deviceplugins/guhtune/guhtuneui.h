@@ -13,11 +13,14 @@
 #include <QPropertyAnimation>
 #include <QAbstractTransition>
 #include <QSequentialAnimationGroup>
+#include <QTimer>
 
 #include "guhtune-ui-elements/clock.h"
 #include "guhtune-ui-elements/itemwidget.h"
 #include "guhtune-ui-elements/itemone.h"
 #include "guhtune-ui-elements/itemtwo.h"
+#include "guhtune-ui-elements/itemthree.h"
+#include "guhtune-ui-elements/itemfour.h"
 
 class GuhTuneUi : public QMainWindow
 {
@@ -33,10 +36,11 @@ private:
 
     QGraphicsPixmapItem *m_splashItem;
     Clock *m_clock;
+    QTimer *m_sleepTimer;
     ItemOne *m_itemOne;
     ItemTwo *m_itemTwo;
-    ItemWidget *m_itemThree;
-    ItemWidget *m_itemFour;
+    ItemThree *m_itemThree;
+    ItemFour *m_itemFour;
 
     QStateMachine *m_machine;
     QState *m_state1;
@@ -82,6 +86,7 @@ public slots:
     void buttonReleased();
     void buttonLongPressed();
     void wakeup();
+    void sleep();
 
 };
 
