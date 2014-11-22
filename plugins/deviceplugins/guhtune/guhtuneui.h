@@ -26,22 +26,18 @@ public:
     ~GuhTuneUi();
 
 private:
-    //QStateMachine *m_machine;
-
     QGraphicsScene *m_scene;
     QGraphicsView *m_view;
 
     QGraphicsPixmapItem *m_splashItem;
     Clock *m_clock;
-
-    QState *createGeometryState(QObject *w1, const QRect &rect1,
-                                QObject *w2, const QRect &rect2,
-                                QObject *w3, const QRect &rect3,
-                                QObject *w4, const QRect &rect4,
-                                QState *parent);
+    ItemWidget *m_itemOne;
+    ItemWidget *m_itemTwo;
+    ItemWidget *m_itemThree;
+    ItemWidget *m_itemFour;
 
 protected:
-     void keyPressEvent(QKeyEvent *keyEvent);
+    void keyPressEvent(QKeyEvent *keyEvent);
 
 signals:
     // Called from ui
@@ -51,10 +47,25 @@ signals:
     void navigationLeft();
     void navigationRight();
 
+    void enterOverview();
+    void exitOverview();
+
     // Called from plugin code
     void buttonPressed();
     void buttonReleased();
     void wakeup();
+
+private slots:
+    void onState1();
+    void onState2();
+    void onState3();
+    void onState4();
+
+public slots:
+    void navigateLeft();
+    void navigateRight();
+
+
 
 };
 
