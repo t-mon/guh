@@ -110,7 +110,7 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
         } else {
             qDebug() << " ----> create Tune UI.";
             m_ui = new GuhTuneUi();
-            m_ui->showFullScreen();
+            m_ui->showMaximized();
         }
     }
 

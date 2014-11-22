@@ -18,8 +18,6 @@ private:
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
 
-private slots:
-    void onGeometryChanged();
 };
 
 #endif // ITEMWIDGET_H

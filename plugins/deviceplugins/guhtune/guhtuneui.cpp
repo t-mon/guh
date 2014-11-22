@@ -4,6 +4,8 @@
 GuhTuneUi::GuhTuneUi(QWidget *parent):
     QMainWindow(parent)
 {
+    int displaySize = 1200;
+    resize(displaySize,displaySize);
     m_scene = new QGraphicsScene(this);
     m_scene->setSceneRect(0, 0, width(), height());
 
@@ -23,17 +25,18 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_clock->setPos(width() / 2 - m_clock->boundingRect().width() / 2, height() / 2 - m_clock->boundingRect().height() / 2);
 
     QGraphicsEllipseItem *displayCircle = new QGraphicsEllipseItem();
-    displayCircle->setRect(QRect(QPoint(-540, -540), QPoint(540, 540)));
+    displayCircle->setRect(QRect(QPoint(-width()/2, -width()/2), QPoint(width()/2, width()/2)));
     displayCircle->setPos(width() / 2, height() / 2);
     displayCircle->setPen(QPen(Qt::white,5));
 
     double itemScale = 5.05;
 
-    QRectF itemRect = QRect(QPoint(-displayCircle->rect().height() / itemScale, -displayCircle->rect().height() / itemScale), QPoint(displayCircle->rect().height() / itemScale, displayCircle->rect().height() / itemScale));
-    QPointF position1(width() / 2 , height() / 2 - 320);
-    QPointF position2(width() / 2 + 320, height() / 2 );
-    QPointF position3(width() / 2 , height() / 2 + 320);
-    QPointF position4(width() / 2 - 320, height() / 2 );
+    QRectF itemRect = QRect(QPoint(-height() / itemScale, -height() / itemScale), QPoint(height() / itemScale, height() / itemScale));
+
+    QPointF position1(width() / 2 , height() / 2 - height() / 2 + itemRect.height() / 2);
+    QPointF position2(width() / 2 + height() / 2 - itemRect.height() / 2, height() / 2 );
+    QPointF position3(width() / 2 , height() / 2 + height() / 2 - itemRect.height() / 2);
+    QPointF position4(width() / 2 - height() / 2 + itemRect.height() / 2, height() / 2 );
 
     QRect geometry1(position1.rx(), position1.ry(), itemRect.width(), itemRect.height());
     QRect geometry2(position2.rx(), position2.ry(), itemRect.width(), itemRect.height());
@@ -42,12 +45,12 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
 
     QRect geometryFullScreen(width()/2 , height()/2, displayCircle->rect().width(), displayCircle->rect().height());
 
-    m_itemOne = new ItemWidget(0,Qt::blue,1);
+    m_itemOne = new ItemOne();
     m_itemOne->setGeometry(itemRect);
     m_itemOne->setPos(position1);
     connect(m_itemOne,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
 
-    m_itemTwo = new ItemWidget(0,Qt::green,2);
+    m_itemTwo = new ItemTwo();
     m_itemTwo->setGeometry(itemRect);
     m_itemTwo->setPos(position2);
     connect(m_itemTwo,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
@@ -62,74 +65,85 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_itemFour->setPos(position4);
     connect(m_itemFour,SIGNAL(geometryChanged()),m_scene,SLOT(update()));
 
+    m_itemOne->setZValue(0);
+    m_itemTwo->setZValue(-1);
+    m_itemThree->setZValue(-2);
+    m_itemFour->setZValue(-3);
+
     //m_scene->addItem(m_splashItem);
     //m_scene->addItem(m_clock);
-    m_scene->addItem(displayCircle);
+    //m_scene->addItem(displayCircle);
     m_scene->addItem(m_itemOne);
     m_scene->addItem(m_itemTwo);
     m_scene->addItem(m_itemThree);
     m_scene->addItem(m_itemFour);
 
 
-    //m_machine = new QStateMachine(this);
-    QStateMachine *machine = new QStateMachine(this);
-    QState *state1 = new QState(machine);
-    QState *state2 = new QState(machine);
-    QState *state3 = new QState(machine);
-    QState *state4 = new QState(machine);
-    QState *state1FullScreen = new QState(machine);
-    QState *state2FullScreen = new QState(machine);
-    QState *state3FullScreen = new QState(machine);
-    QState *state4FullScreen = new QState(machine);
+    // = new QStateMachine(this);
+    m_machine = new QStateMachine(this);
+    m_state1 = new QState(m_machine);
+    m_state2 = new QState(m_machine);
+    m_state3 = new QState(m_machine);
+    m_state4 = new QState(m_machine);
+    m_state1FullScreen = new QState(m_machine);
+    m_state2FullScreen = new QState(m_machine);
+    m_state3FullScreen = new QState(m_machine);
+    m_state4FullScreen = new QState(m_machine);
 
-    connect(state1,SIGNAL(entered()),this,SLOT(onState1()));
-    connect(state2,SIGNAL(entered()),this,SLOT(onState2()));
-    connect(state3,SIGNAL(entered()),this,SLOT(onState3()));
-    connect(state4,SIGNAL(entered()),this,SLOT(onState4()));
+    connect(m_state1,SIGNAL(entered()),this,SLOT(onState1()));
+    connect(m_state2,SIGNAL(entered()),this,SLOT(onState2()));
+    connect(m_state3,SIGNAL(entered()),this,SLOT(onState3()));
+    connect(m_state4,SIGNAL(entered()),this,SLOT(onState4()));
+    connect(m_state1FullScreen,SIGNAL(entered()),this,SLOT(onState1FullScreen()));
+    connect(m_state2FullScreen,SIGNAL(entered()),this,SLOT(onState2FullScreen()));
+    connect(m_state3FullScreen,SIGNAL(entered()),this,SLOT(onState3FullScreen()));
+    connect(m_state4FullScreen,SIGNAL(entered()),this,SLOT(onState4FullScreen()));
 
-    state1->assignProperty(m_itemOne,   "geometry", geometry1);
-    state1->assignProperty(m_itemTwo,   "geometry", geometry2);
-    state1->assignProperty(m_itemThree, "geometry", geometry3);
-    state1->assignProperty(m_itemFour,  "geometry", geometry4);
 
-    state2->assignProperty(m_itemOne,   "geometry", geometry4);
-    state2->assignProperty(m_itemTwo,   "geometry", geometry1);
-    state2->assignProperty(m_itemThree, "geometry", geometry2);
-    state2->assignProperty(m_itemFour,  "geometry", geometry3);
 
-    state3->assignProperty(m_itemOne,   "geometry", geometry3);
-    state3->assignProperty(m_itemTwo,   "geometry", geometry4);
-    state3->assignProperty(m_itemThree, "geometry", geometry1);
-    state3->assignProperty(m_itemFour,  "geometry", geometry2);
+    m_state1->assignProperty(m_itemOne,   "geometry", geometry1);
+    m_state1->assignProperty(m_itemTwo,   "geometry", geometry2);
+    m_state1->assignProperty(m_itemThree, "geometry", geometry3);
+    m_state1->assignProperty(m_itemFour,  "geometry", geometry4);
 
-    state4->assignProperty(m_itemOne,   "geometry", geometry2);
-    state4->assignProperty(m_itemTwo,   "geometry", geometry3);
-    state4->assignProperty(m_itemThree, "geometry", geometry4);
-    state4->assignProperty(m_itemFour,  "geometry", geometry1);
+    m_state2->assignProperty(m_itemOne,   "geometry", geometry4);
+    m_state2->assignProperty(m_itemTwo,   "geometry", geometry1);
+    m_state2->assignProperty(m_itemThree, "geometry", geometry2);
+    m_state2->assignProperty(m_itemFour,  "geometry", geometry3);
 
-    state1FullScreen->assignProperty(m_itemOne,   "geometry", geometryFullScreen);
-    state1FullScreen->assignProperty(m_itemTwo,   "geometry", geometry2);
-    state1FullScreen->assignProperty(m_itemThree, "geometry", geometry3);
-    state1FullScreen->assignProperty(m_itemFour,  "geometry", geometry4);
+    m_state3->assignProperty(m_itemOne,   "geometry", geometry3);
+    m_state3->assignProperty(m_itemTwo,   "geometry", geometry4);
+    m_state3->assignProperty(m_itemThree, "geometry", geometry1);
+    m_state3->assignProperty(m_itemFour,  "geometry", geometry2);
 
-    state2FullScreen->assignProperty(m_itemOne,   "geometry", geometry4);
-    state2FullScreen->assignProperty(m_itemTwo,   "geometry", geometryFullScreen);
-    state2FullScreen->assignProperty(m_itemThree, "geometry", geometry2);
-    state2FullScreen->assignProperty(m_itemFour,  "geometry", geometry3);
+    m_state4->assignProperty(m_itemOne,   "geometry", geometry2);
+    m_state4->assignProperty(m_itemTwo,   "geometry", geometry3);
+    m_state4->assignProperty(m_itemThree, "geometry", geometry4);
+    m_state4->assignProperty(m_itemFour,  "geometry", geometry1);
 
-    state3FullScreen->assignProperty(m_itemOne,   "geometry", geometry3);
-    state3FullScreen->assignProperty(m_itemTwo,   "geometry", geometry4);
-    state3FullScreen->assignProperty(m_itemThree, "geometry", geometryFullScreen);
-    state3FullScreen->assignProperty(m_itemFour,  "geometry", geometry2);
+    m_state1FullScreen->assignProperty(m_itemOne,   "geometry", geometryFullScreen);
+    m_state1FullScreen->assignProperty(m_itemTwo,   "geometry", geometry2);
+    m_state1FullScreen->assignProperty(m_itemThree, "geometry", geometry3);
+    m_state1FullScreen->assignProperty(m_itemFour,  "geometry", geometry4);
 
-    state4FullScreen->assignProperty(m_itemOne,   "geometry", geometry2);
-    state4FullScreen->assignProperty(m_itemTwo,   "geometry", geometry3);
-    state4FullScreen->assignProperty(m_itemThree, "geometry", geometry4);
-    state4FullScreen->assignProperty(m_itemFour,  "geometry", geometryFullScreen);
+    m_state2FullScreen->assignProperty(m_itemOne,   "geometry", geometry4);
+    m_state2FullScreen->assignProperty(m_itemTwo,   "geometry", geometryFullScreen);
+    m_state2FullScreen->assignProperty(m_itemThree, "geometry", geometry2);
+    m_state2FullScreen->assignProperty(m_itemFour,  "geometry", geometry3);
+
+    m_state3FullScreen->assignProperty(m_itemOne,   "geometry", geometry3);
+    m_state3FullScreen->assignProperty(m_itemTwo,   "geometry", geometry4);
+    m_state3FullScreen->assignProperty(m_itemThree, "geometry", geometryFullScreen);
+    m_state3FullScreen->assignProperty(m_itemFour,  "geometry", geometry2);
+
+    m_state4FullScreen->assignProperty(m_itemOne,   "geometry", geometry2);
+    m_state4FullScreen->assignProperty(m_itemTwo,   "geometry", geometry3);
+    m_state4FullScreen->assignProperty(m_itemThree, "geometry", geometry4);
+    m_state4FullScreen->assignProperty(m_itemFour,  "geometry", geometryFullScreen);
 
     // ONE ##############################################################################
     // transition 1->2
-    QAbstractTransition *transition12 = state1->addTransition(this, SIGNAL(navigationRight()), state2);
+    QAbstractTransition *transition12 = m_state1->addTransition(this, SIGNAL(navigationRight()), m_state2);
     QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup(this);
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -138,7 +152,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition12->addAnimation(animationGroup);
 
     // transition 1->4
-    QAbstractTransition *transition14 = state1->addTransition(this, SIGNAL(navigationLeft()), state4);
+    QAbstractTransition *transition14 = m_state1->addTransition(this, SIGNAL(navigationLeft()), m_state4);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -147,7 +161,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition14->addAnimation(animationGroup);
 
     // transition 1->Overview
-    QAbstractTransition *transition1O = state1->addTransition(this, SIGNAL(enterOverview()), state1FullScreen);
+    QAbstractTransition *transition1O = m_state1->addTransition(this, SIGNAL(enterOverview()), m_state1FullScreen);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -156,7 +170,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition1O->addAnimation(animationGroup);
 
     // transition Overview -> 1
-    QAbstractTransition *transitionO1 = state1FullScreen->addTransition(this, SIGNAL(exitOverview()), state1);
+    QAbstractTransition *transitionO1 = m_state1FullScreen->addTransition(this, SIGNAL(exitOverview()), m_state1);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -167,7 +181,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
 
     // TWO ##############################################################################
     // transition 2->3
-    QAbstractTransition *transition23 = state2->addTransition(this, SIGNAL(navigationRight()), state3);
+    QAbstractTransition *transition23 = m_state2->addTransition(this, SIGNAL(navigationRight()), m_state3);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -176,7 +190,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition23->addAnimation(animationGroup);
 
     // transition 2->1
-    QAbstractTransition *transition21 = state2->addTransition(this, SIGNAL(navigationLeft()), state1);
+    QAbstractTransition *transition21 = m_state2->addTransition(this, SIGNAL(navigationLeft()), m_state1);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -185,7 +199,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition21->addAnimation(animationGroup);
 
     // transition 2->Overview
-    QAbstractTransition *transition2O = state2->addTransition(this, SIGNAL(enterOverview()), state2FullScreen);
+    QAbstractTransition *transition2O = m_state2->addTransition(this, SIGNAL(enterOverview()), m_state2FullScreen);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -194,7 +208,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition2O->addAnimation(animationGroup);
 
     // transition Overview -> 2
-    QAbstractTransition *transitionO2 = state2FullScreen->addTransition(this, SIGNAL(exitOverview()), state2);
+    QAbstractTransition *transitionO2 = m_state2FullScreen->addTransition(this, SIGNAL(exitOverview()), m_state2);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -206,7 +220,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
 
     // THREE ##############################################################################
     // transition 3->4
-    QAbstractTransition *transition34 = state3->addTransition(this, SIGNAL(navigationRight()), state4);
+    QAbstractTransition *transition34 = m_state3->addTransition(this, SIGNAL(navigationRight()), m_state4);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -215,7 +229,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition34->addAnimation(animationGroup);
 
     // transition 3->2
-    QAbstractTransition *transition32 = state3->addTransition(this, SIGNAL(navigationLeft()), state2);
+    QAbstractTransition *transition32 = m_state3->addTransition(this, SIGNAL(navigationLeft()), m_state2);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -224,7 +238,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition32->addAnimation(animationGroup);
 
     // transition 3->Overview
-    QAbstractTransition *transition3O = state3->addTransition(this, SIGNAL(enterOverview()), state3FullScreen);
+    QAbstractTransition *transition3O = m_state3->addTransition(this, SIGNAL(enterOverview()), m_state3FullScreen);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -233,7 +247,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition3O->addAnimation(animationGroup);
 
     // transition Overview -> 3
-    QAbstractTransition *transitionO3 = state3FullScreen->addTransition(this, SIGNAL(exitOverview()), state3);
+    QAbstractTransition *transitionO3 = m_state3FullScreen->addTransition(this, SIGNAL(exitOverview()), m_state3);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -244,7 +258,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
 
     // FOUR ##############################################################################
     // transition 4->1
-    QAbstractTransition *transition41 = state4->addTransition(this, SIGNAL(navigationRight()), state1);
+    QAbstractTransition *transition41 = m_state4->addTransition(this, SIGNAL(navigationRight()), m_state1);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -253,7 +267,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition41->addAnimation(animationGroup);
 
     // transition 4->3
-    QAbstractTransition *transition43 = state4->addTransition(this, SIGNAL(navigationLeft()), state3);
+    QAbstractTransition *transition43 = m_state4->addTransition(this, SIGNAL(navigationLeft()), m_state3);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -262,7 +276,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition43->addAnimation(animationGroup);
 
     // transition 4->Overview
-    QAbstractTransition *transition4O = state4->addTransition(this, SIGNAL(enterOverview()), state4FullScreen);
+    QAbstractTransition *transition4O = m_state4->addTransition(this, SIGNAL(enterOverview()), m_state4FullScreen);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -271,7 +285,7 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transition4O->addAnimation(animationGroup);
 
     // transition Overview -> 4
-    QAbstractTransition *transitionO4 = state4FullScreen->addTransition(this, SIGNAL(exitOverview()), state4);
+    QAbstractTransition *transitionO4 = m_state4FullScreen->addTransition(this, SIGNAL(exitOverview()), m_state4);
     animationGroup = new QParallelAnimationGroup;
     animationGroup->addAnimation(new QPropertyAnimation(m_itemOne,   "geometry"));
     animationGroup->addAnimation(new QPropertyAnimation(m_itemTwo,   "geometry"));
@@ -280,8 +294,9 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     transitionO4->addAnimation(animationGroup);
 
 
-    machine->setInitialState(state1);
-    machine->start();
+    m_currentState = m_state1FullScreen;
+    m_machine->setInitialState(m_state1FullScreen);
+    m_machine->start();
     setCentralWidget(m_view);
 }
 
@@ -308,18 +323,20 @@ void GuhTuneUi::keyPressEvent(QKeyEvent *keyEvent)
         qDebug() << "exit overview";
         emit exitOverview();
         break;
+    case Qt::Key_2:
+        tickRight();
+        break;
+    case Qt::Key_1:
+        tickLeft();
+        break;
     case Qt::Key_Space:
-        //m_view->update();
         m_scene->update();
         break;
-    case Qt::Key_T:{
-        bool visible = m_clock->isVisible();
-        m_clock->setVisible(!visible);
-        break;
-    }
     default:
         qDebug() << keyEvent->text() << "key pressed";
     }
+    keyEvent->ignore();
+
 }
 
 void GuhTuneUi::onState1()
@@ -329,6 +346,7 @@ void GuhTuneUi::onState1()
     m_itemThree->setZValue(-2);
     m_itemFour->setZValue(-3);
 
+    m_currentState = m_state1;
 }
 
 void GuhTuneUi::onState2()
@@ -337,6 +355,8 @@ void GuhTuneUi::onState2()
     m_itemTwo->setZValue(0);
     m_itemThree->setZValue(-1);
     m_itemFour->setZValue(-2);
+
+    m_currentState = m_state2;
 }
 
 void GuhTuneUi::onState3()
@@ -345,6 +365,8 @@ void GuhTuneUi::onState3()
     m_itemTwo->setZValue(-3);
     m_itemThree->setZValue(0);
     m_itemFour->setZValue(-1);
+
+    m_currentState = m_state3;
 }
 
 void GuhTuneUi::onState4()
@@ -353,6 +375,80 @@ void GuhTuneUi::onState4()
     m_itemTwo->setZValue(-2);
     m_itemThree->setZValue(-3);
     m_itemFour->setZValue(0);
+
+    m_currentState = m_state4;
+}
+
+void GuhTuneUi::onState1FullScreen()
+{
+    m_currentState = m_state1FullScreen;
+}
+
+void GuhTuneUi::onState2FullScreen()
+{
+    m_currentState = m_state2FullScreen;
+}
+
+void GuhTuneUi::onState3FullScreen()
+{
+    m_currentState = m_state3FullScreen;
+}
+
+void GuhTuneUi::onState4FullScreen()
+{
+    m_currentState = m_state4FullScreen;
+}
+
+void GuhTuneUi::navigateLeft()
+{
+
+}
+
+void GuhTuneUi::navigateRight()
+{
+
+}
+
+void GuhTuneUi::tickLeft()
+{
+    if (m_currentState == m_state1FullScreen) {
+        m_itemOne->tickLeft();
+        m_scene->update();
+    } else if (m_currentState == m_state2FullScreen) {
+        m_itemTwo->tickLeft();
+        m_scene->update();
+    }
+}
+
+void GuhTuneUi::tickRight()
+{
+    if (m_currentState == m_state1FullScreen) {
+        m_itemOne->tickRight();
+        m_scene->update();
+    } else if (m_currentState == m_state2FullScreen) {
+        m_itemTwo->tickRight();
+        m_scene->update();
+    }
+}
+
+void GuhTuneUi::buttonPressed()
+{
+
+}
+
+void GuhTuneUi::buttonReleased()
+{
+
+}
+
+void GuhTuneUi::buttonLongPressed()
+{
+
+}
+
+void GuhTuneUi::wakeup()
+{
+
 }
 
 
