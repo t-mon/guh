@@ -108,7 +108,9 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
         if (qgetenv("DISPLAY").isEmpty()) {
             qDebug() << " ----> ERROR: display NOT found.";
         } else {
-            m_ui = new GuhTuneUi(this);
+            qDebug() << " ----> create Tune UI.";
+            m_ui = new GuhTuneUi();
+            m_ui->showFullScreen();
         }
     }
 
@@ -154,13 +156,13 @@ void DevicePluginGuhTune::handDisappeared()
 void DevicePluginGuhTune::encoderIncreased()
 {
     qDebug() << "encoder +";
-    m_ui->smallStep(GuhTuneUi::RotationLeft);
+    //m_ui->smallStep(GuhTuneUi::RotationLeft);
 }
 
 void DevicePluginGuhTune::encoderDecreased()
 {
     qDebug() << "encoder -";
-    m_ui->smallStep(GuhTuneUi::RotationRight);
+    //m_ui->smallStep(GuhTuneUi::RotationRight);
 }
 
 void DevicePluginGuhTune::pressed(int actionIndex)
