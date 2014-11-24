@@ -18,7 +18,7 @@ public:
     ~GpioMonitor();
 
     void stop();
-    bool addGpio(Gpio *gpio);
+    bool addGpio(Gpio *gpio, bool activeLow);
     QList<Gpio*> gpioList();
 
 

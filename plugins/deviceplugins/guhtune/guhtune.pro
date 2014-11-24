@@ -31,4 +31,3 @@ HEADERS +=                  \
     guhtune-ui-elements/itemfour.h
 
 RESOURCES += images.qrc     \
-

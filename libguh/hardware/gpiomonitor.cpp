@@ -22,9 +22,9 @@ void GpioMonitor::stop()
     m_enabledMutex.unlock();
 }
 
-bool GpioMonitor::addGpio(Gpio *gpio)
+bool GpioMonitor::addGpio(Gpio *gpio, bool activeLow)
 {
-    if (!gpio->exportGpio() || !gpio->setDirection(INPUT) || !gpio->setEdgeInterrupt(EDGE_BOTH) || !gpio->setActiveLow(true)) {
+    if (!gpio->exportGpio() || !gpio->setDirection(INPUT) || !gpio->setEdgeInterrupt(EDGE_BOTH) || !gpio->setActiveLow(activeLow)) {
         return false;
     }
     m_gpioListMutex.lock();

@@ -4,12 +4,12 @@
 GuhTuneUi::GuhTuneUi(QWidget *parent):
     QMainWindow(parent)
 {
-    int displaySize = 1200;
-    resize(displaySize,displaySize);
+    int displaySize = 300   ;
+    resize(displaySize +20 ,displaySize +20);
     m_scene = new QGraphicsScene(this);
-    m_scene->setSceneRect(0, 0, width(), height());
+    m_scene->setSceneRect(0, 0, displaySize, displaySize);
 
-    qDebug() << "UI size =" << width() << "x" << height();
+    qDebug() << "UI size =" << displaySize << "x" << displaySize;
 
     m_view = new QGraphicsView(m_scene);
     m_view->setCacheMode(QGraphicsView::CacheBackground);
@@ -19,34 +19,34 @@ GuhTuneUi::GuhTuneUi(QWidget *parent):
     m_splashItem = new QGraphicsPixmapItem();
     m_splashItem->setPixmap(QPixmap(":/images/logo.png"));
     m_splashItem->setOffset(-m_splashItem->pixmap().width() / 2, -m_splashItem->pixmap().height() / 2);
-    m_splashItem->setPos(width() / 2, height() / 2);
+    m_splashItem->setPos(displaySize / 2, displaySize / 2);
 
-    QGraphicsEllipseItem *displayCircle = new QGraphicsEllipseItem();
-    displayCircle->setRect(QRect(QPoint(-width()/2, -width()/2), QPoint(width()/2, width()/2)));
-    displayCircle->setPos(width() / 2, height() / 2);
-    displayCircle->setPen(QPen(Qt::white,5));
+//    QGraphicsEllipseItem *displayCircle = new QGraphicsEllipseItem();
+//    displayCircle->setRect(QRect(QPoint(-displaySize/2, -displaySize/2), QPoint(displaySize/2, displaySize/2)));
+//    displayCircle->setPos(displaySize / 2, displaySize / 2);
+//    displayCircle->setPen(QPen(Qt::white,5));
 
     double itemScale = 5.05;
 
-    QRectF itemRect = QRect(QPoint(-height() / itemScale, -height() / itemScale), QPoint(height() / itemScale, height() / itemScale));
+    QRectF itemRect = QRect(QPoint(-displaySize / itemScale, -displaySize / itemScale), QPoint(displaySize / itemScale, displaySize / itemScale));
 
-    QPointF position1(width() / 2 , height() / 2 - height() / 2 + itemRect.height() / 2);
-    QPointF position2(width() / 2 + height() / 2 - itemRect.height() / 2, height() / 2 );
-    QPointF position3(width() / 2 , height() / 2 + height() / 2 - itemRect.height() / 2);
-    QPointF position4(width() / 2 - height() / 2 + itemRect.height() / 2, height() / 2 );
+    QPointF position1(displaySize / 2 , displaySize / 2 - displaySize / 2 + itemRect.height() / 2);
+    QPointF position2(displaySize / 2 + displaySize / 2 - itemRect.width() / 2, displaySize / 2 );
+    QPointF position3(displaySize / 2 , displaySize / 2 + displaySize / 2 - itemRect.height() / 2);
+    QPointF position4(displaySize / 2 - displaySize / 2 + itemRect.width() / 2, displaySize / 2 );
 
     QRect geometry1(position1.rx(), position1.ry(), itemRect.width(), itemRect.height());
     QRect geometry2(position2.rx(), position2.ry(), itemRect.width(), itemRect.height());
     QRect geometry3(position3.rx(), position3.ry(), itemRect.width(), itemRect.height());
     QRect geometry4(position4.rx(), position4.ry(), itemRect.width(), itemRect.height());
 
-    QRect geometryFullScreen(width()/2 , height()/2, displayCircle->rect().width(), displayCircle->rect().height());
+    QRect geometryFullScreen(displaySize/2 , displaySize/2, displaySize, displaySize);
 
     // CLOCK ##################################################################
     m_clock = new Clock();
-    //m_clock->setPos(width() / 2, height() / 2);
+    //m_clock->setPos(displaySize / 2, displaySize / 2);
     m_clock->setZValue(1);
-    m_clock->setGeometry(QRect(QPoint(0,0), QPoint(width(), width())));
+    m_clock->setGeometry(QRect(QPoint(0,0), QPoint(displaySize, displaySize)));
     m_clock->setVisible(false);
     connect(m_clock,SIGNAL(clockChanged()),m_view,SLOT(update()));
 
@@ -412,49 +412,79 @@ void GuhTuneUi::onState4FullScreen()
 
 void GuhTuneUi::navigateLeft()
 {
-
+    wakeup();
+    if (m_currentState == m_state1
+            || m_currentState == m_state2
+            || m_currentState == m_state3
+            || m_currentState == m_state4) {
+        emit navigateLeft();
+        m_scene->update();
+    }
 }
 
 void GuhTuneUi::navigateRight()
 {
-
+    wakeup();
+    if (m_currentState == m_state1
+            || m_currentState == m_state2
+            || m_currentState == m_state3
+            || m_currentState == m_state4) {
+        emit navigateRight();
+        m_scene->update();
+    }
 }
 
 void GuhTuneUi::tickLeft()
 {
+    wakeup();
     if (m_currentState == m_state1FullScreen) {
         m_itemOne->tickLeft();
-        m_scene->update();
     } else if (m_currentState == m_state2FullScreen) {
         m_itemTwo->tickLeft();
-        m_scene->update();
+    } else if (m_currentState == m_state4FullScreen) {
+        m_itemFour->tickLeft();
     }
+    m_scene->update();
 }
 
 void GuhTuneUi::tickRight()
 {
+    wakeup();
     if (m_currentState == m_state1FullScreen) {
         m_itemOne->tickRight();
-        m_scene->update();
     } else if (m_currentState == m_state2FullScreen) {
         m_itemTwo->tickRight();
-        m_scene->update();
+    } else if (m_currentState == m_state4FullScreen) {
+        m_itemFour->tickRight();
     }
+    m_scene->update();
 }
 
 void GuhTuneUi::buttonPressed()
 {
-
+    wakeup();
 }
 
 void GuhTuneUi::buttonReleased()
 {
-
+    wakeup();
+    if (m_currentState == m_state1
+            || m_currentState == m_state2
+            || m_currentState == m_state3
+            || m_currentState == m_state4) {
+        emit enterOverview();
+    }
 }
 
 void GuhTuneUi::buttonLongPressed()
 {
-
+    wakeup();
+    if (m_currentState == m_state1FullScreen
+            || m_currentState == m_state2FullScreen
+            || m_currentState == m_state3FullScreen
+            || m_currentState == m_state4FullScreen) {
+        emit exitOverview();
+    }
 }
 
 void GuhTuneUi::wakeup()

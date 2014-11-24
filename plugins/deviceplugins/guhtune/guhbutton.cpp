@@ -21,6 +21,7 @@
 GuhButton::GuhButton(QObject *parent, int gpio) :
     QObject(parent), m_gpioPin(gpio)
 {
+    m_buttonPressed = false;
 }
 
 bool GuhButton::enable()
@@ -30,7 +31,7 @@ bool GuhButton::enable()
 
     m_gpio = new Gpio(this, m_gpioPin);
 
-    if(!m_monitor->addGpio(m_gpio)){
+    if(!m_monitor->addGpio(m_gpio, false)){
         return false;
     }
     connect(m_monitor, &GpioMonitor::changed, this, &GuhButton::gpioChanged);

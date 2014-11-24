@@ -11,6 +11,8 @@ class ItemFour : public QGraphicsWidget
     Q_OBJECT
 public:
     explicit ItemFour(QGraphicsWidget *parent = 0);
+    void tickLeft();
+    void tickRight();
 
 private:
     double m_currentTemperature;

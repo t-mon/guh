@@ -6,5 +6,6 @@
         <file>images/template.svg</file>
         <file>images/work.svg</file>
         <file>images/logo.png</file>
+        <file>images/radiator.svg</file>
     </qresource>
 </RCC>

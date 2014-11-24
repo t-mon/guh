@@ -322,7 +322,7 @@ bool Gpio::setActiveLow(bool activeLow)
         return false;
     }
 
-    if(!activeLow){
+    if(activeLow){
         if(write(fd, "0", 2) != 2){
             qDebug() << "ERROR: could not write to gpio (set Active LOW)";
             close(fd);
@@ -331,7 +331,7 @@ bool Gpio::setActiveLow(bool activeLow)
         close(fd);
         return true;
     }
-    if(activeLow){
+    if(!activeLow){
         if(write(fd, "1", 2) != 2){
             qDebug() << "ERROR: could not write to gpio (set Active HIGH)";
             close(fd);

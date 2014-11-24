@@ -59,9 +59,7 @@ void DevicePluginGuhTune::startMonitoringAutoDevices()
 
 DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device)
 {
-
     if (myDevices().isEmpty()) {
-
         // Hardware pushbutton
         m_button = new GuhButton(this, 44);
         if(m_button->enable()){
@@ -80,7 +78,7 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
             qDebug() << " ----> hardware encoder found.";
 
             m_encoder->setBasicSensitivity(2);
-            m_encoder->setNavigationSensitivity(10);
+            m_encoder->setNavigationSensitivity(4);
 
             connect(m_encoder, &GuhEncoder::increased, this, &DevicePluginGuhTune::encoderIncreased);
             connect(m_encoder, &GuhEncoder::decreased, this, &DevicePluginGuhTune::encoderDecreased);
@@ -110,7 +108,7 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
         } else {
             qDebug() << " ----> create Tune UI.";
             m_ui = new GuhTuneUi();
-            m_ui->showMaximized();
+            m_ui->show();
         }
     }
 
@@ -128,24 +126,33 @@ DeviceManager::HardwareResources DevicePluginGuhTune::requiredHardware() const
 void DevicePluginGuhTune::buttonPressed()
 {
     qDebug() << "button pressed";
-    m_ui->buttonPressed();
+    if (m_ui) {
+        m_ui->buttonPressed();
+    }
 }
 
 void DevicePluginGuhTune::buttonReleased()
 {
     qDebug() << "button released";
-    m_ui->buttonReleased();
+    if (m_ui) {
+        m_ui->buttonReleased();
+    }
 }
 
 void DevicePluginGuhTune::buttonLongPressed()
 {
     qDebug() << "button long pressed";
+    if (m_ui) {
+        m_ui->buttonLongPressed();
+    }
 }
 
 void DevicePluginGuhTune::handDetected()
 {
     qDebug() << "hand detected";
-    m_ui->wakeup();
+    if (m_ui) {
+        m_ui->wakeup();
+    }
 }
 
 void DevicePluginGuhTune::handDisappeared()
@@ -156,36 +163,49 @@ void DevicePluginGuhTune::handDisappeared()
 void DevicePluginGuhTune::encoderIncreased()
 {
     qDebug() << "encoder +";
-    //m_ui->smallStep(GuhTuneUi::RotationLeft);
+    if (m_ui) {
+        m_ui->tickRight();
+    }
 }
 
 void DevicePluginGuhTune::encoderDecreased()
 {
     qDebug() << "encoder -";
-    //m_ui->smallStep(GuhTuneUi::RotationRight);
+    if (m_ui) {
+        m_ui->tickLeft();
+    }
 }
 
 void DevicePluginGuhTune::pressed(int actionIndex)
 {
-    qDebug() << "pressed" << actionIndex;
+    Q_UNUSED(actionIndex);
+    //qDebug() << "pressed" << actionIndex;
 }
 
 void DevicePluginGuhTune::increase(int actionIndex)
 {
-    qDebug() << "increase" << actionIndex;
+    Q_UNUSED(actionIndex);
+    //qDebug() << "increase" << actionIndex;
 }
 
 void DevicePluginGuhTune::decrease(int actionIndex)
 {
-    qDebug() << "decrease" << actionIndex;
+    Q_UNUSED(actionIndex);
+    //qDebug() << "decrease" << actionIndex;
 }
 
 void DevicePluginGuhTune::navigationLeft()
 {
-    qDebug() << "navigation LEFT     <--- ";
+    //qDebug() << "navigation LEFT     <--- ";
+    if (m_ui) {
+        m_ui->navigateLeft();
+    }
 }
 
 void DevicePluginGuhTune::navigationRight()
 {
-    qDebug() << "navigation Right    ---> ";
+    //qDebug() << "navigation Right    ---> ";
+    if (m_ui) {
+        m_ui->navigateRight();
+    }
 }

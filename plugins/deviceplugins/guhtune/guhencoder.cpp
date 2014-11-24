@@ -23,6 +23,8 @@ GuhEncoder::GuhEncoder(QObject *parent, int gpioButton, int gpioA, int gpioB) :
 {
     m_basicSensitivityState = 0;
     m_navigationSensitivityState = 0;
+    m_buttonPressed = false;
+
 }
 
 bool GuhEncoder::enable()
@@ -34,7 +36,7 @@ bool GuhEncoder::enable()
     m_gpioB = new Gpio(this, m_gpioPinB);
     m_gpioButton = new Gpio(this, m_gpioPinButton);
 
-    if(!m_monitor->addGpio(m_gpioA) || !m_monitor->addGpio(m_gpioB) || !m_monitor->addGpio(m_gpioButton)){
+    if(!m_monitor->addGpio(m_gpioA, false) || !m_monitor->addGpio(m_gpioB, false) || !m_monitor->addGpio(m_gpioButton, true)){
         return false;
     }
     connect(m_monitor, &GpioMonitor::changed, this, &GuhEncoder::gpioChanged);
@@ -67,20 +69,20 @@ void GuhEncoder::setNavigationSensitivity(int sensitivity)
 void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
 {
     if (gpioPin == m_gpioPinA) {
-        // encode rotation
+        qDebug() << "A changed";
         if(!value != m_stateA){
             int encoded = (value << 1) | m_stateB;
             int sum = (m_encodedState << 2) | encoded;
             if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
-                //                m_basicSensitivityState++;
-                //                m_navigationSensitivityState++;
-                //                update();
+                m_basicSensitivityState++;
+                m_navigationSensitivityState++;
+                update();
                 emit increased();
             }
             if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
-                //                m_basicSensitivityState--;
-                //                m_navigationSensitivityState--;
-                //                update();
+                m_basicSensitivityState--;
+                m_navigationSensitivityState--;
+                update();
                 emit decreased();
             }
             m_encodedState = encoded;
@@ -92,15 +94,15 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
             int encoded = (m_stateA << 1) | value;
             int sum = (m_encodedState << 2) | encoded;
             if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
-                //                m_basicSensitivityState++;
-                //                m_navigationSensitivityState++;
-                //                update();
+                m_basicSensitivityState++;
+                m_navigationSensitivityState++;
+                update();
                 emit increased();
             }
             if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
-                //                m_basicSensitivityState--;
-                //                m_navigationSensitivityState--;
-                //                update();
+                m_basicSensitivityState--;
+                m_navigationSensitivityState--;
+                update();
                 emit decreased();
             }
             m_encodedState = encoded;
@@ -108,7 +110,7 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
         }
     } else if (gpioPin == m_gpioPinButton){
         // check button state
-        bool buttonState = !QVariant(value).toBool();
+        bool buttonState = QVariant(value).toBool();
         if (m_buttonPressed != buttonState) {
             if (buttonState) {
                 emit buttonPressed();
@@ -125,11 +127,6 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
 void GuhEncoder::update()
 {
     qDebug() << m_basicSensitivityState << m_navigationSensitivityState;
-
-    // negativ
-    //  größer als das vorherige
-    //  current != 0
-    //
 
     if (m_basicSensitivityState % m_basicSensitivity == 0 && m_basicSensitivityState != 0) {
         // check direction
