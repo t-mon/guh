@@ -21,7 +21,7 @@
 #include "guhbutton.h"
 #include "guhencoder.h"
 #include "guhtouch.h"
-#include "guhtuneui.h"
+#include "guhtuneuiserver.h"
 
 #include <QDebug>
 #include <QStringList>
@@ -43,13 +43,6 @@ void DevicePluginGuhTune::startMonitoringAutoDevices()
             return;
         }
     }
-
-    // check if we have a display
-    if (qgetenv("DISPLAY").isEmpty()) {
-        qDebug() << " ----> ERROR: no display found";
-        //return;
-    }
-    qDebug() << " ----> display found";
 
     QList<DeviceDescriptor> deviceDescriptorList;
     DeviceDescriptor deviceDescriptor(guhTuneItemDeviceClassId, "guhTune device");
@@ -102,14 +95,14 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
             m_touch->deleteLater();
         }
 
-        // UI
-        if (qgetenv("DISPLAY").isEmpty()) {
-            qDebug() << " ----> ERROR: display NOT found.";
+        m_uiServer = new GuhTuneUiServer(this);
+        if (m_uiServer->startServer()) {
+            // TODO: connections
+
         } else {
-            qDebug() << " ----> create Tune UI.";
-            m_ui = new GuhTuneUi();
-            m_ui->show();
+            qDebug() << "----> ERROR: guhTune UI server could not be initialized.";
         }
+
     }
 
     device->setName("guhTune item (" + device->paramValue("item").toString() + ")");
@@ -126,33 +119,21 @@ DeviceManager::HardwareResources DevicePluginGuhTune::requiredHardware() const
 void DevicePluginGuhTune::buttonPressed()
 {
     qDebug() << "button pressed";
-    if (m_ui) {
-        m_ui->buttonPressed();
-    }
 }
 
 void DevicePluginGuhTune::buttonReleased()
 {
     qDebug() << "button released";
-    if (m_ui) {
-        m_ui->buttonReleased();
-    }
 }
 
 void DevicePluginGuhTune::buttonLongPressed()
 {
     qDebug() << "button long pressed";
-    if (m_ui) {
-        m_ui->buttonLongPressed();
-    }
 }
 
 void DevicePluginGuhTune::handDetected()
 {
     qDebug() << "hand detected";
-    if (m_ui) {
-        m_ui->wakeup();
-    }
 }
 
 void DevicePluginGuhTune::handDisappeared()
@@ -163,49 +144,19 @@ void DevicePluginGuhTune::handDisappeared()
 void DevicePluginGuhTune::encoderIncreased()
 {
     qDebug() << "encoder +";
-    if (m_ui) {
-        m_ui->tickRight();
-    }
 }
 
 void DevicePluginGuhTune::encoderDecreased()
 {
     qDebug() << "encoder -";
-    if (m_ui) {
-        m_ui->tickLeft();
-    }
-}
-
-void DevicePluginGuhTune::pressed(int actionIndex)
-{
-    Q_UNUSED(actionIndex);
-    //qDebug() << "pressed" << actionIndex;
-}
-
-void DevicePluginGuhTune::increase(int actionIndex)
-{
-    Q_UNUSED(actionIndex);
-    //qDebug() << "increase" << actionIndex;
-}
-
-void DevicePluginGuhTune::decrease(int actionIndex)
-{
-    Q_UNUSED(actionIndex);
-    //qDebug() << "decrease" << actionIndex;
 }
 
 void DevicePluginGuhTune::navigationLeft()
 {
-    //qDebug() << "navigation LEFT     <--- ";
-    if (m_ui) {
-        m_ui->navigateLeft();
-    }
+    qDebug() << "navigation LEFT     <--- ";
 }
 
 void DevicePluginGuhTune::navigationRight()
 {
-    //qDebug() << "navigation Right    ---> ";
-    if (m_ui) {
-        m_ui->navigateRight();
-    }
+    qDebug() << "navigation Right    ---> ";
 }

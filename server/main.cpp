@@ -17,21 +17,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <QCoreApplication>
-#include <QApplication>
 #include <guhcore.h>
 
 #include <QtPlugin>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication *a;
-    // FIXME: move back to core application once we have a separated UI for guhTune
-    if (!qgetenv("DISPLAY").isEmpty()) {
-        a = new QApplication(argc,argv);
-    }else{
-        qDebug() << "no display found";
-        a = new QCoreApplication(argc,argv);
-    }
+    QCoreApplication *a = new QCoreApplication(argc,argv);
 
     a->setOrganizationName("guh");
 

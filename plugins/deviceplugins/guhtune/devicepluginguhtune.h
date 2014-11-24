@@ -27,7 +27,7 @@
 class GuhButton;
 class GuhEncoder;
 class GuhTouch;
-class GuhTuneUi;
+class GuhTuneUiServer;
 
 class DevicePluginGuhTune : public DevicePlugin
 {
@@ -43,16 +43,12 @@ public:
     void startMonitoringAutoDevices() override;
     DeviceManager::DeviceSetupStatus setupDevice(Device *device) override;
 
-    Q_INVOKABLE void pressed(int actionIndex);
-    Q_INVOKABLE void increase(int actionIndex);
-    Q_INVOKABLE void decrease(int actionIndex);
-
 private:
     GuhButton *m_button;
     GuhEncoder *m_encoder;
     GuhTouch *m_touch;
 
-    GuhTuneUi *m_ui;
+    GuhTuneUiServer *m_uiServer;
 
 private slots:
     void buttonPressed();
