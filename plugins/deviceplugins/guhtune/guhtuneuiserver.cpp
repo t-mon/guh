@@ -1,3 +1,21 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ *  This file is part of guh.                                              *
+ *                                                                         *
+ *  Guh is free software: you can redistribute it and/or modify            *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, version 2 of the License.                *
+ *                                                                         *
+ *  Guh is distributed in the hope that it will be useful,                 *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with guh. If not, see <http://www.gnu.org/licenses/>.            *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "guhtuneuiserver.h"
 
 GuhTuneUiServer::GuhTuneUiServer(QObject *parent):
@@ -8,7 +26,7 @@ GuhTuneUiServer::GuhTuneUiServer(QObject *parent):
 void GuhTuneUiServer::sendData(const QByteArray &data)
 {
     foreach (QTcpSocket *client, m_clientList) {
-        client->write(data);
+        client->write(data + "\n");
     }
 }
 
@@ -56,9 +74,8 @@ bool GuhTuneUiServer::startServer()
     foreach(const QHostAddress &address, QNetworkInterface::allAddresses()){
         QTcpServer *server = new QTcpServer(this);
         if(server->listen(address, 9876)) {
-            qDebug() << " ----> guhTune UI server started and listening on port" << server->serverPort() << "and ip " << address.toString();
+            qDebug() << "              server started and listening on port" << server->serverPort() << "and ip " << address.toString();
             connect(server, SIGNAL(newConnection()), SLOT(newClientConnected()));
-
             m_serverList.append(server);
         } else {
             qDebug() << "ERROR: can not listening to" << address.toString();
@@ -69,46 +86,49 @@ bool GuhTuneUiServer::startServer()
     return true;
 }
 
-bool GuhTuneUiServer::stopServer()
-{
-    return true;
-}
-
 void GuhTuneUiServer::navigateLeft()
 {
+    sendData("NL");
 }
 
 void GuhTuneUiServer::navigateRight()
 {
+    sendData("NR");
 }
 
 void GuhTuneUiServer::tickLeft()
 {
+    sendData("L");
 }
 
 void GuhTuneUiServer::tickRight()
 {
+    sendData("R");
 }
 
 void GuhTuneUiServer::buttonPressed()
 {
+    sendData("BP");
 }
 
 void GuhTuneUiServer::buttonReleased()
 {
+    sendData("BR");
 }
 
 void GuhTuneUiServer::buttonLongPressed()
 {
+    sendData("BLP");
 }
 
-void GuhTuneUiServer::wakeup()
+void GuhTuneUiServer::handDetected()
 {
+    sendData("HDE");
 }
 
-void GuhTuneUiServer::sleep()
+void GuhTuneUiServer::handDisappeard()
 {
+    sendData("HDI");
 }
-
 
 

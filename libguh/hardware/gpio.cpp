@@ -53,6 +53,8 @@ Gpio::~Gpio()
 /*! Returns true if the GPIO could be exported in the system file "/sys/class/gpio/export".*/
 bool Gpio::exportGpio()
 {
+    unexportGpio();
+
     char buf[64];
 
     int fd = open("/sys/class/gpio/export", O_WRONLY);

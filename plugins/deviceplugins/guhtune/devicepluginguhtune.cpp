@@ -97,10 +97,10 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
 
         m_uiServer = new GuhTuneUiServer(this);
         if (m_uiServer->startServer()) {
-            // TODO: connections
-
+            qDebug() << " ----> guhTune UI server running";
         } else {
-            qDebug() << "----> ERROR: guhTune UI server could not be initialized.";
+            m_uiServer->deleteLater();
+            qDebug() << " ----> ERROR: guhTune UI server could not be initialized.";
         }
 
     }
@@ -119,44 +119,71 @@ DeviceManager::HardwareResources DevicePluginGuhTune::requiredHardware() const
 void DevicePluginGuhTune::buttonPressed()
 {
     qDebug() << "button pressed";
+    if (m_uiServer) {
+        m_uiServer->buttonPressed();
+    }
 }
 
 void DevicePluginGuhTune::buttonReleased()
 {
     qDebug() << "button released";
+    if (m_uiServer) {
+        m_uiServer->buttonReleased();
+    }
 }
 
 void DevicePluginGuhTune::buttonLongPressed()
 {
     qDebug() << "button long pressed";
+    if (m_uiServer) {
+        m_uiServer->buttonLongPressed();
+    }
 }
 
 void DevicePluginGuhTune::handDetected()
 {
     qDebug() << "hand detected";
+    if (m_uiServer) {
+        m_uiServer->handDetected();
+    }
 }
 
 void DevicePluginGuhTune::handDisappeared()
 {
     qDebug() << "hand disappeared";
+    if (m_uiServer) {
+        m_uiServer->handDisappeard();
+    }
 }
 
 void DevicePluginGuhTune::encoderIncreased()
 {
     qDebug() << "encoder +";
+    if (m_uiServer) {
+        m_uiServer->tickRight();
+    }
 }
 
 void DevicePluginGuhTune::encoderDecreased()
 {
     qDebug() << "encoder -";
+    if (m_uiServer) {
+        m_uiServer->tickLeft();
+    }
 }
 
 void DevicePluginGuhTune::navigationLeft()
 {
     qDebug() << "navigation LEFT     <--- ";
+    if (m_uiServer) {
+        m_uiServer->navigateLeft();
+    }
 }
 
 void DevicePluginGuhTune::navigationRight()
 {
     qDebug() << "navigation Right    ---> ";
+    if (m_uiServer) {
+        m_uiServer->navigateRight();
+    }
 }

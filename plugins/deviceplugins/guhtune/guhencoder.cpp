@@ -69,7 +69,6 @@ void GuhEncoder::setNavigationSensitivity(int sensitivity)
 void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
 {
     if (gpioPin == m_gpioPinA) {
-        qDebug() << "A changed";
         if(!value != m_stateA){
             int encoded = (value << 1) | m_stateB;
             int sum = (m_encodedState << 2) | encoded;
@@ -126,25 +125,25 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
 
 void GuhEncoder::update()
 {
-    qDebug() << m_basicSensitivityState << m_navigationSensitivityState;
+    //qDebug() << m_basicSensitivityState << m_navigationSensitivityState;
 
     if (m_basicSensitivityState % m_basicSensitivity == 0 && m_basicSensitivityState != 0) {
-        // check direction
-        if (m_basicSensitivityState < 0) {
-            emit decreased();
-        } else {
-            emit increased();
-        }
-        m_basicSensitivityState = 0;
+//        // check direction
+//        if (m_basicSensitivityState < 0) {
+//            emit decreased();
+//        } else {
+//            emit increased();
+//        }
+//        m_basicSensitivityState = 0;
     }
-    if (m_navigationSensitivityState % m_navigationSensitivity == 0 && m_navigationSensitivityState != 0) {
-        // check direction
-        if (m_navigationSensitivityState < 0) {
-            emit navigationLeft();
-        } else {
-            emit navigationRight();
-        }
-        m_navigationSensitivityState= 0;
-    }
+//    if (m_navigationSensitivityState % m_navigationSensitivity == 0 && m_navigationSensitivityState != 0) {
+//        // check direction
+//        if (m_navigationSensitivityState < 0) {
+//            emit navigationLeft();
+//        } else {
+//            emit navigationRight();
+//        }
+//        m_navigationSensitivityState= 0;
+//    }
 }
 
