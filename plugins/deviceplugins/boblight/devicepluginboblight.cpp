@@ -50,17 +50,23 @@ void DevicePluginBoblight::startMonitoringAutoDevices()
         return;
     }
 
-    QList<Device*> loadedDevices = deviceManager()->findConfiguredDevices(boblightDeviceClassId);
+    //QList<Device*> loadedDevices = deviceManager()->findConfiguredDevices(boblightDeviceClassId);
+
+    if(!myDevices().isEmpty()){
+        return;
+    }
 
     QList<DeviceDescriptor> deviceDescriptorList;
-    for (int i = loadedDevices.count(); i < m_bobClient->lightsCount(); i++) {
-        DeviceDescriptor deviceDescriptor(boblightDeviceClassId, "Boblight (Channel " + QString::number(i) + ")");
-        ParamList params;
-        Param param("channel");
-        param.setValue(i);
-        params.append(param);
-        deviceDescriptor.setParams(params);
-        deviceDescriptorList.append(deviceDescriptor);
+    for (int i = 0; i < m_bobClient->lightsCount(); i++) {
+        if(i == 8){
+            DeviceDescriptor deviceDescriptor(boblightDeviceClassId, "Boblight (Channel " + QString::number(i) + ")");
+            ParamList params;
+            Param param("channel");
+            param.setValue(i);
+            params.append(param);
+            deviceDescriptor.setParams(params);
+            deviceDescriptorList.append(deviceDescriptor);
+        }
     }
     emit autoDevicesAppeared(boblightDeviceClassId, deviceDescriptorList);
 }
@@ -71,8 +77,11 @@ DeviceManager::DeviceSetupStatus DevicePluginBoblight::setupDevice(Device *devic
         return DeviceManager::DeviceSetupStatusFailure;
     }
 
-    device->setName("Boblight (Channel " + device->paramValue("channel").toString() + ")");
-    m_bobClient->currentColor(device->paramValue("channel").toInt());
+    if(device->paramValue("channel").toInt() == 8){
+        device->setName("Ambilight");
+        m_bobClient->currentColor(device->paramValue("channel").toInt());
+    }
+
     return DeviceManager::DeviceSetupStatusSuccess;
 }
 
@@ -178,7 +187,6 @@ DeviceManager::DeviceError DevicePluginBoblight::executeAction(Device *device, c
         return DeviceManager::DeviceErrorActionTypeNotFound;
     }
     return DeviceManager::DeviceErrorDeviceClassNotFound;
-
 }
 
 void DevicePluginBoblight::connectToBoblight()
@@ -190,7 +198,6 @@ void DevicePluginBoblight::connectToBoblight()
 
 void DevicePluginBoblight::updateColor(const int &channel, const QColor &newColor)
 {
-    //qDebug() << "update color " << newColor;
     m_bobClient->setColor(channel, newColor);
     m_bobClient->sync();
 }

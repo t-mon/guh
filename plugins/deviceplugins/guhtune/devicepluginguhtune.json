@@ -10,27 +10,42 @@
                     "deviceClassId": "4a20b247-576c-4a0f-bc95-9eb6b2f2eb3d",
                     "name": "guhTune Item",
                     "createMethods": ["auto"],
-                    "eventTypes": [
+                    "paramTypes": [
                         {
-                            "id": "eeed2786-02eb-4a57-8e61-149741afb58c",
-                            "name": "selected",
-                            "paramTypes": [
-                                {
-                                    "name": "index",
-                                    "type": "int"
-                                }
-                            ]
+                            "name": "item",
+                            "type": "int"
+                        }
+
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "79780b65-692c-4431-aede-a9dcfc10dce6",
+                            "name": "toggle"
                         },
                         {
-                            "id": "1bc20ff4-4a53-4346-9477-c2c15fc11d61",
+                            "id": "e664dc4f-d0d0-4eec-b23d-1e2b711b50ee",
                             "name": "setValue",
                             "paramTypes": [
                                 {
-                                    "name": "index",
+                                    "name": "percentage",
                                     "type": "int"
                                 }
 
                             ]
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "97508d06-9c48-464f-8132-e4a923ed55f5",
+                            "name": "power",
+                            "type": "bool",
+                            "defaultValue": "false"
+                        },
+                        {
+                            "id": "db22405e-1217-4e25-a94e-334f123cb40c",
+                            "name": "value",
+                            "type": "int",
+                            "defaultValue": "0"
                         }
                     ]
                 }

@@ -60,6 +60,8 @@ private slots:
     void encoderDecreased();
     void navigationLeft();
     void navigationRight();
+
+    void dataAvailable(const QByteArray &data);
 };
 
 #endif // DEVICEPLUGINELRO_H

@@ -54,7 +54,7 @@ void GuhTuneUiServer::readPackage()
         qDebug() << "line in:" << dataLine;
         message.append(dataLine);
         if(dataLine.endsWith('\n')){
-            emit dataAvailable(message);
+            emit dataAvailable(message.left(message.length()-1));
             message.clear();
         }
     }

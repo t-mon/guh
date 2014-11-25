@@ -21,6 +21,8 @@
 GuhEncoder::GuhEncoder(QObject *parent, int gpioButton, int gpioA, int gpioB) :
     QObject(parent), m_gpioPinButton(gpioButton), m_gpioPinA(gpioA), m_gpioPinB(gpioB)
 {
+    m_basicSensitivity = 1;
+    m_navigationSensitivity = 3;
     m_basicSensitivityState = 0;
     m_navigationSensitivityState = 0;
     m_buttonPressed = false;
@@ -76,13 +78,13 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
                 m_basicSensitivityState++;
                 m_navigationSensitivityState++;
                 update();
-                emit increased();
+                //emit increased();
             }
             if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
                 m_basicSensitivityState--;
                 m_navigationSensitivityState--;
                 update();
-                emit decreased();
+                //emit decreased();
             }
             m_encodedState = encoded;
             m_stateA = !value;
@@ -128,22 +130,22 @@ void GuhEncoder::update()
     //qDebug() << m_basicSensitivityState << m_navigationSensitivityState;
 
     if (m_basicSensitivityState % m_basicSensitivity == 0 && m_basicSensitivityState != 0) {
-//        // check direction
-//        if (m_basicSensitivityState < 0) {
-//            emit decreased();
-//        } else {
-//            emit increased();
-//        }
-//        m_basicSensitivityState = 0;
+        // check direction
+        if (m_basicSensitivityState < 0) {
+            emit decreased();
+        } else {
+            emit increased();
+        }
+        m_basicSensitivityState = 0;
     }
-//    if (m_navigationSensitivityState % m_navigationSensitivity == 0 && m_navigationSensitivityState != 0) {
-//        // check direction
-//        if (m_navigationSensitivityState < 0) {
-//            emit navigationLeft();
-//        } else {
-//            emit navigationRight();
-//        }
-//        m_navigationSensitivityState= 0;
-//    }
+    if (m_navigationSensitivityState % m_navigationSensitivity == 0 && m_navigationSensitivityState != 0) {
+        // check direction
+        if (m_navigationSensitivityState < 0) {
+            emit navigationLeft();
+        } else {
+            emit navigationRight();
+        }
+        m_navigationSensitivityState= 0;
+    }
 }
 

@@ -69,7 +69,7 @@
                                 },
                                 {
                                     "name": "animation duration",
-                                    "ty4pe": "uint",
+                                    "type": "uint",
                                     "defaultValue": "1000"
                                 }
                             ]

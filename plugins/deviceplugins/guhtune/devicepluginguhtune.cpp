@@ -25,10 +25,13 @@
 
 #include <QDebug>
 #include <QStringList>
+#include <QByteArray>
 
 DeviceClassId guhTuneItemDeviceClassId = DeviceClassId("4a20b247-576c-4a0f-bc95-9eb6b2f2eb3d");
-EventTypeId selectedEventTypeId = EventTypeId("eeed2786-02eb-4a57-8e61-149741afb58c");
-EventTypeId setValueEventTypeId = EventTypeId("1bc20ff4-4a53-4346-9477-c2c15fc11d61");
+ActionTypeId toggleActionTypeId = ActionTypeId("79780b65-692c-4431-aede-a9dcfc10dce6");
+ActionTypeId setValueActionTypeId = ActionTypeId("e664dc4f-d0d0-4eec-b23d-1e2b711b50ee");
+StateTypeId powerStateTypeId = StateTypeId("97508d06-9c48-464f-8132-e4a923ed55f5");
+StateTypeId valueStateTypeId = StateTypeId("db22405e-1217-4e25-a94e-334f123cb40c");
 
 DevicePluginGuhTune::DevicePluginGuhTune()
 {
@@ -45,14 +48,39 @@ void DevicePluginGuhTune::startMonitoringAutoDevices()
     }
 
     QList<DeviceDescriptor> deviceDescriptorList;
-    DeviceDescriptor deviceDescriptor(guhTuneItemDeviceClassId, "guhTune device");
-    deviceDescriptorList.append(deviceDescriptor);
+
+    DeviceDescriptor deviceDescriptorCouch(guhTuneItemDeviceClassId, "guhTune Couch");
+    ParamList paramsCouch;
+    paramsCouch.append(Param("item", 1));
+    deviceDescriptorCouch.setParams(paramsCouch);
+    deviceDescriptorList.append(deviceDescriptorCouch);
+
+    DeviceDescriptor deviceDescriptorWork(guhTuneItemDeviceClassId, "guhTune Working");
+    ParamList paramsWork;
+    paramsWork.append(Param("item", 2));
+    deviceDescriptorWork.setParams(paramsWork);
+    deviceDescriptorList.append(deviceDescriptorWork);
+
+    DeviceDescriptor deviceDescriptorSwitch(guhTuneItemDeviceClassId, "guhTune Switch");
+    ParamList paramsSwitch;
+    paramsSwitch.append(Param("item", 3));
+    deviceDescriptorSwitch.setParams(paramsSwitch);
+    deviceDescriptorList.append(deviceDescriptorSwitch);
+
+    DeviceDescriptor deviceDescriptorRadiator(guhTuneItemDeviceClassId, "guhTune Radiator");
+    ParamList paramsRadiator;
+    paramsRadiator.append(Param("item", 4));
+    deviceDescriptorRadiator.setParams(paramsRadiator);
+    deviceDescriptorList.append(deviceDescriptorRadiator);
+
     emit autoDevicesAppeared(guhTuneItemDeviceClassId, deviceDescriptorList);
 }
 
 DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device)
 {
+    // initialize the hardware only once
     if (myDevices().isEmpty()) {
+
         // Hardware pushbutton
         m_button = new GuhButton(this, 44);
         if(m_button->enable()){
@@ -71,7 +99,7 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
             qDebug() << " ----> hardware encoder found.";
 
             m_encoder->setBasicSensitivity(2);
-            m_encoder->setNavigationSensitivity(4);
+            m_encoder->setNavigationSensitivity(10);
 
             connect(m_encoder, &GuhEncoder::increased, this, &DevicePluginGuhTune::encoderIncreased);
             connect(m_encoder, &GuhEncoder::decreased, this, &DevicePluginGuhTune::encoderDecreased);
@@ -95,19 +123,30 @@ DeviceManager::DeviceSetupStatus DevicePluginGuhTune::setupDevice(Device *device
             m_touch->deleteLater();
         }
 
+        // TCP Server for guhTuneUi
         m_uiServer = new GuhTuneUiServer(this);
         if (m_uiServer->startServer()) {
             qDebug() << " ----> guhTune UI server running";
+            connect(m_uiServer, SIGNAL(dataAvailable(QByteArray)), this, SLOT(dataAvailable(QByteArray)));
+
         } else {
             m_uiServer->deleteLater();
             qDebug() << " ----> ERROR: guhTune UI server could not be initialized.";
         }
-
     }
 
-    device->setName("guhTune item (" + device->paramValue("item").toString() + ")");
+    if(device->paramValue("item").toInt() == 1) {
+        device->setName("guhTune | Couch (" + device->paramValue("item").toString() + ")");
+    } else if (device->paramValue("item").toInt() == 2) {
+        device->setName("guhTune | Work (" + device->paramValue("item").toString() + ")");
+    } else if (device->paramValue("item").toInt() == 3) {
+        device->setName("guhTune | Switch (" + device->paramValue("item").toString() + ")");
+    } else if (device->paramValue("item").toInt() == 4) {
+        device->setName("guhTune | Radiator (" + device->paramValue("item").toString() + ")");
+    } else {
+        return DeviceManager::DeviceSetupStatusFailure;
+    }
 
-    Q_UNUSED(device);
     return DeviceManager::DeviceSetupStatusSuccess;
 }
 
@@ -185,5 +224,46 @@ void DevicePluginGuhTune::navigationRight()
     qDebug() << "navigation Right    ---> ";
     if (m_uiServer) {
         m_uiServer->navigateRight();
+    }
+}
+
+void DevicePluginGuhTune::dataAvailable(const QByteArray &data)
+{
+    int item = data.left(1).toInt();
+    QByteArray message = data.right(data.length() - 2);
+
+    qDebug() << "item = " << item << " | message = " << message;
+
+    Device *device;
+
+    // get the device with the item id
+    foreach (Device* configuredDevice, myDevices()) {
+        if (configuredDevice->paramValue("item").toInt() == item){
+            device = configuredDevice;
+            break;
+        }
+    }
+
+    if (device) {
+        if (message == "toggle") {
+            bool currentState = device->stateValue(powerStateTypeId).toBool();
+            device->setStateValue(powerStateTypeId, !currentState);
+            qDebug() << "Toggle device " << item << " to " << !currentState;
+            return;
+        } else {
+            bool ok;
+            int value = message.toInt(&ok);
+            if(ok){
+                device->setStateValue(valueStateTypeId, value);
+                qDebug() << "Set item " << item << " value to " << value;
+            }
+
+            // set the brightness of the ambilight
+//            foreach (Device* ambilight, deviceManager()->findConfiguredDevices(DeviceClassId("1647c61c-db14-461e-8060-8a3533d5d92f"))) {
+//                qDebug() << "Found Boblight device -> " << ambilight->name() << " ...and set brightness to " << value;
+
+//            }
+            return;
+        }
     }
 }

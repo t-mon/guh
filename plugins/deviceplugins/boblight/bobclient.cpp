@@ -18,7 +18,7 @@
 
 #include "bobclient.h"
 
-#include "libboblight/boblight.h"
+#include "boblight.h"
 
 #include <QDebug>
 
