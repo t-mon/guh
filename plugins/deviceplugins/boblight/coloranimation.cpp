@@ -22,7 +22,7 @@ ColorAnimation::ColorAnimation(ActionId actionId, int channel, QColor startColor
     m_actionId(actionId), m_channel(channel), m_startColor(startColor), m_endColor(endColor), m_duration(duration)
 {
     m_animationTimer = new QTimer(this);
-    m_animationTimer->setInterval(50);
+    m_animationTimer->setInterval(30);
 
     m_currentColor = m_startColor;
 
@@ -32,6 +32,13 @@ ColorAnimation::ColorAnimation(ActionId actionId, int channel, QColor startColor
 void ColorAnimation::startAnimation()
 {
     m_animationTimer->start();
+}
+
+void ColorAnimation::stopAnimation()
+{
+    // animation interuppted
+    m_animationTimer->stop();
+    emit animationFinished(m_actionId, m_currentColor);
 }
 
 QColor ColorAnimation::startColor()
@@ -105,6 +112,6 @@ void ColorAnimation::animate()
     if (m_currentColor == m_endColor) {
         // animation finished
         m_animationTimer->stop();
-        emit animationFinished(m_actionId);
+        emit animationFinished(m_actionId, m_endColor);
     }
 }

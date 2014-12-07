@@ -33,9 +33,9 @@ class GuhTuneUiServer : public QObject
 
 public:
     explicit GuhTuneUiServer(QObject *parent = 0);
+    void sendData(const QByteArray &data);
 
 private:
-    void sendData(const QByteArray &data);
     QList<QTcpServer*> m_serverList;
     QList<QTcpSocket*> m_clientList;
 

@@ -41,6 +41,11 @@ bool GuhButton::enable()
     m_longpressedTimer->setSingleShot(true);
     connect(m_longpressedTimer, &QTimer::timeout, this, &GuhButton::buttonLongPressed);
 
+    m_debounceTimer = new QTimer(this);
+    m_debounceTimer->setSingleShot(true);
+    m_debounceTimer->setInterval(50);
+
+
     m_monitor->start();
     return true;
 }
@@ -53,12 +58,16 @@ void GuhButton::disable()
 void GuhButton::gpioChanged(const int &gpioPin, const int &value)
 {
     if (gpioPin == m_gpioPin){
+        if(m_debounceTimer->isActive()){
+            return;
+        }
         // check button state
         bool buttonState = !QVariant(value).toBool();
         if (m_buttonPressed != buttonState) {
             if (buttonState) {
                 emit buttonPressed();
                 m_longpressedTimer->start();
+                m_debounceTimer->start();
             } else {
                 emit buttonReleased();
                 m_longpressedTimer->stop();

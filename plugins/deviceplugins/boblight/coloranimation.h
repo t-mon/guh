@@ -31,6 +31,7 @@ class ColorAnimation : public QObject
 public:
     explicit ColorAnimation(ActionId actionId = ActionId(), int channel = -1, QColor startColor = QColor(0,0,0), QColor endColor = QColor(255,255,255), int duration = 1000);
     void startAnimation();
+    void stopAnimation();
 
     int channel();
     QColor startColor();
@@ -49,7 +50,7 @@ private:
 
 signals:
     void updateColor(const int &channel, const QColor &color);
-    void animationFinished(ActionId actionId);
+    void animationFinished(ActionId actionId, QColor color);
 
 private slots:
     void animate();

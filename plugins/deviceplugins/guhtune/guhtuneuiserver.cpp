@@ -35,7 +35,7 @@ void GuhTuneUiServer::newClientConnected()
     // got a new client connected
     QTcpServer *server = qobject_cast<QTcpServer*>(sender());
     QTcpSocket *newConnection = server->nextPendingConnection();
-    qDebug() << "new client connected:" << newConnection->peerAddress().toString();
+    qDebug() << "----> guhTune UI server: new client connected:" << newConnection->peerAddress().toString();
 
     // append the new client to the client list
     m_clientList.append(newConnection);
@@ -47,11 +47,9 @@ void GuhTuneUiServer::newClientConnected()
 void GuhTuneUiServer::readPackage()
 {
     QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
-    qDebug() << "-----------> data comming from" << client->peerAddress().toString();
     QByteArray message;
     while(client->canReadLine()){
         QByteArray dataLine = client->readLine();
-        qDebug() << "line in:" << dataLine;
         message.append(dataLine);
         if(dataLine.endsWith('\n')){
             emit dataAvailable(message.left(message.length()-1));
@@ -74,11 +72,11 @@ bool GuhTuneUiServer::startServer()
     foreach(const QHostAddress &address, QNetworkInterface::allAddresses()){
         QTcpServer *server = new QTcpServer(this);
         if(server->listen(address, 9876)) {
-            qDebug() << "              server started and listening on port" << server->serverPort() << "and ip " << address.toString();
+            qDebug() << "              ----> guhTune UI server: started and listening on port" << server->serverPort() << "and ip " << address.toString();
             connect(server, SIGNAL(newConnection()), SLOT(newClientConnected()));
             m_serverList.append(server);
         } else {
-            qDebug() << "ERROR: can not listening to" << address.toString();
+            qWarning() << "----> guhTune UI server ERROR: can not listening to" << address.toString();
             delete server;
             return false;
         }

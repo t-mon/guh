@@ -49,7 +49,7 @@ public slots:
 private slots:
     void connectToBoblight();
     void updateColor(const int &channel, const QColor &newColor);
-    void animationFinished(ActionId actionId);
+    void animationFinished(ActionId actionId, QColor color);
 
 private:
     BobClient *m_bobClient;

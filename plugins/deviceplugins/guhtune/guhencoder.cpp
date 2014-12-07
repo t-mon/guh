@@ -48,6 +48,10 @@ bool GuhEncoder::enable()
     m_longpressedTimer->setSingleShot(true);
     connect(m_longpressedTimer, &QTimer::timeout, this, &GuhEncoder::buttonLongPressed);
 
+    m_debounceTimer = new QTimer(this);
+    m_debounceTimer->setSingleShot(true);
+    m_debounceTimer->setInterval(50);
+
     m_monitor->start();
     return true;
 }
@@ -78,13 +82,11 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
                 m_basicSensitivityState++;
                 m_navigationSensitivityState++;
                 update();
-                //emit increased();
             }
             if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
                 m_basicSensitivityState--;
                 m_navigationSensitivityState--;
                 update();
-                //emit decreased();
             }
             m_encodedState = encoded;
             m_stateA = !value;
@@ -110,12 +112,16 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
             m_stateB = !value;
         }
     } else if (gpioPin == m_gpioPinButton){
+        if(m_debounceTimer->isActive()){
+            return;
+        }
         // check button state
         bool buttonState = QVariant(value).toBool();
         if (m_buttonPressed != buttonState) {
             if (buttonState) {
                 emit buttonPressed();
                 m_longpressedTimer->start();
+                m_debounceTimer->start();
             } else {
                 emit buttonReleased();
                 m_longpressedTimer->stop();
@@ -127,8 +133,6 @@ void GuhEncoder::gpioChanged(const int &gpioPin, const int &value)
 
 void GuhEncoder::update()
 {
-    //qDebug() << m_basicSensitivityState << m_navigationSensitivityState;
-
     if (m_basicSensitivityState % m_basicSensitivity == 0 && m_basicSensitivityState != 0) {
         // check direction
         if (m_basicSensitivityState < 0) {

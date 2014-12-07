@@ -64,6 +64,8 @@ private:
     int m_navigationSensitivityState;
     int m_navigationSensitivityLastState;
 
+    QTimer *m_debounceTimer;
+
 signals:
     void increased();
     void decreased();

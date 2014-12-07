@@ -40,7 +40,7 @@ DevicePluginGuhTune::DevicePluginGuhTune()
 void DevicePluginGuhTune::startMonitoringAutoDevices()
 {
     qDebug() << "*****************************************";
-    // make shore, we add only one guhTune device
+    // make shore, we add only once guhTune items
     foreach (Device *device, myDevices()) {
         if (device->deviceClassId() == guhTuneItemDeviceClassId) {
             return;
@@ -232,11 +232,17 @@ void DevicePluginGuhTune::dataAvailable(const QByteArray &data)
     int item = data.left(1).toInt();
     QByteArray message = data.right(data.length() - 2);
 
-    qDebug() << "item = " << item << " | message = " << message;
+    // item 1 -> couch
+    // item 2 -> work
+    // item 3 -> light
+    // item 4 -> radiator
+
+    if(item == 4){
+        return;
+    }
 
     Device *device;
-
-    // get the device with the item id
+    // get the device with corresponding item id
     foreach (Device* configuredDevice, myDevices()) {
         if (configuredDevice->paramValue("item").toInt() == item){
             device = configuredDevice;
@@ -244,26 +250,50 @@ void DevicePluginGuhTune::dataAvailable(const QByteArray &data)
         }
     }
 
+    // if we have found the the device
     if (device) {
+        // check if its a toggle command
         if (message == "toggle") {
-            bool currentState = device->stateValue(powerStateTypeId).toBool();
-            device->setStateValue(powerStateTypeId, !currentState);
-            qDebug() << "Toggle device " << item << " to " << !currentState;
-            return;
-        } else {
-            bool ok;
-            int value = message.toInt(&ok);
-            if(ok){
-                device->setStateValue(valueStateTypeId, value);
-                qDebug() << "Set item " << item << " value to " << value;
+            if(item == 1 || item == 2 || item == 3){
+                bool currentState = device->stateValue(powerStateTypeId).toBool();
+                device->setStateValue(powerStateTypeId, !currentState);
+                qDebug() << "Toggle device " << item << " to " << !currentState;
+                if(!currentState){
+                    m_uiServer->sendData(QByteArray::number(item) + ":1");
+                } else {
+                    m_uiServer->sendData(QByteArray::number(item) + ":0");
+                }
+                return;
             }
+        } else {
+            // check if its a brightness command
+            //Only change brightness if item 1 or item 2 are selected
+            if(item == 1 || item == 2){
+                bool ok;
+                int value = message.toInt(&ok);
+                if(ok){
+                    device->setStateValue(valueStateTypeId, value);
+                    qDebug() << "Set item " << item << " value to " << value;
+                }
+                DeviceClassId ambilightDeviceClassId = DeviceClassId("1647c61c-db14-461e-8060-8a3533d5d92f");
+                ActionTypeId ambilightSetBrightnessActionTypeId = ActionTypeId("b8ee03a3-c63a-4a03-ad96-b549757fd1d7");
 
-            // set the brightness of the ambilight
-//            foreach (Device* ambilight, deviceManager()->findConfiguredDevices(DeviceClassId("1647c61c-db14-461e-8060-8a3533d5d92f"))) {
-//                qDebug() << "Found Boblight device -> " << ambilight->name() << " ...and set brightness to " << value;
+                int brightness = 255 * value / 100;
 
-//            }
-            return;
+                // set the brightness of the ambilight
+                foreach (Device* ambilight, deviceManager()->findConfiguredDevices(ambilightDeviceClassId)) {
+                    // Create the action
+                    Action brightnessAction(ambilightSetBrightnessActionTypeId, ambilight->id());
+                    ParamList actionParams;
+                    actionParams.append(Param("brightness", brightness));
+                    actionParams.append(Param("animation duration", 0));
+                    brightnessAction.setParams(actionParams);
+                    deviceManager()->executeAction(brightnessAction);
+                }
+                return;
+            } else {
+                qDebug() << "item " << item << "is can not be dimmed";
+            }
         }
     }
 }

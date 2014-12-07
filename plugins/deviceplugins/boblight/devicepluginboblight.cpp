@@ -50,8 +50,7 @@ void DevicePluginBoblight::startMonitoringAutoDevices()
         return;
     }
 
-    //QList<Device*> loadedDevices = deviceManager()->findConfiguredDevices(boblightDeviceClassId);
-
+    // check if we allready added the channels
     if(!myDevices().isEmpty()){
         return;
     }
@@ -134,7 +133,7 @@ DeviceManager::DeviceError DevicePluginBoblight::executeAction(Device *device, c
                                                                     device->paramValue("channel").toInt(),
                                                                     device->stateValue(colorStateTypeId).value<QColor>(),
                                                                     QColor(255,255,255),
-                                                                    2000);
+                                                                    500);
 
                 connect(colorAnimation, &ColorAnimation::updateColor, this, &DevicePluginBoblight::updateColor);
                 connect(colorAnimation, &ColorAnimation::animationFinished, this, &DevicePluginBoblight::animationFinished);
@@ -148,7 +147,7 @@ DeviceManager::DeviceError DevicePluginBoblight::executeAction(Device *device, c
                                                                     device->paramValue("channel").toInt(),
                                                                     device->stateValue(colorStateTypeId).value<QColor>(),
                                                                     QColor(0,0,0),
-                                                                    2000);
+                                                                    500);
 
                 connect(colorAnimation, &ColorAnimation::updateColor, this, &DevicePluginBoblight::updateColor);
                 connect(colorAnimation, &ColorAnimation::animationFinished, this, &DevicePluginBoblight::animationFinished);
@@ -202,13 +201,11 @@ void DevicePluginBoblight::updateColor(const int &channel, const QColor &newColo
     m_bobClient->sync();
 }
 
-void DevicePluginBoblight::animationFinished(ActionId actionId)
+void DevicePluginBoblight::animationFinished(ActionId actionId, QColor color)
 {
     ColorAnimation *colorAnimation = static_cast<ColorAnimation*>(sender());
     Device* device = m_runningAnimations.take(colorAnimation);
-    device->setStateValue(colorStateTypeId, colorAnimation->endColor());
+    device->setStateValue(colorStateTypeId, color);
     emit actionExecutionFinished(actionId, DeviceManager::DeviceErrorNoError);
     colorAnimation->deleteLater();
 }
-
-

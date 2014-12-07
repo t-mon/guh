@@ -40,6 +40,7 @@ private:
 
     bool m_buttonPressed;
     QTimer *m_longpressedTimer;
+    QTimer *m_debounceTimer;
 
 signals:
     void buttonPressed();

@@ -48,21 +48,21 @@ bool Radio433::enable()
 {
     m_brennenstuhlTransmitter->enable();
 
-    bool receiverAvailable = m_receiver->startReceiver();
-    if(!receiverAvailable){
-        //qWarning() << "ERROR: radio 433 MHz receiver not available on GPIO's";
-    }
+//    bool receiverAvailable = m_receiver->startReceiver();
+//    if(!receiverAvailable){
+//        //qWarning() << "ERROR: radio 433 MHz receiver not available on GPIO's";
+//    }
 
-    bool transmitterAvailable = m_transmitter->startTransmitter();
-    if(!transmitterAvailable){
-        //qWarning() << "ERROR: radio 433 MHz transmitter not available on GPIO's";
-    }
+//    bool transmitterAvailable = m_transmitter->startTransmitter();
+//    if(!transmitterAvailable){
+//        //qWarning() << "ERROR: radio 433 MHz transmitter not available on GPIO's";
+//    }
 
-    if(!receiverAvailable && !transmitterAvailable){
-        qWarning() << "--> Radio 433 MHz GPIO's not available.";
-        return false;
-    }
-    qDebug() << "--> Radio 433 MHz GPIO's enabled.";
+//    if(!receiverAvailable && !transmitterAvailable){
+//        qWarning() << "--> Radio 433 MHz GPIO's not available.";
+//        return false;
+//    }
+//    qDebug() << "--> Radio 433 MHz GPIO's enabled.";
     return true;
 }
 
@@ -72,7 +72,7 @@ bool Radio433::disabel()
     if(m_receiver->stopReceiver()){
         return true;
     }
-    return false;
+    return true;
 }
 
 void Radio433::readingChanged(bool reading)
@@ -95,17 +95,18 @@ void Radio433::brennenstuhlAvailableChanged()
 
 bool Radio433::sendData(int delay, QList<int> rawData)
 {
-    bool sendGpio = false;
-    bool sendBrennenstuhl = false;
+    //bool sendGpio = false;
+    //bool sendBrennenstuhl = false;
 
     if(m_brennenstuhlTransmitter->available()){
-        sendBrennenstuhl = m_brennenstuhlTransmitter->sendData(delay, rawData);
+        m_brennenstuhlTransmitter->sendData(delay, rawData);
     }
 
-    if(m_transmitter->available()){
-        m_transmitter->sendData(delay, rawData);
-        sendGpio = true;
-    }
+//    if(m_transmitter->available()){
+//        m_transmitter->sendData(delay, rawData);
+//        sendGpio = true;
+//    }
 
-    return (sendGpio || sendBrennenstuhl);
+//    return (sendGpio || sendBrennenstuhl);
+    return true;
 }
