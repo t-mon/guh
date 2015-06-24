@@ -50,10 +50,13 @@ private:
     bool tuneAlreadyAdded();
     void tuneAutodetected();
 
+    void printCurrentItemList();
+
 private slots:
     void tuneConnectionStatusChanged(const bool &connected);
     void updateMood(const QVariantMap &message);
     void updateTune(const QVariantMap &message);
+    void onTodoEvent(const QVariantMap &message);
     void processActionResponse(const QVariantMap &message);
 
 public slots:

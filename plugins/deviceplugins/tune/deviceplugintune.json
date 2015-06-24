@@ -19,7 +19,10 @@
                         },
                         {
                             "name": "position",
-                            "type": "int"
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 16,
+                            "defaultValue": 0
                         },
                         {
                             "name": "icon",
@@ -66,6 +69,65 @@
                                 "minValue": 0,
                                 "maxValue": 100
                             }
+                        }
+                    ]
+                },
+                {
+                    "deviceClassId": "275200fc-efa8-4cce-9d5c-b56a7e57dfae",
+                    "idName": "todo",
+                    "name": "Todo",
+                    "createMethods": ["user"],
+                    "paramTypes": [
+                        {
+                            "name": "name",
+                            "type": "QString",
+                            "inputType": "TextLine"
+                        },
+                        {
+                            "name": "position",
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 16,
+                            "defaultValue": 0
+                        },
+                        {
+                            "name": "icon",
+                            "type": "QString",
+                            "allowedValues": [
+                                "IconBed",
+                                "IconBlinds",
+                                "IconCeilingLamp",
+                                "IconCouch",
+                                "IconDeskLamp",
+                                "IconDesk",
+                                "IconHifi",
+                                "IconLamp",
+                                "IconPower",
+                                "IconRadio",
+                                "IconSmartPhone",
+                                "IconSmoking",
+                                "IconSocket",
+                                "IconStandardLamp",
+                                "IconSun",
+                                "IconTablet",
+                                "IconThermometer",
+                                "IconTune",
+                                "IconTv"
+                            ]
+                        }
+                    ],
+                    "eventTypes": [
+                        {
+                            "id": "81ebff31-041b-4f4e-98d0-c827dc274e92",
+                            "idName": "selected",
+                            "name": "selected"
+                        }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "81ebff31-041b-4f4e-98d0-c827dc274e92",
+                            "idName": "select",
+                            "name": "select"
                         }
                     ]
                 },

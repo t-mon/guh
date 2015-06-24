@@ -57,6 +57,7 @@ signals:
     void connectionStatusChanged(const bool &connectionStatus);
     void gotTuneSync(const QVariantMap &params);
     void gotMoodSync(const QVariantMap &params);
+    void gotTodoEvent(const QVariantMap &params);
     void gotActionResponse(const QVariantMap &response);
 
 private slots:

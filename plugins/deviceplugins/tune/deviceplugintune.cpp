@@ -34,6 +34,7 @@ DevicePluginTune::DevicePluginTune()
     connect(m_server, &JsonRpcServer::connectionStatusChanged, this, &DevicePluginTune::tuneConnectionStatusChanged);
     connect(m_server, &JsonRpcServer::gotMoodSync, this, &DevicePluginTune::updateMood);
     connect(m_server, &JsonRpcServer::gotTuneSync, this, &DevicePluginTune::updateTune);
+    connect(m_server, &JsonRpcServer::gotTodoEvent, this, &DevicePluginTune::onTodoEvent);
     connect(m_server, &JsonRpcServer::gotActionResponse, this, &DevicePluginTune::processActionResponse);
 }
 
@@ -55,8 +56,8 @@ DeviceManager::DeviceSetupStatus DevicePluginTune::setupDevice(Device *device)
         return DeviceManager::DeviceSetupStatusSuccess;
     }
 
-    // mood
-    if ((device->deviceClassId() == moodDeviceClassId) && tuneAlreadyAdded()) {
+    // mood / todo
+    if ((device->deviceClassId() == moodDeviceClassId || device->deviceClassId() == todoDeviceClassId) && tuneAlreadyAdded()) {
 
         // check index position
         int position = device->paramValue("position").toInt();
@@ -65,7 +66,7 @@ DeviceManager::DeviceSetupStatus DevicePluginTune::setupDevice(Device *device)
             device->setParamValue("position", myDevices().count());
         } else {
             if (position <= 0) {
-                device->setParamValue("position", 0);
+                device->setParamValue("position", 1);
                 position = 0;
             }
             foreach (Device *d, myDevices()) {
@@ -74,12 +75,10 @@ DeviceManager::DeviceSetupStatus DevicePluginTune::setupDevice(Device *device)
                     d->setParamValue("position", currentPosition + 1);
                 }
             }
+            printCurrentItemList();
         }
-
-        device->setName(device->paramValue("name").toString() + " (Mood)");
         return DeviceManager::DeviceSetupStatusSuccess;
     }
-
     return DeviceManager::DeviceSetupStatusFailure;
 }
 
@@ -91,7 +90,7 @@ void DevicePluginTune::postSetupDevice(Device *device)
 
 void DevicePluginTune::deviceRemoved(Device *device)
 {
-    if (device->deviceClassId() == moodDeviceClassId) {
+    if (device->deviceClassId() == moodDeviceClassId || device->deviceClassId() == todoDeviceClassId) {
         int position = device->paramValue("position").toInt();
 
         foreach (Device *d, myDevices()) {
@@ -100,6 +99,7 @@ void DevicePluginTune::deviceRemoved(Device *device)
                 d->setParamValue("position", currentPosition - 1);
             }
         }
+        printCurrentItemList();
         sync();
     }
     if (device->deviceClassId() == tuneDeviceClassId && m_server->tuneAvailable()) {
@@ -131,6 +131,15 @@ void DevicePluginTune::tuneAutodetected()
     descriptor.setParams(params);
     descriptorList.append(descriptor);
     metaObject()->invokeMethod(this, "autoDevicesAppeared", Qt::QueuedConnection, Q_ARG(DeviceClassId, tuneDeviceClassId), Q_ARG(QList<DeviceDescriptor>, descriptorList));
+}
+
+void DevicePluginTune::printCurrentItemList()
+{
+    qCDebug(dcTune) << "--------------------------";
+    foreach (Device *d, myDevices()) {
+        qCDebug(dcTune) << d->paramValue("position").toInt() << " -> " << d->paramValue("name").toString();
+    }
+    qCDebug(dcTune) << "--------------------------";
 }
 
 void DevicePluginTune::tuneConnectionStatusChanged(const bool &connected)
@@ -176,6 +185,19 @@ void DevicePluginTune::updateTune(const QVariantMap &message)
     }
 }
 
+void DevicePluginTune::onTodoEvent(const QVariantMap &message)
+{
+    QVariantMap todo = message.value("todo").toMap();
+    Device *device = deviceManager()->findConfiguredDevice(DeviceId(todo.value("deviceId").toString()));
+
+    if (!device) {
+        qCWarning(dcTune) << "could not find Todo device for id" << todo.value("deviceId").toString();
+        return;
+    }
+
+    emit emitEvent(Event(selectedEventTypeId, device->id()));
+}
+
 void DevicePluginTune::processActionResponse(const QVariantMap &message)
 {
     bool success = message.value("success").toBool();
@@ -194,7 +216,9 @@ DeviceManager::DeviceError DevicePluginTune::executeAction(Device *device, const
     }
 
     // check DeviceClassId
-    if (device->deviceClassId() != moodDeviceClassId && device->deviceClassId() != tuneDeviceClassId) {
+    if (device->deviceClassId() != moodDeviceClassId &&
+            device->deviceClassId() != tuneDeviceClassId &&
+            device->deviceClassId() != todoDeviceClassId) {
         return DeviceManager::DeviceErrorDeviceClassNotFound;
     }
 
@@ -202,8 +226,14 @@ DeviceManager::DeviceError DevicePluginTune::executeAction(Device *device, const
     if (action.actionTypeId() != powerActionTypeId &&
             action.actionTypeId() != brightnessActionTypeId &&
             action.actionTypeId() != valueActionTypeId &&
+            action.actionTypeId() != selectActionTypeId &&
             action.actionTypeId() != activeActionTypeId){
         return DeviceManager::DeviceErrorActionTypeNotFound;
+    }
+
+    if (device->deviceClassId() == todoDeviceClassId && action.actionTypeId() == selectActionTypeId) {
+        emit emitEvent(Event(selectedEventTypeId, device->id()));
+        return DeviceManager::DeviceErrorNoError;
     }
 
     // request the action execution on tune

@@ -1,0 +1,104 @@
+{
+    "types": {
+        "Mood": {
+            "name": "QString",
+            "deviceId": "QUuid",
+            "position": "int",
+            "icon": "QString",
+            "states": {
+                "value": "int",
+                "active": "bool"
+            }
+        },
+        "Todo": {
+            "name": "QString",
+            "deviceId": "QUuid",
+            "position": "int",
+            "icon": "QString"
+        },
+        "Tune": {
+            "name": "QString",
+            "deviceId": "QUuid",
+            "states": {
+                "brightness": "int",
+                "power": "bool",
+                "humidity": "int",
+                "lightIntensity": "int",
+                "temperature": "double",
+                "approximationDetected": "bool"
+            }
+        }
+    },
+    "methods": {
+        "Items.Sync": {
+            "description": "Syncing all devices (moods and tune) from guh to tune",
+            "params": {
+                "moods": [
+                    "$ref:Mood"
+                ],
+                "tune": {
+                    "name": "QString",
+                    "deviceId": "QUuid",
+                    "brightness": "int",
+                    "power": "bool"
+                }
+            },
+            "returns": {
+                "success": "bool"
+            }
+        },
+        "Mood.SyncStates": {
+            "description": "Syncing the state values of the mood to guh",
+            "params": {
+                "mood": "$ref:Mood"
+            },
+            "returns": {
+                "success": "bool"
+            }
+        },
+        "Mood.ExecuteAction": {
+            "description": "Execute an action on a mood from guh",
+            "params": {
+                "actionId": "QUuid",
+                "deviceId": "QUuid",
+                "value": "int",
+                "active": "bool"
+            },
+            "returns": {
+                "success": "bool",
+                "actionId": "QUuid"
+            }
+        },
+        "Tune.SyncStates": {
+            "description": "Syncing the state values of tune to guh",
+            "params": {
+                "tune": "$ref:Tune"
+            },
+            "returns": {
+                "success": "bool"
+            }
+        },
+        "Tune.ExecuteAction": {
+            "description": "Execute an action on tune from guh",
+            "params": {
+                "actionId": "QUuid",
+                "deviceId": "QUuid",
+                "brightness": "int",
+                "power": "bool"
+            },
+            "returns": {
+                "success": "bool",
+                "actionId": "QUuid"
+            }
+        },
+        "Todo.OnPressed": {
+            "description": "Signal when a Todo was selected",
+            "params": {
+                "todo": "$ref:Todo"
+            },
+            "returns": {
+                "success": "bool"
+            }
+        }
+    }
+}

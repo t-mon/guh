@@ -23,6 +23,7 @@
 
 extern PluginId pluginId;
 extern DeviceClassId moodDeviceClassId;
+extern DeviceClassId todoDeviceClassId;
 extern StateTypeId activeStateTypeId;
 extern ActionTypeId activeActionTypeId;
 extern StateTypeId valueStateTypeId;
@@ -73,6 +74,7 @@ bool JsonRpcServer::sync(QList<Device *> deviceList)
     QVariantMap message;
     QVariantMap params;
     QVariantList moods;
+    QVariantList todos;
     QVariantMap tune;
     foreach (Device* device, deviceList) {
         if (device->deviceClassId() == moodDeviceClassId) {
@@ -87,6 +89,14 @@ bool JsonRpcServer::sync(QList<Device *> deviceList)
             mood.insert("states", states);
             moods.append(mood);
         }
+        if (device->deviceClassId() == todoDeviceClassId) {
+            QVariantMap todo;
+            todo.insert("name", device->paramValue("name"));
+            todo.insert("deviceId", device->id());
+            todo.insert("position", device->paramValue("position"));
+            todo.insert("icon", device->paramValue("icon"));
+            todos.append(todo);
+        }
         if (device->deviceClassId() == tuneDeviceClassId) {
             tune.insert("name", device->paramValue("name"));
             tune.insert("deviceId", device->id());
@@ -96,6 +106,7 @@ bool JsonRpcServer::sync(QList<Device *> deviceList)
     }
     m_id++;
     params.insert("moods", moods);
+    params.insert("todos", todos);
     params.insert("tune", tune);
     message.insert("method", "Items.Sync");
     message.insert("id", m_id);
@@ -230,6 +241,11 @@ void JsonRpcServer::processData(const QByteArray &data)
 
     if (message.value("method").toString() == "Tune.SyncStates") {
         emit gotTuneSync(message.value("params").toMap());
+        m_manager->sendData(formatResponse(commandId));
+    }
+
+    if (message.value("method").toString() == "Todo.OnPressed") {
+        emit gotTodoEvent(message.value("params").toMap());
         m_manager->sendData(formatResponse(commandId));
     }
 
