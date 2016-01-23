@@ -48,19 +48,16 @@ QString AuthenticationHandler::name() const
 
 JsonReply *AuthenticationHandler::Authenticate(const QVariantMap &params)
 {
-    qCDebug(dcJsonRpc) << params;
-
     QString clientDescription = params.value("clientDescription").toString();
     QString userName = params.value("userName").toString();
     QString password = params.value("password").toString();
 
     QString token = GuhCore::instance()->authenticationManager()->authenticate(clientDescription, userName, password);
-
     if (token.isEmpty())
         return createReply(statusToReply(AuthenticationManager::AuthenticationErrorAuthenicationFailed));
 
     QVariantMap returnParams;
-    returnParams.insert("token", GuhCore::instance()->authenticationManager()->createToken());
+    returnParams.insert("token", token);
     returnParams.insert("authenticationError", JsonTypes::authenticationErrorToString(AuthenticationManager::AuthenticationErrorNoError));
     return createReply(returnParams);
 }

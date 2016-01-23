@@ -284,7 +284,7 @@ void JsonRPCServer::registerHandler(JsonHandler *handler)
 void JsonRPCServer::clientConnected(const QUuid &clientId)
 {
     // Notifications enabled by default
-    m_clients.insert(clientId, true);
+    m_clients.insert(clientId, false);
 
     TransportInterface *interface = qobject_cast<TransportInterface *>(sender());
 

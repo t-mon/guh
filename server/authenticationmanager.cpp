@@ -51,9 +51,15 @@ QList<AuthorizedConnection> AuthenticationManager::authorizedConnections() const
 
 bool AuthenticationManager::verifyToken(const QString &token) const
 {
-    Q_UNUSED(token)
+    qCDebug(dcAuthentication) << "Verify token" << token;
+    foreach (const AuthorizedConnection &connection, m_connections) {
+        if (connection.token() == token) {
+            return true;
+        }
+    }
 
-    return true;
+    qCWarning(dcAuthentication) << "Token not authorized.";
+    return false;
 }
 
 bool AuthenticationManager::verifyLogin(const QString &userName, const QString &password)
@@ -82,6 +88,8 @@ QString AuthenticationManager::authenticate(const QString &clientDescription, co
         return QString();
 
     QString token = createToken();
+
+    qCDebug(dcAuthentication) << "Generated token" << token;
 
     AuthorizedConnection connection;
     connection.setClientDescription(clientDescription);
@@ -151,7 +159,7 @@ void AuthenticationManager::loadUsers()
     }
 
     if (!hasUser("guh")) {
-        qCWarning(dcAuthentication) << "There is no default user configured. Please check your configuration";// << settings.fileName();
+        qCWarning(dcAuthentication) << "There is no default user \"guh\" configured. Please check your configuration";// << settings.fileName();
     }
 
     settings.endGroup();
@@ -174,12 +182,42 @@ void AuthenticationManager::saveUsers()
 
 void AuthenticationManager::loadAuthorizedConnections()
 {
+    GuhSettings settings(GuhSettings::SettingsRoleUsers);
+    settings.beginGroup("AuthorizedConnections");
 
+    foreach (const QString &token, settings.childGroups()) {
+        qCDebug(dcAuthentication) << "Load token" << token;
+        settings.beginGroup(token);
+        AuthorizedConnection connection;
+        connection.setClientDescription(settings.value("clientDescription").toString());
+        connection.setToken(token);
+        connection.setLastLogin((quint64)settings.value("lastLogin").toUInt());
+        foreach (const User &user, m_users) {
+            if (UserId(settings.value("userId").toString()) == user.userId()) {
+                connection.setUser(user);
+            }
+        }
+        qCDebug(dcAuthentication) << "Connection token" << connection.token();
+
+        m_connections.append(connection);
+        settings.endGroup();
+    }
+    settings.endGroup();
 }
 
 void AuthenticationManager::saveAuthorizedConnections()
 {
+    GuhSettings settings(GuhSettings::SettingsRoleUsers);
+    settings.beginGroup("AuthorizedConnections");
 
+    foreach (const AuthorizedConnection &connection, m_connections) {
+        settings.beginGroup(connection.token());
+        settings.setValue("clientDescription", connection.clientDescription());
+        settings.setValue("userId", connection.user().userId().toString());
+        settings.setValue("lastLogin", connection.lastLogin());
+        settings.endGroup();
+    }
+    settings.endGroup();
 }
 
 }

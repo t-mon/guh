@@ -170,13 +170,13 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
 
         // TODO: check if authentication enables
         if (!message.contains("token")) {
+            qCWarning(dcJsonRpc) << "Error parsing command. Missing \"token\"" << message;
             sendErrorResponse(clientId, commandId, "Authentication token missing");
             return;
         }
 
         QString token = message.value("token").toString();
         bool authenticated = GuhCore::instance()->authenticationManager()->verifyToken(token);
-
         if (!authenticated) {
             sendErrorResponse(clientId, commandId, "Authentication failed");
             return;
