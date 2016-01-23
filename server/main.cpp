@@ -111,6 +111,7 @@ int main(int argc, char *argv[])
     s_loggingFilters.insert("JsonRpc", true);
     s_loggingFilters.insert("Rest", true);
     s_loggingFilters.insert("OAuth2", false);
+    s_loggingFilters.insert("Authentication", true);
 
     QHash<QString, bool> loggingFiltersPlugins;
     foreach (const QJsonObject &pluginMetadata, DeviceManager::pluginsMetadata()) {
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
                                              "manufacturers. With the powerful rule engine you are able to connect any \n"
                                              "device available in the system and create individual scenes and behaviors \n"
                                              "for your environment.\n\n"
-                                             "guhd %1 (C) 2014-2015 guh\n"
+                                             "guhd %1 (C) 2014-2016 guh\n"
                                              "Released under the GNU GENERAL PUBLIC LICENSE Version 2.\n\n"
                                              "API version: %2\n").arg(GUH_VERSION_STRING).arg(JSON_PROTOCOL_VERSION);
 
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
 
         // create core instance
         GuhCore::instance()->setRunningMode(GuhCore::RunningModeApplication);
-        return application.exec();
+        return  application.exec();
     }
 
     GuhService service(argc, argv);

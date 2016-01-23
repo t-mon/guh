@@ -20,6 +20,7 @@ SOURCES += $$top_srcdir/server/guhcore.cpp \
     $$top_srcdir/server/jsonrpc/eventhandler.cpp \
     $$top_srcdir/server/jsonrpc/statehandler.cpp \
     $$top_srcdir/server/jsonrpc/logginghandler.cpp \
+    $$top_srcdir/server/jsonrpc/authenticationhandler.cpp \
     $$top_srcdir/server/stateevaluator.cpp \
     $$top_srcdir/server/logging/logengine.cpp \
     $$top_srcdir/server/logging/logfilter.cpp \
@@ -37,6 +38,9 @@ SOURCES += $$top_srcdir/server/guhcore.cpp \
     $$top_srcdir/server/rest/logsresource.cpp \
     $$top_srcdir/server/rest/pluginsresource.cpp \
     $$top_srcdir/server/rest/rulesresource.cpp \
+    $$top_srcdir/server/authenticationmanager.cpp \
+    $$top_srcdir/server/authentication/authorizedconnection.cpp \
+    $$top_srcdir/server/authentication/user.cpp
 
 
 HEADERS += $$top_srcdir/server/guhcore.h \
@@ -52,6 +56,7 @@ HEADERS += $$top_srcdir/server/guhcore.h \
     $$top_srcdir/server/jsonrpc/eventhandler.h \
     $$top_srcdir/server/jsonrpc/statehandler.h \
     $$top_srcdir/server/jsonrpc/logginghandler.h \
+    $$top_srcdir/server/jsonrpc/authenticationhandler.h \
     $$top_srcdir/server/stateevaluator.h \
     $$top_srcdir/server/logging/logging.h \
     $$top_srcdir/server/logging/logengine.h \
@@ -70,5 +75,8 @@ HEADERS += $$top_srcdir/server/guhcore.h \
     $$top_srcdir/server/rest/logsresource.h \
     $$top_srcdir/server/rest/pluginsresource.h \
     $$top_srcdir/server/rest/rulesresource.h \
+    $$top_srcdir/server/authenticationmanager.h \
+    $$top_srcdir/server/authentication/authorizedconnection.h \
+    $$top_srcdir/server/authentication/user.h
 
 

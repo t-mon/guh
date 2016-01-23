@@ -37,7 +37,6 @@ public:
 
     QString queryString() const;
 
-
     void addTimeFilter(const QDateTime &startDate = QDateTime(), const QDateTime &endDate = QDateTime());
     QList<QPair<QDateTime, QDateTime> > timeFilters() const;
 

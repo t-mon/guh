@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,28 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#ifndef AUTHENTICATIONHANDLER_H
+#define AUTHENTICATIONHANDLER_H
 
-#include <QLoggingCategory>
+#include <QObject>
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+#include "jsonhandler.h"
 
-#endif // LOGGINGCATEGORYS_H
+namespace guhserver {
+
+class AuthenticationHandler : public JsonHandler
+{
+    Q_OBJECT
+public:
+    explicit AuthenticationHandler(QObject *parent = 0);
+
+    QString name() const override;
+
+    Q_INVOKABLE JsonReply *Authenticate(const QVariantMap &params);
+
+
+};
+
+}
+
+#endif // AUTHENTICATIONHANDLER_H

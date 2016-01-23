@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,58 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#include "user.h"
 
-#include <QLoggingCategory>
+namespace guhserver {
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+User::User() :
+    m_isAdmin(false)
+{
+}
 
-#endif // LOGGINGCATEGORYS_H
+UserId User::userId() const
+{
+    return m_userId;
+}
+
+void User::setUserId(const UserId &userId)
+{
+    m_userId = userId;
+}
+
+QString User::userName() const
+{
+    return m_userName;
+}
+
+void User::setUserName(const QString &userName)
+{
+    m_userName = userName;
+}
+
+QString User::password() const
+{
+    return m_password;
+}
+
+void User::setPassword(const QString &password)
+{
+    m_password = password;
+}
+
+bool User::isAdmin() const
+{
+    return m_isAdmin;
+}
+
+void User::setAdmin(const bool &isAdmin)
+{
+    m_isAdmin = isAdmin;
+}
+
+bool User::isValid()
+{
+    return !m_userId.isNull() && !m_userName.isEmpty() && !m_password.isEmpty();
+}
+
+}

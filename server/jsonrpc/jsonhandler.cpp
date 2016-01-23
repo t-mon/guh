@@ -173,6 +173,12 @@ QVariantMap JsonHandler::statusToReply(Logging::LoggingError status) const
     return returns;
 }
 
+QVariantMap JsonHandler::statusToReply(AuthenticationManager::AuthenticationError status) const
+{
+    QVariantMap returns;
+    returns.insert("authenticationError", JsonTypes::authenticationErrorToString(status));
+    return returns;
+}
 
 /*!
     \class guhserver::JsonReply

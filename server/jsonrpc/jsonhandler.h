@@ -111,11 +111,13 @@ protected:
     QVariantMap statusToReply(DeviceManager::DeviceError status) const;
     QVariantMap statusToReply(RuleEngine::RuleError status) const;
     QVariantMap statusToReply(Logging::LoggingError status) const;
+    QVariantMap statusToReply(AuthenticationManager::AuthenticationError status) const;
 
 private:
     QHash<QString, QString> m_descriptions;
     QHash<QString, QVariantMap> m_params;
     QHash<QString, QVariantMap> m_returns;
+
 };
 
 }

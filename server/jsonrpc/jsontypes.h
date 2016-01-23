@@ -27,6 +27,7 @@
 #include "rule.h"
 #include "devicemanager.h"
 #include "ruleengine.h"
+#include "authenticationmanager.h"
 
 #include "types/event.h"
 #include "types/action.h"
@@ -114,6 +115,7 @@ public:
     DECLARE_TYPE(loggingSource, "LoggingSource", Logging, LoggingSource)
     DECLARE_TYPE(loggingLevel, "LoggingLevel", Logging, LoggingLevel)
     DECLARE_TYPE(loggingEventType, "LoggingEventType", Logging, LoggingEventType)
+    DECLARE_TYPE(authenticationError, "AuthenticationError", AuthenticationManager, AuthenticationError)
 
     DECLARE_OBJECT(paramType, "ParamType")
     DECLARE_OBJECT(param, "Param")

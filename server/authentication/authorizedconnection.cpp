@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,53 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#include "authorizedconnection.h"
 
-#include <QLoggingCategory>
+namespace guhserver {
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+AuthorizedConnection::AuthorizedConnection()
+{
 
-#endif // LOGGINGCATEGORYS_H
+}
+
+User AuthorizedConnection::user() const
+{
+    return m_user;
+}
+
+void AuthorizedConnection::setUser(const User &user)
+{
+    m_user = user;
+}
+
+QString AuthorizedConnection::token() const
+{
+    return m_token;
+}
+
+void AuthorizedConnection::setToken(const QString &token)
+{
+    m_token = token;
+}
+
+QString AuthorizedConnection::clientDescription() const
+{
+    return m_clientDescription;
+}
+
+void AuthorizedConnection::setClientDescription(const QString &clientDescription)
+{
+    m_clientDescription = clientDescription;
+}
+
+quint64 AuthorizedConnection::lastLogin() const
+{
+    return m_lastLogin;
+}
+
+void AuthorizedConnection::setLastLogin(const quint64 &lastLogin)
+{
+    m_lastLogin = lastLogin;
+}
+
+}

@@ -54,6 +54,7 @@
 #include "eventhandler.h"
 #include "logginghandler.h"
 #include "statehandler.h"
+#include "authenticationhandler.h"
 
 #ifndef TESTING_ENABLED
 #include "tcpserver.h"
@@ -192,6 +193,7 @@ void JsonRPCServer::setup()
     registerHandler(new EventHandler(this));
     registerHandler(new LoggingHandler(this));
     registerHandler(new StateHandler(this));
+    registerHandler(new AuthenticationHandler(this));
 }
 
 void JsonRPCServer::processData(const QUuid &clientId, const QString &targetNamespace, const QString &method, const QVariantMap &message)

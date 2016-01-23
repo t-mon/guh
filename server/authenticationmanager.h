@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,53 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#ifndef AUTHENTICATIONMANAGER_H
+#define AUTHENTICATIONMANAGER_H
 
-#include <QLoggingCategory>
+#include <QObject>
+#include <QAuthenticator>
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+#include "authentication/user.h"
+#include "authentication/authorizedconnection.h"
 
-#endif // LOGGINGCATEGORYS_H
+namespace guhserver {
+
+class AuthenticationManager : public QObject
+{
+    Q_OBJECT
+    Q_ENUMS(AuthenticationError)
+
+public:
+    enum AuthenticationError {
+        AuthenticationErrorNoError,
+        AuthenticationErrorAuthenicationFailed,
+        AuthenticationErrorPermissionDenied
+    };
+
+    explicit AuthenticationManager(QObject *parent = 0);
+
+    static QString createToken();
+
+    QList<User> users() const;
+    QList<AuthorizedConnection> authorizedConnections() const;
+
+    bool verifyToken(const QString &token) const;
+    bool verifyLogin(const QString &userName, const QString &password);
+
+    QString authenticate(const QString &clientDescription, const QString &userName, const QString &password);
+
+private:
+    QList<User> m_users;
+    QList<AuthorizedConnection> m_connections;
+
+    bool hasUser(const QString &userName);
+
+    void loadUsers();
+    void saveUsers();
+    void loadAuthorizedConnections();
+    void saveAuthorizedConnections();
+
+};
+
+}
+#endif // AUTHENTICATIONMANAGER_H

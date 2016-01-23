@@ -52,6 +52,7 @@ QVariantList JsonTypes::s_loggingError;
 QVariantList JsonTypes::s_loggingSource;
 QVariantList JsonTypes::s_loggingLevel;
 QVariantList JsonTypes::s_loggingEventType;
+QVariantList JsonTypes::s_authenticationError;
 
 QVariantMap JsonTypes::s_paramType;
 QVariantMap JsonTypes::s_param;
@@ -94,6 +95,7 @@ void JsonTypes::init()
     s_loggingSource = enumToStrings(Logging::staticMetaObject, "LoggingSource");
     s_loggingLevel = enumToStrings(Logging::staticMetaObject, "LoggingLevel");
     s_loggingEventType = enumToStrings(Logging::staticMetaObject, "LoggingEventType");
+    s_authenticationError = enumToStrings(AuthenticationManager::staticMetaObject, "AuthenticationError");
 
     // ParamType
     s_paramType.insert("name", basicTypeToString(String));
@@ -281,6 +283,7 @@ QVariantMap JsonTypes::allTypes()
     allTypes.insert("LoggingLevel", loggingLevel());
     allTypes.insert("LoggingSource", loggingSource());
     allTypes.insert("LoggingEventType", loggingEventType());
+    allTypes.insert("AuthenticationError", authenticationError());
 
     allTypes.insert("StateType", stateTypeDescription());
     allTypes.insert("StateDescriptor", stateDescriptorDescription());
@@ -1244,6 +1247,12 @@ QPair<bool, QString> JsonTypes::validateVariant(const QVariant &templateVariant,
                 QPair<bool, QString> result = validateEnum(s_deviceError, variant);
                 if (!result.first) {
                     qCWarning(dcJsonRpc) << QString("value %1 not allowed in %2").arg(variant.toString()).arg(deviceErrorRef());
+                    return result;
+                }
+            } else if (refName == authenticationErrorRef()) {
+                QPair<bool, QString> result = validateEnum(s_authenticationError, variant);
+                if (!result.first) {
+                    qCWarning(dcJsonRpc) << QString("value %1 not allowed in %2").arg(variant.toString()).arg(authenticationErrorRef());
                     return result;
                 }
             } else if (refName == ruleErrorRef()) {

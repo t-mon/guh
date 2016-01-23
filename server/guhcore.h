@@ -31,6 +31,7 @@
 #include "devicemanager.h"
 #include "ruleengine.h"
 #include "servermanager.h"
+#include "authenticationmanager.h"
 
 #include <QObject>
 #include <QDebug>
@@ -53,9 +54,6 @@ public:
 
     static GuhCore* instance();
     ~GuhCore();
-
-    // Used for testing
-    void destroy();
 
     RunningMode runningMode() const;
     void setRunningMode(const RunningMode &runningMode);
@@ -101,7 +99,11 @@ public:
     LogEngine* logEngine() const;
     JsonRPCServer *jsonRPCServer() const;
     RestServer *restServer() const;
+    AuthenticationManager *authenticationManager() const;
     DeviceManager *deviceManager() const;
+
+public slots:
+    void destroy();
 
 signals:
     void eventTriggered(const Event &event);
@@ -129,6 +131,7 @@ private:
     RunningMode m_runningMode;
 
     ServerManager *m_serverManager;
+    AuthenticationManager *m_authenticationManager;
     DeviceManager *m_deviceManager;
     RuleEngine *m_ruleEngine;
 

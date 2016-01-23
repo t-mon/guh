@@ -43,6 +43,8 @@
         This role will create the \b{rules.conf} file and is used to store the configured \l{guhserver::Rule}{Rules}.
     \value SettingsRolePlugins
         This role will create the \b{plugins.conf} file and is used to store the \l{DevicePlugin}{Plugin} configurations.
+    \value SettingsRoleUsers
+        This role will create the \b{users.conf} file and is used to store the user settings and authenticated connections of the guh system.
     \value SettingsRoleGlobal
         This role will create the \b{guhd.conf} file and is used to store the global settings of the guh system. This settings
         file is read only.
@@ -104,6 +106,19 @@ GuhSettings::GuhSettings(const SettingsRole &role, QObject *parent):
             m_settings = new QSettings(settingsFile, QSettings::IniFormat, this);
         } else {
             settingsFile = QDir::homePath() + "/.config/" + settingsPrefix + "/plugins.conf";
+            m_settings = new QSettings(settingsFile, QSettings::NativeFormat, this);
+        }
+        break;
+    case SettingsRoleUsers:
+        // check if we are running a test
+        if (settingsPrefix == "guh-test") {
+            settingsFile = "/tmp/" + settingsPrefix + "/test-users.conf";
+            m_settings = new QSettings(settingsFile, QSettings::NativeFormat, this);
+        } else if (rootPrivilege) {
+            settingsFile = "/etc/" + settingsPrefix + "/users.conf";
+            m_settings = new QSettings(settingsFile, QSettings::IniFormat, this);
+        } else {
+            settingsFile = QDir::homePath() + "/.config/" + settingsPrefix + "/users.conf";
             m_settings = new QSettings(settingsFile, QSettings::NativeFormat, this);
         }
         break;

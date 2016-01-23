@@ -164,6 +164,27 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
         return;
     }
 
+    // verify authentication
+    if (targetNamespace != "Authentication" && method != "Authenticate") {
+        // check token key
+
+        // TODO: check if authentication enables
+        if (!message.contains("token")) {
+            sendErrorResponse(clientId, commandId, "Authentication token missing");
+            return;
+        }
+
+        QString token = message.value("token").toString();
+        bool authenticated = GuhCore::instance()->authenticationManager()->verifyToken(token);
+
+        if (!authenticated) {
+            sendErrorResponse(clientId, commandId, "Authentication failed");
+            return;
+        }
+
+        // TODO: verify permissions
+    }
+
     emit dataAvailable(clientId, targetNamespace, method, message);
 }
 

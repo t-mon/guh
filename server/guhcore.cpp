@@ -565,6 +565,8 @@ GuhCore::GuhCore(QObject *parent) :
     qCDebug(dcApplication) << "Creating Rule Engine";
     m_ruleEngine = new RuleEngine(this);
 
+    qCDebug(dcApplication) << "Creating Authentication Manager";
+    m_authenticationManager = new AuthenticationManager(this);
 
     qCDebug(dcApplication) << "Creating Server Manager";
     m_serverManager = new ServerManager(this);
@@ -661,6 +663,11 @@ JsonRPCServer *GuhCore::jsonRPCServer() const
 RestServer *GuhCore::restServer() const
 {
     return m_serverManager->restServer();
+}
+
+AuthenticationManager *GuhCore::authenticationManager() const
+{
+    return m_authenticationManager;
 }
 
 void GuhCore::actionExecutionFinished(const ActionId &id, DeviceManager::DeviceError status)

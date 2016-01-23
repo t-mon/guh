@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,42 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#ifndef USER_H
+#define USER_H
 
-#include <QLoggingCategory>
+#include <QObject>
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+#include "typeutils.h"
 
-#endif // LOGGINGCATEGORYS_H
+namespace guhserver {
+
+class User
+{
+public:
+    User();
+
+    UserId userId() const;
+    void setUserId(const UserId &userId);
+
+    QString userName() const;
+    void setUserName(const QString &userName);
+
+    QString password() const;
+    void setPassword(const QString &password);
+
+    bool isAdmin() const;
+    void setAdmin(const bool &isAdmin);
+
+    bool isValid();
+
+private:
+    QString m_userName;
+    QString m_password;
+    UserId m_userId;
+    bool m_isAdmin;
+
+};
+
+}
+
+#endif // USER_H

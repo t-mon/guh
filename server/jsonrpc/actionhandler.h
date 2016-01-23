@@ -44,6 +44,7 @@ private slots:
 
 private:
     QHash<ActionId, JsonReply*> m_asyncActionExecutions;
+
 };
 
 }

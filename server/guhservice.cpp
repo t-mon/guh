@@ -54,6 +54,7 @@ GuhService::GuhService(int argc, char **argv):
 /*! Destroyes the forked guhd application. */
 GuhService::~GuhService()
 {
+    GuhCore::instance()->destroy();
 }
 
 /*! Starts the forked guhd application. */

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -18,24 +18,40 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef LOGGINGCATEGORYS_H
-#define LOGGINGCATEGORYS_H
+#ifndef AUTHENTICATEDCONNECTION_H
+#define AUTHENTICATEDCONNECTION_H
 
-#include <QLoggingCategory>
+#include <QObject>
 
-// Core / libguh
-Q_DECLARE_LOGGING_CATEGORY(dcApplication)
-Q_DECLARE_LOGGING_CATEGORY(dcDeviceManager)
-Q_DECLARE_LOGGING_CATEGORY(dcRuleEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcHardware)
-Q_DECLARE_LOGGING_CATEGORY(dcConnection)
-Q_DECLARE_LOGGING_CATEGORY(dcLogEngine)
-Q_DECLARE_LOGGING_CATEGORY(dcTcpServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebServer)
-Q_DECLARE_LOGGING_CATEGORY(dcWebSocketServer)
-Q_DECLARE_LOGGING_CATEGORY(dcJsonRpc)
-Q_DECLARE_LOGGING_CATEGORY(dcRest)
-Q_DECLARE_LOGGING_CATEGORY(dcOAuth2)
-Q_DECLARE_LOGGING_CATEGORY(dcAuthentication)
+#include "user.h"
 
-#endif // LOGGINGCATEGORYS_H
+namespace guhserver {
+
+class AuthorizedConnection
+{
+public:
+    explicit AuthorizedConnection();
+
+    User user() const;
+    void setUser(const User &user);
+
+    QString token() const;
+    void setToken(const QString &token);
+
+    QString clientDescription() const;
+    void setClientDescription(const QString &clientDescription);
+
+    quint64 lastLogin() const;
+    void setLastLogin(const quint64 &lastLogin);
+
+private:
+    User m_user;
+    QString m_token;
+    QString m_clientDescription;
+    quint64 m_lastLogin;
+
+};
+
+}
+
+#endif // AUTHENTICATEDCONNECTION_H
