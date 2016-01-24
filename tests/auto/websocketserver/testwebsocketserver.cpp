@@ -104,14 +104,15 @@ void TestWebSocketServer::testBasicCall_data()
     QTest::addColumn<QByteArray>("data");
     QTest::addColumn<bool>("valid");
 
-    QTest::newRow("valid call") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\"}") << true;
-    QTest::newRow("missing id") << QByteArray("{\"method\":\"JSONRPC.Introspect\"}")<< false;
-    QTest::newRow("missing method") << QByteArray("{\"id\":42}") << false;
-    QTest::newRow("borked") << QByteArray("{\"id\":42, \"method\":\"JSO")<< false;
-    QTest::newRow("invalid function") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Foobar\"}") << false;
-    QTest::newRow("invalid namespace") << QByteArray("{\"id\":42, \"method\":\"FOO.Introspect\"}") << false;
-    QTest::newRow("missing dot") << QByteArray("{\"id\":42, \"method\":\"JSONRPCIntrospect\"}") << false;
-    QTest::newRow("invalid params") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\", \"params\":{\"törööö\":\"chooo-chooo\"}}") << false;
+    QTest::newRow("valid call") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSONRPC.Introspect\"}") << true;
+    QTest::newRow("missing token") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\"}") << false;
+    QTest::newRow("missing id") << QByteArray("{\"method\":\"JSONRPC.Introspect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}")<< false;
+    QTest::newRow("missing method") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << false;
+    QTest::newRow("borked") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSO")<< false;
+    QTest::newRow("invalid function") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSONRPC.Foobar\"}") << false;
+    QTest::newRow("invalid namespace") << QByteArray("{\"id\":42,\"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"FOO.Introspect\"}") << false;
+    QTest::newRow("missing dot") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSONRPCIntrospect\"}") << false;
+    QTest::newRow("invalid params") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSONRPC.Introspect\", \"params\":{\"törööö\":\"chooo-chooo\"}}") << false;
 }
 
 void TestWebSocketServer::testBasicCall()
@@ -144,6 +145,7 @@ QVariant TestWebSocketServer::injectSocketAndWait(const QString &method, const Q
     QVariantMap call;
     call.insert("id", m_socketCommandId);
     call.insert("method", method);
+    call.insert("token", "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE");
     call.insert("params", params);
     QJsonDocument jsonDoc = QJsonDocument::fromVariant(call);
 

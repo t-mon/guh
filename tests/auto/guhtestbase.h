@@ -70,7 +70,7 @@ protected slots:
     void cleanupTestCase();
 
 protected:
-    QVariant injectAndWait(const QString &method, const QVariantMap &params = QVariantMap());
+    QVariant injectAndWait(const QString &method, const QVariantMap &params = QVariantMap(), const QString &token = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE");
     QVariant checkNotification(const QSignalSpy &spy, const QString &notification);
 
     QVariant getAndWait(const QNetworkRequest &request, const int &expectedStatus = 200);

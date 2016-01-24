@@ -31,6 +31,7 @@ class AuthorizedConnection
 {
 public:
     explicit AuthorizedConnection();
+    AuthorizedConnection(const AuthorizedConnection &other);
 
     User user() const;
     void setUser(const User &user);

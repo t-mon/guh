@@ -27,6 +27,14 @@ User::User() :
 {
 }
 
+User::User(const User &other)
+{
+    m_userId = other.userId();
+    m_userName = other.userName();
+    m_password = other.password();
+    m_isAdmin = other.isAdmin();
+}
+
 UserId User::userId() const
 {
     return m_userId;

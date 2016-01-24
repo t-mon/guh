@@ -37,6 +37,8 @@ public:
 
     Q_INVOKABLE JsonReply *Authenticate(const QVariantMap &params);
 
+    Q_INVOKABLE JsonReply *ChangePassword(const QVariantMap &params);
+
 
 };
 

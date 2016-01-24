@@ -31,7 +31,8 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     QVariantMap returns;
 
     params.clear(); returns.clear();
-    setDescription("Authenticate", "This method can be called to get an authentication token.");
+    setDescription("Authenticate", "This method can be called to get an authentication token. "
+                   "If the authentication was successfull, the access token will be returned.");
     params.insert("clientDescription", JsonTypes::basicTypeToString(JsonTypes::String));
     params.insert("userName", JsonTypes::basicTypeToString(JsonTypes::String));
     params.insert("password", JsonTypes::basicTypeToString(JsonTypes::String));
@@ -39,6 +40,16 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     returns.insert("o:token", JsonTypes::basicTypeToString(JsonTypes::String));
     returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
     setReturns("Authenticate", returns);
+
+    params.clear(); returns.clear();
+    setDescription("ChangePassword", "This method can be called to change the password of the given user name.");
+    params.insert("userName", JsonTypes::basicTypeToString(JsonTypes::String));
+    params.insert("password", JsonTypes::basicTypeToString(JsonTypes::String));
+    params.insert("newPassword", JsonTypes::basicTypeToString(JsonTypes::String));
+    setParams("ChangePassword", params);
+    returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
+    setReturns("ChangePassword", returns);
+
 }
 
 QString AuthenticationHandler::name() const
@@ -60,6 +71,18 @@ JsonReply *AuthenticationHandler::Authenticate(const QVariantMap &params)
     returnParams.insert("token", token);
     returnParams.insert("authenticationError", JsonTypes::authenticationErrorToString(AuthenticationManager::AuthenticationErrorNoError));
     return createReply(returnParams);
+}
+
+JsonReply *AuthenticationHandler::ChangePassword(const QVariantMap &params)
+{
+    QString userName = params.value("userName").toString();
+    QString currentPassword = params.value("password").toString();
+    QString newPassword = params.value("newPassword").toString();
+
+    if (!GuhCore::instance()->authenticationManager()->changePassword(userName, currentPassword, newPassword))
+        return createReply(statusToReply(AuthenticationManager::AuthenticationErrorAuthenicationFailed));
+
+    return createReply(statusToReply(AuthenticationManager::AuthenticationErrorNoError));
 }
 
 }

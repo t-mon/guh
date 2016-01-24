@@ -1,4 +1,4 @@
-35
+36
 {
     "methods": {
         "Actions.ExecuteAction": {
@@ -28,6 +28,29 @@
                         "$ref:ParamType"
                     ]
                 }
+            }
+        },
+        "Authentication.Authenticate": {
+            "description": "This method can be called to get an authentication token. If the authentication was successfull, the access token will be returned.",
+            "params": {
+                "clientDescription": "String",
+                "password": "String",
+                "userName": "String"
+            },
+            "returns": {
+                "authenticationError": "$ref:AuthenticationError",
+                "o:token": "String"
+            }
+        },
+        "Authentication.ChangePassword": {
+            "description": "This method can be called to change the password of the given user name.",
+            "params": {
+                "newPassword": "String",
+                "password": "String",
+                "userName": "String"
+            },
+            "returns": {
+                "authenticationError": "$ref:AuthenticationError"
             }
         },
         "Devices.AddConfiguredDevice": {
@@ -533,6 +556,11 @@
                 "$ref:ParamType"
             ]
         },
+        "AuthenticationError": [
+            "AuthenticationErrorNoError",
+            "AuthenticationErrorAuthenicationFailed",
+            "AuthenticationErrorPermissionDenied"
+        ],
         "BasicTag": [
             "BasicTagService",
             "BasicTagDevice",

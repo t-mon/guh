@@ -38,6 +38,7 @@ class RuleEngine : public QObject
     Q_OBJECT
     Q_ENUMS(RuleError)
     Q_ENUMS(RemovePolicy)
+
 public:
     enum RuleError {
         RuleErrorNoError,

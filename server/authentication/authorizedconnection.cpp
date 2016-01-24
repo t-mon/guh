@@ -27,6 +27,14 @@ AuthorizedConnection::AuthorizedConnection()
 
 }
 
+AuthorizedConnection::AuthorizedConnection(const AuthorizedConnection &other)
+{
+    m_user = other.user();
+    m_token = other.token();
+    m_clientDescription = other.clientDescription();
+    m_lastLogin = other.lastLogin();
+}
+
 User AuthorizedConnection::user() const
 {
     return m_user;

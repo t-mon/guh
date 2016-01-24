@@ -25,12 +25,17 @@
 
 #include "typeutils.h"
 
+class AuthenticationManager;
+
 namespace guhserver {
 
 class User
 {
+    friend class AuthenticationManager;
+
 public:
     User();
+    User(const User &other);
 
     UserId userId() const;
     void setUserId(const UserId &userId);

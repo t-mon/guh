@@ -151,13 +151,12 @@ void TcpServer::onClientConnected()
 void TcpServer::readPackage()
 {
     QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
-    qCDebug(dcTcpServer) << "data comming from" << client->peerAddress().toString();
     QByteArray message;
     while (client->canReadLine()) {
         QByteArray dataLine = client->readLine();
-        qCDebug(dcTcpServer) << "line in:" << dataLine;
         message.append(dataLine);
         if (dataLine.endsWith('\n')) {
+            qCDebug(dcTcpServer) << "Received data from" << client->peerAddress().toString() << ":" << dataLine;
             validateMessage(m_clientList.key(client), message);
             message.clear();
         }
@@ -177,7 +176,7 @@ void TcpServer::onError(QAbstractSocket::SocketError error)
     QTcpServer *server = qobject_cast<QTcpServer *>(sender());
     QUuid uuid = m_serverList.key(server);
     qCWarning(dcTcpServer) << "Tcp server" << server->serverAddress().toString() << "error:" << error << server->errorString();
-    qCWarning(dcTcpServer) << "shutting down Tcp server" << server->serverAddress().toString();
+    qCWarning(dcTcpServer) << "Shutting down Tcp server" << server->serverAddress().toString();
 
     server->close();
     m_serverList.take(uuid)->deleteLater();

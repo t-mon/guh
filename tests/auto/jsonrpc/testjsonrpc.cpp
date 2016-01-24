@@ -110,14 +110,15 @@ void TestJSONRPC::testBasicCall_data()
     QTest::addColumn<bool>("idValid");
     QTest::addColumn<bool>("valid");
 
-    QTest::newRow("valid call") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\"}") << true << true;
-    QTest::newRow("missing id") << QByteArray("{\"method\":\"JSONRPC.Introspect\"}") << false << false;
-    QTest::newRow("missing method") << QByteArray("{\"id\":42}") << true << false;
-    QTest::newRow("borked") << QByteArray("{\"id\":42, \"method\":\"JSO") << false << false;
-    QTest::newRow("invalid function") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Foobar\"}") << true << false;
-    QTest::newRow("invalid namespace") << QByteArray("{\"id\":42, \"method\":\"FOO.Introspect\"}") << true << false;
-    QTest::newRow("missing dot") << QByteArray("{\"id\":42, \"method\":\"JSONRPCIntrospect\"}") << true << false;
-    QTest::newRow("invalid params") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\", \"params\":{\"törööö\":\"chooo-chooo\"}}") << true << false;
+    QTest::newRow("valid call") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << true << true;
+    QTest::newRow("missing token") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\"}") << true << false;
+    QTest::newRow("missing id") << QByteArray("{\"method\":\"JSONRPC.Introspect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << false << false;
+    QTest::newRow("missing method") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << true << false;
+    QTest::newRow("borked") << QByteArray("{\"id\":42, \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"method\":\"JSO") << false << false;
+    QTest::newRow("invalid function") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Foobar\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << true << false;
+    QTest::newRow("invalid namespace") << QByteArray("{\"id\":42, \"method\":\"FOO.Introspect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << true << false;
+    QTest::newRow("missing dot") << QByteArray("{\"id\":42, \"method\":\"JSONRPCIntrospect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\"}") << true << false;
+    QTest::newRow("invalid params") << QByteArray("{\"id\":42, \"method\":\"JSONRPC.Introspect\", \"token\":\"4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE\", \"params\":{\"törööö\":\"chooo-chooo\"}}") << true << false;
 }
 
 void TestJSONRPC::testBasicCall()

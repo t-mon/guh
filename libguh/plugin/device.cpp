@@ -184,7 +184,7 @@ QVariant Device::stateValue(const StateTypeId &stateTypeId) const
 /*! For convenience, this finds the \l{State} matching the given \a stateTypeId in this Device and sets the current value to \a value. */
 void Device::setStateValue(const StateTypeId &stateTypeId, const QVariant &value)
 {
-    for (int i = 0; i < m_states.count(); ++i) {
+        for (int i = 0; i < m_states.count(); ++i) {
         if (m_states.at(i).stateTypeId() == stateTypeId) {
             if (m_states.at(i).value() == value)
                 return;

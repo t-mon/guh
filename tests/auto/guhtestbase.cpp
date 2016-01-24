@@ -118,10 +118,11 @@ void GuhTestBase::cleanupTestCase()
     GuhCore::instance()->destroy();
 }
 
-QVariant GuhTestBase::injectAndWait(const QString &method, const QVariantMap &params)
+QVariant GuhTestBase::injectAndWait(const QString &method, const QVariantMap &params, const QString &token)
 {
     QVariantMap call;
     call.insert("id", m_commandId);
+    call.insert("token", token);
     call.insert("method", method);
     call.insert("params", params);
 

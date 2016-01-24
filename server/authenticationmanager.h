@@ -22,7 +22,6 @@
 #define AUTHENTICATIONMANAGER_H
 
 #include <QObject>
-#include <QAuthenticator>
 
 #include "authentication/user.h"
 #include "authentication/authorizedconnection.h"
@@ -42,14 +41,14 @@ public:
     };
 
     explicit AuthenticationManager(QObject *parent = 0);
-
-    static QString createToken();
+    ~AuthenticationManager();
 
     QList<User> users() const;
     QList<AuthorizedConnection> authorizedConnections() const;
 
-    bool verifyToken(const QString &token) const;
+    bool verifyToken(const QString &token);
     bool verifyLogin(const QString &userName, const QString &password);
+    bool changePassword(const QString &userName, const QString &currentPassword, const QString &newPassword);
 
     QString authenticate(const QString &clientDescription, const QString &userName, const QString &password);
 
@@ -57,14 +56,17 @@ private:
     QList<User> m_users;
     QList<AuthorizedConnection> m_connections;
 
+    QString createToken();
+    QString getPasswordHash(const QString &password) const;
+
     bool hasUser(const QString &userName);
 
     void loadUsers();
     void saveUsers();
     void loadAuthorizedConnections();
     void saveAuthorizedConnections();
-
 };
 
 }
+
 #endif // AUTHENTICATIONMANAGER_H

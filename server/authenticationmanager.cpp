@@ -34,9 +34,10 @@ AuthenticationManager::AuthenticationManager(QObject *parent) :
     loadAuthorizedConnections();
 }
 
-QString AuthenticationManager::createToken()
+AuthenticationManager::~AuthenticationManager()
 {
-    return QString(QCryptographicHash::hash(QUuid::createUuid().toByteArray(), QCryptographicHash::Sha3_256).toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
+    qCDebug(dcApplication) << "Shutting down \"Authentication Manager\"";
+    saveAuthorizedConnections();
 }
 
 QList<User> AuthenticationManager::users() const
@@ -49,62 +50,97 @@ QList<AuthorizedConnection> AuthenticationManager::authorizedConnections() const
     return m_connections;
 }
 
-bool AuthenticationManager::verifyToken(const QString &token) const
+bool AuthenticationManager::verifyToken(const QString &token)
 {
     qCDebug(dcAuthentication) << "Verify token" << token;
-    foreach (const AuthorizedConnection &connection, m_connections) {
-        if (connection.token() == token) {
+    for (int i = 0; i < m_connections.count(); ++i) {
+        if (m_connections.at(i).token() == token) {
+            AuthorizedConnection newConnection(m_connections.at(i));
+            newConnection.setLastLogin(QDateTime::currentDateTime().toTime_t());
+            m_connections[i] = newConnection;
+            qCDebug(dcAuthentication) << "Token authorized: last login" << QDateTime::fromTime_t(newConnection.lastLogin()).toString("dd.MM.yyyy hh:mm:ss");
             return true;
         }
     }
 
-    qCWarning(dcAuthentication) << "Token not authorized.";
+    qCWarning(dcAuthentication) << "Authentication failed. Token not authorized.";
     return false;
 }
 
 bool AuthenticationManager::verifyLogin(const QString &userName, const QString &password)
 {
-    QByteArray encrypthedPassword = QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Sha3_512).toHex();
-
     if (!hasUser(userName)) {
-        qCWarning(dcAuthentication) << "There is no user" << userName;
+        qCWarning(dcAuthentication) << "Authentication failed. There is no user" << userName;
         return false;
     }
 
     foreach (const User &user, m_users) {
-        if (user.userName() == userName && user.password().toUtf8() == encrypthedPassword) {
+        if (user.userName() == userName && user.password() == getPasswordHash(password)) {
+            qCDebug(dcAuthentication) << "User" << userName << "authenticated successfully";
             return true;
         }
     }
 
-    qCWarning(dcAuthentication) << "Wrong password for user" << userName;
+    qCWarning(dcAuthentication) << "Authentication failed. Wrong password for user" << userName;
+    return false;
+}
+
+bool AuthenticationManager::changePassword(const QString &userName, const QString &currentPassword, const QString &newPassword)
+{
+    bool loginVerfied = verifyLogin(userName, currentPassword);
+    if (!loginVerfied) {
+        qCWarning(dcAuthentication) << "Could not change password. Client authentication failed.";
+        return false;
+    }
+
+    for (int i = 0; i < m_users.count(); i++) {
+        if (m_users.at(i).userName() == userName) {
+            User newUser(m_users.at(i));
+            newUser.setPassword(getPasswordHash(newPassword));
+            m_users[i] = newUser;
+            qCWarning(dcAuthentication) << "Password for user" << userName << "changed successfully.";
+
+            saveUsers();
+            return true;
+        }
+    }
     return false;
 }
 
 QString AuthenticationManager::authenticate(const QString &clientDescription, const QString &userName, const QString &password)
 {
     bool loginVerfied = verifyLogin(userName, password);
-    if (!loginVerfied)
+    if (!loginVerfied) {
+        qCWarning(dcAuthentication) << "Client" << clientDescription << "authentication failed.";
         return QString();
+    }
 
     QString token = createToken();
-
-    qCDebug(dcAuthentication) << "Generated token" << token;
-
     AuthorizedConnection connection;
     connection.setClientDescription(clientDescription);
     connection.setToken(token);
-    connection.setLastLogin(QDateTime::currentMSecsSinceEpoch() / 1000);
+    connection.setLastLogin(QDateTime::currentDateTime().toTime_t());
     foreach (const User &user, m_users) {
         if (userName == user.userName()) {
             connection.setUser(user);
         }
     }
-
     m_connections.append(connection);
     saveAuthorizedConnections();
 
+    qCDebug(dcAuthentication) << "Client" << clientDescription << "authorized successfully. " << token;
+
     return token;
+}
+
+QString AuthenticationManager::createToken()
+{
+    return QString(QCryptographicHash::hash(QUuid::createUuid().toByteArray(), QCryptographicHash::Sha3_256).toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
+}
+
+QString AuthenticationManager::getPasswordHash(const QString &password) const
+{
+    return QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_256).toHex());
 }
 
 bool AuthenticationManager::hasUser(const QString &userName)
@@ -129,10 +165,21 @@ void AuthenticationManager::loadUsers()
         qCDebug(dcAuthentication) << "Creating default user \"guh\" with default password \"guh\".";
         settings.beginGroup(UserId::createUuid().toString());
         settings.setValue("username", "guh");
-        settings.setValue("password", QString(QCryptographicHash::hash(("guh"), QCryptographicHash::Sha3_512).toHex()));
+        settings.setValue("password", getPasswordHash("guh"));
         settings.setValue("isAdmin", true);
         settings.endGroup();
     }
+
+#ifdef TESTING_ENABLED
+    // add user for testing if not already added
+    if (!settings.childGroups().contains("{17cf3358-fd30-4df9-a3b5-fe888cd70a24}")) {
+        settings.beginGroup("{17cf3358-fd30-4df9-a3b5-fe888cd70a24}");
+        settings.setValue("username", "guh-test");
+        settings.setValue("password", getPasswordHash("guh_test_password@1234"));
+        settings.setValue("isAdmin", true);
+        settings.endGroup();
+    }
+#endif
 
     foreach (const QString &userId, settings.childGroups()) {
         settings.beginGroup(userId);
@@ -144,23 +191,23 @@ void AuthenticationManager::loadUsers()
         user.setAdmin(settings.value("isAdmin").toBool());
 
         if (!user.isValid()) {
-            qCWarning(dcAuthentication) << "Incomplete user data. Please check the";// << settings.fileName() << "file.";
+            qCWarning(dcAuthentication) << "Incomplete user data. Please check the" << settings.fileName() << "file.";
             settings.endGroup();
             continue;
         }
 
-        if (!hasUser(user.userName())) {
-            m_users.append(user);
-        } else {
+        if (hasUser(user.userName())) {
             qCWarning(dcAuthentication) << "Duplicated username found. Not adding user" << user.userName() <<  "to the system.";
+            settings.endGroup();
+            continue;
         }
 
+        m_users.append(user);
         settings.endGroup();
     }
 
-    if (!hasUser("guh")) {
-        qCWarning(dcAuthentication) << "There is no default user \"guh\" configured. Please check your configuration";// << settings.fileName();
-    }
+    if (!hasUser("guh"))
+        qCWarning(dcAuthentication) << "There is no default user \"guh\" configured. Please check your configuration" << settings.fileName();
 
     settings.endGroup();
 }
@@ -168,8 +215,9 @@ void AuthenticationManager::loadUsers()
 void AuthenticationManager::saveUsers()
 {
     GuhSettings settings(GuhSettings::SettingsRoleUsers);
-    settings.beginGroup("Users");
+    qCDebug(dcAuthentication) << "Loading users from" << settings.fileName();
 
+    settings.beginGroup("Users");
     foreach (const User &user, m_users) {
         settings.beginGroup(user.userId().toString());
         settings.setValue("username", user.userName());
@@ -183,10 +231,20 @@ void AuthenticationManager::saveUsers()
 void AuthenticationManager::loadAuthorizedConnections()
 {
     GuhSettings settings(GuhSettings::SettingsRoleUsers);
+    qCDebug(dcAuthentication) << "Loading authorized connections from" << settings.fileName();
+
     settings.beginGroup("AuthorizedConnections");
 
+#ifdef TESTING_ENABLED
+    // add authorized connection for testing
+    settings.beginGroup("4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE");
+    settings.setValue("clientDescription", "guh-tests");
+    settings.setValue("userId", "{17cf3358-fd30-4df9-a3b5-fe888cd70a24}");
+    settings.setValue("lastLogin", QDateTime::currentDateTime().toTime_t());
+    settings.endGroup();
+#endif
+
     foreach (const QString &token, settings.childGroups()) {
-        qCDebug(dcAuthentication) << "Load token" << token;
         settings.beginGroup(token);
         AuthorizedConnection connection;
         connection.setClientDescription(settings.value("clientDescription").toString());
@@ -197,8 +255,6 @@ void AuthenticationManager::loadAuthorizedConnections()
                 connection.setUser(user);
             }
         }
-        qCDebug(dcAuthentication) << "Connection token" << connection.token();
-
         m_connections.append(connection);
         settings.endGroup();
     }

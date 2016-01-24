@@ -96,9 +96,6 @@ public:
     AuthenticationManager *authenticationManager() const;
     DeviceManager *deviceManager() const;
 
-public slots:
-    void destroy();
-
 signals:
     void eventTriggered(const Event &event);
     void deviceStateChanged(Device *device, const QUuid &stateTypeId, const QVariant &value);

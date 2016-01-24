@@ -170,7 +170,7 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
 
         // TODO: check if authentication enables
         if (!message.contains("token")) {
-            qCWarning(dcJsonRpc) << "Error parsing command. Missing \"token\"" << message;
+            qCWarning(dcJsonRpc) << "Error parsing command. Missing 'token':" << message;
             sendErrorResponse(clientId, commandId, "Authentication token missing");
             return;
         }
