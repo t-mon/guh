@@ -139,6 +139,7 @@ public:
     DECLARE_OBJECT(rule, "Rule")
     DECLARE_OBJECT(ruleDescription, "RuleDescription")
     DECLARE_OBJECT(logEntry, "LogEntry")
+    DECLARE_OBJECT(authorizedConnection, "AuthorizedConnection")
 
     // pack types    
     static QVariantMap packEventType(const EventType &eventType);
@@ -165,6 +166,7 @@ public:
     static QVariantMap packRuleDescription(const Rule &rule);
     static QVariantMap packLogEntry(const LogEntry &logEntry);
     static QVariantList packCreateMethods(DeviceClass::CreateMethods createMethods);
+    static QVariantMap packAuthorizedConnection(const AuthorizedConnection &connection);
 
     // pack resources
     static QVariantList packSupportedVendors();

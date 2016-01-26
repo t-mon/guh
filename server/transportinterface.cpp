@@ -139,8 +139,8 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
     bool success;
     int commandId = message.value("id").toInt(&success);
     if (!success) {
-        qCWarning(dcJsonRpc) << "Error parsing command. Missing \"id\":" << message;
-        sendErrorResponse(clientId, commandId, "Error parsing command. Missing 'id'");
+        qCWarning(dcJsonRpc) << "Error parsing command. Missing \"id\":\n" << message;
+        sendErrorResponse(clientId, commandId, "Error parsing command. Missing 'id'.");
         return;
     }
 
@@ -165,12 +165,12 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
     }
 
     // verify authentication
-    if (targetNamespace != "Authentication" && method != "Authenticate") {
-        // check token key
-
+    if (message.value("method").toString() != "Authentication.Authenticate") {
         // TODO: check if authentication enables
+
+        // check token key
         if (!message.contains("token")) {
-            qCWarning(dcJsonRpc) << "Error parsing command. Missing 'token':" << message;
+            qCWarning(dcJsonRpc) << "Error parsing command. Missing \"token\":\n" << message;
             sendErrorResponse(clientId, commandId, "Authentication token missing");
             return;
         }

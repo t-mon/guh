@@ -45,8 +45,13 @@ private slots:
     void testAuthenticate_data();
     void testAuthenticate();
 
-private:
-    QString m_token;
+    void testAccessTokens_data();
+    void testAccessTokens();
+
+    void changePassword_data();
+    void changePassword();
+
+    void removeAuthorizedConnections();
 
 };
 
@@ -54,19 +59,19 @@ void TestAuthentication::testAuthenticate_data()
 {
     QTest::addColumn<QString>("userName");
     QTest::addColumn<QString>("password");
-    QTest::addColumn<bool>("success");
+    QTest::addColumn<AuthenticationManager::AuthenticationError>("error");
 
-    QTest::newRow("Valid authentication") << "guh-test" << "guh_test_password@1234" << true;
-    QTest::newRow("Invalid authentication: wrong password") << "guh-test" << "wrong password!!@1234" << false;
-    QTest::newRow("Invalid authentication: wrong user") << "guh-tests" << "guh_test_password@1234" << false;
-    QTest::newRow("Invalid authentication: wrong user and wrong password") << "guh-tests" << "guh_test_password@1235" << false;
+    QTest::newRow("Valid authentication") << "guh-test" << "guh_test_password@1234" << AuthenticationManager::AuthenticationErrorNoError;
+    QTest::newRow("Invalid authentication: wrong password") << "guh-test" << "wrong password!!@1234" << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Invalid authentication: wrong user") << "guh-tests" << "guh_test_password@1234" << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Invalid authentication: wrong user and wrong password") << "guh-tests" << "guh_test_password@1235" << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
 }
 
 void TestAuthentication::testAuthenticate()
 {
     QFETCH(QString, userName);
     QFETCH(QString, password);
-    QFETCH(bool, success);
+    QFETCH(AuthenticationManager::AuthenticationError, error);
 
     QVariantMap params;
     params.insert("clientDescription", "guh-tests");
@@ -74,28 +79,116 @@ void TestAuthentication::testAuthenticate()
     params.insert("password", password);
 
     QVariant response = injectAndWait("Authentication.Authenticate", params);
-    QVERIFY(!response.isNull());
+    verifyAuthenticationError(response, error);
 
-    QVariantMap responseParams = response.toMap().value("params").toMap();
-    if (success) {
+    if (error == AuthenticationManager::AuthenticationErrorNoError) {
+        QVariantMap responseParams = response.toMap().value("params").toMap();
         QVERIFY(responseParams.contains("token"));
-        m_token = params.value("token").toString();
-        qDebug() << "Got token" << m_token;
+        QString token = responseParams.value("token").toString();
+        qDebug() << "Got token" << token;
         QVERIFY(responseParams.value("authenticationError").toString() == "AuthenticationErrorNoError");
 
         // test new token
-        response = injectAndWait("JSONRPC.Introspect", QVariantMap(), m_token);
-        QVERIFY(!response.isNull());
+        response = injectAndWait("JSONRPC.Introspect", QVariantMap(), token);
+        QVERIFY(response.toMap().value("status").toString() == "success");
 
+        // check if the token is still allowed after restart
         restartServer();
-
-        response = injectAndWait("JSONRPC.Introspect", QVariantMap(), m_token);
-
-
-    } else {
-        QVERIFY(responseParams.value("authenticationError").toString() == "AuthenticationErrorAuthenicationFailed");
-        qDebug() << QJsonDocument::fromVariant(response).toJson();
+        response = injectAndWait("JSONRPC.Introspect", QVariantMap(), token);
+        QVERIFY(response.toMap().value("status").toString() == "success");
     }
+}
+
+void TestAuthentication::testAccessTokens_data()
+{
+    QTest::addColumn<QString>("token");
+    QTest::addColumn<bool>("success");
+
+    QTest::newRow("Valid token") << testToken << true;
+    QTest::newRow("Invalid token") << "invalidtoken1kjb1h32kjhv12jhv3" << false;
+    QTest::newRow("Invalid token") << "manamana-diediediediedie_manamana" << false;
+    QTest::newRow("Invalid token") << QString() << false;
+}
+
+void TestAuthentication::testAccessTokens()
+{
+    QFETCH(QString, token);
+    QFETCH(bool, success);
+
+    QVariant response = injectAndWait("JSONRPC.Introspect", QVariantMap(), token);
+    QVERIFY(!response.isNull());
+
+    if (!success) {
+        QVERIFY(response.toMap().value("status").toString() == "error");
+        QVERIFY(response.toMap().value("error").toString() == "Authentication failed");
+    } else {
+        QVERIFY(response.toMap().value("status").toString() == "success");
+    }
+}
+
+void TestAuthentication::changePassword_data()
+{
+    QTest::addColumn<QString>("userName");
+    QTest::addColumn<QString>("password");
+    QTest::addColumn<QString>("newPassword");
+    QTest::addColumn<AuthenticationManager::AuthenticationError>("error");
+
+    QTest::newRow("Change password successfully") << testUserName << testUserPassword << "!!@12Bla.$$||" << AuthenticationManager::AuthenticationErrorNoError;
+    QTest::newRow("Change password back") << testUserName << "!!@12Bla.$$||" << testUserPassword << AuthenticationManager::AuthenticationErrorNoError;
+    QTest::newRow("Invalid username") << "blub blub" << testUserPassword << testUserPassword << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Invalid password") << testUserName << "blub blub" << "something_else" << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Weak password - empty") << testUserName << testUserPassword << QString() << AuthenticationManager::AuthenticationErrorWeakPassword;
+    QTest::newRow("Weak password - to short") << testUserName << testUserPassword << "1234" << AuthenticationManager::AuthenticationErrorWeakPassword;
+}
+
+void TestAuthentication::changePassword()
+{
+    QFETCH(QString, userName);
+    QFETCH(QString, password);
+    QFETCH(QString, newPassword);
+    QFETCH(AuthenticationManager::AuthenticationError, error);
+
+    QVariantMap params;
+    params.insert("userName", userName);
+    params.insert("password", password);
+    params.insert("newPassword", newPassword);
+
+    QVariant response = injectAndWait("Authentication.ChangePassword", params);
+    verifyAuthenticationError(response, error);
+}
+
+void TestAuthentication::removeAuthorizedConnections()
+{
+    // get authorized connections
+    QVariant response = injectAndWait("Authentication.GetAuthorizedConnections");
+    verifyAuthenticationError(response);
+
+    QVariantList tokenList;
+    foreach (const QVariant connectionVariant, response.toMap().value("params").toMap().value("connections").toList()) {
+        QVariantMap connection = connectionVariant.toMap();
+        QVariant token = connection.value("token");
+        qDebug() << token;
+        if (token.toString() != testToken)
+            tokenList.append(token);
+
+    }
+
+    QVariantMap params;
+    params.insert("tokens", tokenList);
+    response = injectAndWait("Authentication.RemoveAuthorizedConnections", params);
+    verifyAuthenticationError(response);
+
+    // check if only one connection left
+    response = injectAndWait("Authentication.GetAuthorizedConnections");
+    verifyAuthenticationError(response);
+    QCOMPARE(response.toMap().value("params").toMap().value("connections").toList().count(), 1);
+
+    restartServer();
+
+    // check if only one connection left after restart
+    response = injectAndWait("Authentication.GetAuthorizedConnections");
+    verifyAuthenticationError(response);
+    QCOMPARE(response.toMap().value("params").toMap().value("connections").toList().count(), 1);
 }
 
 #include "testauthentication.moc"

@@ -26,6 +26,7 @@
 #include "devicemanager.h"
 #include "logging/logengine.h"
 #include "jsontypes.h"
+#include "authenticationmanager.h"
 
 #include <QVariantMap>
 #include <QJsonDocument>
@@ -60,6 +61,11 @@ ActionTypeId mockActionIdAsync = ActionTypeId("fbae06d3-7666-483e-a39e-ec50fe890
 ActionTypeId mockActionIdFailing = ActionTypeId("df3cf33d-26d5-4577-9132-9823bd33fad0");
 ActionTypeId mockActionIdAsyncFailing = ActionTypeId("bfe89a1d-3497-4121-8318-e77c37537219");
 
+QString testToken = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE";
+QString testUserName = "guh-test";
+QString testUserPassword = "guh_test_password@1234";
+UserId testUserId = UserId("17cf3358-fd30-4df9-a3b5-fe888cd70a24");
+
 GuhTestBase::GuhTestBase(QObject *parent) :
     QObject(parent),
     m_commandId(0)
@@ -78,6 +84,8 @@ void GuhTestBase::initTestCase()
     rulesSettings.clear();
     GuhSettings deviceSettings(GuhSettings::SettingsRoleDevices);
     deviceSettings.clear();
+    GuhSettings pluginsSettings(GuhSettings::SettingsRolePlugins);
+    pluginsSettings.clear();
 
     GuhCore::instance();
 

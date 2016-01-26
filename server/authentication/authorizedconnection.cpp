@@ -29,20 +29,20 @@ AuthorizedConnection::AuthorizedConnection()
 
 AuthorizedConnection::AuthorizedConnection(const AuthorizedConnection &other)
 {
-    m_user = other.user();
+    m_userId = other.userId();
     m_token = other.token();
     m_clientDescription = other.clientDescription();
     m_lastLogin = other.lastLogin();
 }
 
-User AuthorizedConnection::user() const
+UserId AuthorizedConnection::userId() const
 {
-    return m_user;
+    return m_userId;
 }
 
-void AuthorizedConnection::setUser(const User &user)
+void AuthorizedConnection::setUserId(const UserId &userId)
 {
-    m_user = user;
+    m_userId = userId;
 }
 
 QString AuthorizedConnection::token() const

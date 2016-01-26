@@ -109,8 +109,7 @@ private:
 
 }
 
-using namespace guhserver;
-Q_DECLARE_METATYPE(RuleEngine::RuleError)
+Q_DECLARE_METATYPE(guhserver::RuleEngine::RuleError)
 
 
 #endif // RULEENGINE_H

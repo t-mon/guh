@@ -33,8 +33,8 @@ public:
     explicit AuthorizedConnection();
     AuthorizedConnection(const AuthorizedConnection &other);
 
-    User user() const;
-    void setUser(const User &user);
+    UserId userId() const;
+    void setUserId(const UserId &userId);
 
     QString token() const;
     void setToken(const QString &token);
@@ -46,7 +46,7 @@ public:
     void setLastLogin(const quint64 &lastLogin);
 
 private:
-    User m_user;
+    UserId m_userId;
     QString m_token;
     QString m_clientDescription;
     quint64 m_lastLogin;

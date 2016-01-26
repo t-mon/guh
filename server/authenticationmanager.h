@@ -37,36 +37,62 @@ public:
     enum AuthenticationError {
         AuthenticationErrorNoError,
         AuthenticationErrorAuthenicationFailed,
+        AuthenticationErrorWeakPassword,
         AuthenticationErrorPermissionDenied
     };
 
     explicit AuthenticationManager(QObject *parent = 0);
     ~AuthenticationManager();
 
+    // users
     QList<User> users() const;
-    QList<AuthorizedConnection> authorizedConnections() const;
-
-    bool verifyToken(const QString &token);
-    bool verifyLogin(const QString &userName, const QString &password);
+    User getUser(const UserId &userId) const;
+    User getUser(const QString &userName) const;
     bool changePassword(const QString &userName, const QString &currentPassword, const QString &newPassword);
 
+    // Authorized connections
+    QList<AuthorizedConnection> authorizedConnections() const;
+    QList<AuthorizedConnection> getAuthorizedConnections(const UserId &userId) const;
+    void removeAuthorizedConnections(const QList<QString> tokenList);
+    bool verifyPasswordStrength(const QString &password) const;
+
+    // access methods
+    bool verifyToken(const QString &token);
+    bool verifyLogin(const QString &userName, const QString &password);
     QString authenticate(const QString &clientDescription, const QString &userName, const QString &password);
 
 private:
     QList<User> m_users;
     QList<AuthorizedConnection> m_connections;
 
+#ifdef TESTING_ENABLED
+    // used for testing
+    UserId m_testUserId;
+    QString m_testUserName;
+    QString m_testUserPassword;
+    QString m_testToken;
+#endif
+
+    // create token/password
     QString createToken();
     QString getPasswordHash(const QString &password) const;
 
-    bool hasUser(const QString &userName);
+    bool userExists(const QString &userName);
 
     void loadUsers();
     void saveUsers();
+
     void loadAuthorizedConnections();
     void saveAuthorizedConnections();
+
+signals:
+    void authorizedConnectionAdded(const AuthorizedConnection &connection);
+    void authorizedConnectionRemoved(const AuthorizedConnection &connection);
+
 };
 
 }
+
+Q_DECLARE_METATYPE(guhserver::AuthenticationManager::AuthenticationError)
 
 #endif // AUTHENTICATIONMANAGER_H

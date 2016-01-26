@@ -76,6 +76,7 @@ QVariantMap JsonTypes::s_deviceDescriptor;
 QVariantMap JsonTypes::s_rule;
 QVariantMap JsonTypes::s_ruleDescription;
 QVariantMap JsonTypes::s_logEntry;
+QVariantMap JsonTypes::s_authorizedConnection;
 
 void JsonTypes::init()
 {
@@ -243,6 +244,12 @@ void JsonTypes::init()
     s_logEntry.insert("o:eventType", loggingEventTypeRef());
     s_logEntry.insert("o:errorCode", basicTypeToString(String));
 
+    // Authorized Connection
+    s_authorizedConnection.insert("clientDescription", basicTypeToString(String));
+    s_authorizedConnection.insert("token", basicTypeToString(String));
+    s_authorizedConnection.insert("lastUpdate", basicTypeToString(Int));
+    s_authorizedConnection.insert("userName", basicTypeToString(String));
+
     s_initialized = true;
 }
 
@@ -306,6 +313,7 @@ QVariantMap JsonTypes::allTypes()
     allTypes.insert("Rule", ruleDescription());
     allTypes.insert("RuleDescription", ruleDescriptionDescription());
     allTypes.insert("LogEntry", logEntryDescription());
+    allTypes.insert("AuthorizedConnection", authorizedConnectionDescription());
     return allTypes;
 }
 
@@ -716,6 +724,16 @@ QVariantList JsonTypes::packCreateMethods(DeviceClass::CreateMethods createMetho
     return ret;
 }
 
+QVariantMap JsonTypes::packAuthorizedConnection(const AuthorizedConnection &connection)
+{
+    QVariantMap connectionMap;
+    connectionMap.insert("clientDescription", connection.clientDescription());
+    connectionMap.insert("token", connection.token());
+    connectionMap.insert("lastUpdate", connection.lastLogin());
+    connectionMap.insert("userName", GuhCore::instance()->authenticationManager()->getUser(connection.userId()).userName());
+    return connectionMap;
+}
+
 QVariantList JsonTypes::packSupportedVendors()
 {
     QVariantList supportedVendors;
@@ -1096,10 +1114,16 @@ QPair<bool, QString> JsonTypes::validateVariant(const QVariant &templateVariant,
                     qCWarning(dcJsonRpc) << "Error validating action";
                     return result;
                 }
+            } else if (refName == authorizedConnectionRef()) {
+                QPair<bool, QString> result = validateMap(authorizedConnectionDescription(), variant.toMap());
+                if (!result.first) {
+                    qCWarning(dcJsonRpc) << "Error validating authorized connection.";
+                    return result;
+                }
             } else if (refName == eventRef()) {
                 QPair<bool, QString> result = validateMap(eventDescription(), variant.toMap());
                 if (!result.first) {
-                    qCWarning(dcJsonRpc) << "event not valid";
+                    qCWarning(dcJsonRpc) << "Event not valid";
                     return result;
                 }
             } else if (refName == paramRef()) {

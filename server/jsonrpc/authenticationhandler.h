@@ -39,6 +39,10 @@ public:
 
     Q_INVOKABLE JsonReply *ChangePassword(const QVariantMap &params);
 
+    Q_INVOKABLE JsonReply *GetAuthorizedConnections(const QVariantMap &params);
+
+    Q_INVOKABLE JsonReply *RemoveAuthorizedConnections(const QVariantMap &params);
+
 
 };
 

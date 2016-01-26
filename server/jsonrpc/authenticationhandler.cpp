@@ -41,6 +41,7 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
     setReturns("Authenticate", returns);
 
+
     params.clear(); returns.clear();
     setDescription("ChangePassword", "This method can be called to change the password of the given user name.");
     params.insert("userName", JsonTypes::basicTypeToString(JsonTypes::String));
@@ -50,6 +51,22 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
     setReturns("ChangePassword", returns);
 
+    params.clear(); returns.clear();
+    setDescription("GetAuthorizedConnections", "This method returns the list of authorized connection in guh. "
+                   "Each connection represents an access token.");
+    params.insert("o:userId", JsonTypes::basicTypeToString(JsonTypes::Uuid));
+    setParams("GetAuthorizedConnections", params);
+    returns.insert("o:connections", QVariantList() << JsonTypes::authorizedConnectionRef());
+    returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
+    setReturns("GetAuthorizedConnections", returns);
+
+    params.clear(); returns.clear();
+    setDescription("RemoveAuthorizedConnections", "This method allows to remove authorized connections from the system. "
+                   "The connection will be represented by the token. This forces the client to re-authenticate.");
+    params.insert("tokens", QVariantList() << JsonTypes::basicTypeToString(JsonTypes::String));
+    setParams("RemoveAuthorizedConnections", params);
+    returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
+    setReturns("RemoveAuthorizedConnections", returns);
 }
 
 QString AuthenticationHandler::name() const
@@ -79,9 +96,34 @@ JsonReply *AuthenticationHandler::ChangePassword(const QVariantMap &params)
     QString currentPassword = params.value("password").toString();
     QString newPassword = params.value("newPassword").toString();
 
+    if (!GuhCore::instance()->authenticationManager()->verifyPasswordStrength(newPassword))
+        return createReply(statusToReply(AuthenticationManager::AuthenticationErrorWeakPassword));
+
     if (!GuhCore::instance()->authenticationManager()->changePassword(userName, currentPassword, newPassword))
         return createReply(statusToReply(AuthenticationManager::AuthenticationErrorAuthenicationFailed));
 
+    return createReply(statusToReply(AuthenticationManager::AuthenticationErrorNoError));
+}
+
+JsonReply *AuthenticationHandler::GetAuthorizedConnections(const QVariantMap &params)
+{
+    Q_UNUSED(params)
+    QVariantList connectionList;
+    foreach (const AuthorizedConnection &connection, GuhCore::instance()->authenticationManager()->authorizedConnections()) {
+        connectionList.append(JsonTypes::packAuthorizedConnection(connection));
+    }
+
+    QVariantMap returnParams;
+    returnParams.insert("connections", connectionList);
+    returnParams.insert("authenticationError", JsonTypes::authenticationErrorToString(AuthenticationManager::AuthenticationErrorNoError));
+    return createReply(returnParams);
+}
+
+JsonReply *AuthenticationHandler::RemoveAuthorizedConnections(const QVariantMap &params)
+{
+    qCDebug(dcJsonRpc) << "Remove authorized connections with tokens" << params;
+    QList<QString> tokenList = params.value("tokens").toStringList();
+    GuhCore::instance()->authenticationManager()->removeAuthorizedConnections(tokenList);
     return createReply(statusToReply(AuthenticationManager::AuthenticationErrorNoError));
 }
 

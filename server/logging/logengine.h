@@ -36,6 +36,7 @@ namespace guhserver {
 class LogEngine: public QObject
 {
     Q_OBJECT
+
 public:
     LogEngine(QObject *parent = 0);
     ~LogEngine();

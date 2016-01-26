@@ -28,6 +28,7 @@
 #include "devicemanager.h"
 #include "ruleengine.h"
 #include "jsontypes.h"
+#include "authenticationmanager.h"
 
 #include <QObject>
 #include <QUuid>
@@ -54,6 +55,11 @@ extern EventTypeId mockEvent1Id;
 extern EventTypeId mockEvent2Id;
 extern StateTypeId mockIntStateId;
 extern StateTypeId mockBoolStateId;
+
+extern QString testToken;
+extern QString testUserName;
+extern QString testUserPassword;
+extern UserId testUserId;
 
 using namespace guhserver;
 
@@ -109,6 +115,10 @@ protected:
 
     inline void verifyLoggingError(const QVariant &response, Logging::LoggingError error = Logging::LoggingErrorNoError) {
         verifyError(response, "loggingError", JsonTypes::loggingErrorToString(error));
+    }
+
+    inline void verifyAuthenticationError(const QVariant &response, AuthenticationManager::AuthenticationError error = AuthenticationManager::AuthenticationErrorNoError) {
+        verifyError(response, "authenticationError", JsonTypes::authenticationErrorToString(error));
     }
 
     inline void verifyParams(const QVariantList &requestList, const QVariantList &responseList, bool allRequired = true)

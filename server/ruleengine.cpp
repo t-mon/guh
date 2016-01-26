@@ -101,7 +101,6 @@
 #include "devicemanager.h"
 #include "plugin/device.h"
 
-#include <QDebug>
 #include <QStringList>
 #include <QStandardPaths>
 #include <QCoreApplication>
