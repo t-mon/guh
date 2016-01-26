@@ -40,7 +40,8 @@ SOURCES += $$top_srcdir/server/guhcore.cpp \
     $$top_srcdir/server/rest/rulesresource.cpp \
     $$top_srcdir/server/authenticationmanager.cpp \
     $$top_srcdir/server/authentication/authorizedconnection.cpp \
-    $$top_srcdir/server/authentication/user.cpp
+    $$top_srcdir/server/authentication/user.cpp \
+    $$PWD/rest/authenticationresource.cpp
 
 
 HEADERS += $$top_srcdir/server/guhcore.h \
@@ -77,6 +78,7 @@ HEADERS += $$top_srcdir/server/guhcore.h \
     $$top_srcdir/server/rest/rulesresource.h \
     $$top_srcdir/server/authenticationmanager.h \
     $$top_srcdir/server/authentication/authorizedconnection.h \
-    $$top_srcdir/server/authentication/user.h
+    $$top_srcdir/server/authentication/user.h \
+    $$PWD/rest/authenticationresource.h
 
 

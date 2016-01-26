@@ -142,6 +142,16 @@ HttpReply *RestResource::createLoggingErrorReply(const HttpReply::HttpStatusCode
     return reply;
 }
 
+HttpReply *RestResource::createAuthenticationErrorReply(const HttpReply::HttpStatusCode &statusCode, const AuthenticationManager::AuthenticationError &authenticationError)
+{
+    HttpReply *reply = new HttpReply(statusCode, HttpReply::TypeSync);
+    QVariantMap response;
+    response.insert("error", JsonTypes::authenticationErrorToString(authenticationError));
+    reply->setHeader(HttpReply::ContentTypeHeader, "application/json; charset=\"utf-8\";");
+    reply->setPayload(QJsonDocument::fromVariant(response).toJson());
+    return reply;
+}
+
 /*! Returns the pointer to a new created \l{HttpReply} initialized with \l{HttpReply::Ok} and \l{HttpReply::TypeAsync}.  */
 HttpReply *RestResource::createAsyncReply()
 {

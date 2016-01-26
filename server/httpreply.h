@@ -37,17 +37,22 @@ class HttpReply: public QObject
 public:
 
     enum HttpStatusCode {
+        // Sucessfull
         Ok                      = 200,
         Created                 = 201,
         Accepted                = 202,
         NoContent               = 204,
+        // Redirections
         Found                   = 302,
+        // Client errors
         BadRequest              = 400,
+        Unauthorized            = 401,
         Forbidden               = 403,
         NotFound                = 404,
         MethodNotAllowed        = 405,
         RequestTimeout          = 408,
         Conflict                = 409,
+        // Server errors
         InternalServerError     = 500,
         NotImplemented          = 501,
         BadGateway              = 502,

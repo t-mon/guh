@@ -92,6 +92,8 @@ private:
     QHash<QString, JsonHandler *> m_handlers;
     QHash<JsonReply *, TransportInterface *> m_asyncReplies;
 
+    bool m_authenticationRequired;
+
     // clientId, notificationsEnabled
     QHash<QUuid, bool> m_clients;
 

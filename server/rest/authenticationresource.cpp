@@ -18,36 +18,55 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef AUTHENTICATIONHANDLER_H
-#define AUTHENTICATIONHANDLER_H
-
-#include <QObject>
-
-#include "jsonhandler.h"
+#include "authenticationresource.h"
 
 namespace guhserver {
 
-class AuthenticationHandler : public JsonHandler
+AuthenticationResource::AuthenticationResource(QObject *parent) :
+    RestResource(parent)
 {
-    Q_OBJECT
-public:
-    explicit AuthenticationHandler(QObject *parent = 0);
-
-    QString name() const override;
-
-    Q_INVOKABLE JsonReply *Authenticate(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *ChangePassword(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *GetAuthorizedConnections(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *RemoveAuthorizedConnections(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *GetUsers(const QVariantMap &params);
-
-
-};
 
 }
 
-#endif // AUTHENTICATIONHANDLER_H
+QString AuthenticationResource::name() const
+{
+    return "authentication";
+}
+
+
+guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
+{
+    // check method
+    HttpReply *reply;
+    switch (request.method()) {
+//    case HttpRequest::Get:
+//        reply = proccessGetRequest(request, urlTokens);
+//        break;
+    case HttpRequest::Post:
+        reply = proccessPostRequest(request, urlTokens);
+        break;
+//    case HttpRequest::Put:
+//        reply = proccessPutRequest(request, urlTokens);
+//        break;
+//    case HttpRequest::Delete:
+//        reply = proccessDeleteRequest(request, urlTokens);
+//        break;
+//    case HttpRequest::Options:
+//        reply = proccessOptionsRequest(request, urlTokens);
+//        break;
+    default:
+        reply = createErrorReply(HttpReply::BadRequest);
+        break;
+    }
+    return reply;
+}
+
+guhserver::HttpReply *guhserver::AuthenticationResource::proccessPostRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
+{
+    Q_UNUSED(request)
+    Q_UNUSED(urlTokens)
+
+    return createSuccessReply();
+}
+
+}

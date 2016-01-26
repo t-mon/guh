@@ -49,6 +49,7 @@ public:
     static HttpReply *createDeviceErrorReply(const HttpReply::HttpStatusCode &statusCode, const DeviceManager::DeviceError &deviceError);
     static HttpReply *createRuleErrorReply(const HttpReply::HttpStatusCode &statusCode, const RuleEngine::RuleError &ruleError);
     static HttpReply *createLoggingErrorReply(const HttpReply::HttpStatusCode &statusCode, const Logging::LoggingError &loggingError);
+    static HttpReply *createAuthenticationErrorReply(const HttpReply::HttpStatusCode &statusCode, const AuthenticationManager::AuthenticationError &authenticationError);
     static HttpReply *createAsyncReply();
     static QPair<bool, QVariant> verifyPayload(const QByteArray &payload);
 

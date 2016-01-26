@@ -77,6 +77,7 @@ QVariantMap JsonTypes::s_rule;
 QVariantMap JsonTypes::s_ruleDescription;
 QVariantMap JsonTypes::s_logEntry;
 QVariantMap JsonTypes::s_authorizedConnection;
+QVariantMap JsonTypes::s_user;
 
 void JsonTypes::init()
 {
@@ -250,6 +251,11 @@ void JsonTypes::init()
     s_authorizedConnection.insert("lastUpdate", basicTypeToString(Int));
     s_authorizedConnection.insert("userName", basicTypeToString(String));
 
+    // user
+    s_user.insert("userId", basicTypeToString(String));
+    s_user.insert("userName", basicTypeToString(String));
+    s_user.insert("isAdmin", basicTypeToString(Bool));
+
     s_initialized = true;
 }
 
@@ -314,6 +320,7 @@ QVariantMap JsonTypes::allTypes()
     allTypes.insert("RuleDescription", ruleDescriptionDescription());
     allTypes.insert("LogEntry", logEntryDescription());
     allTypes.insert("AuthorizedConnection", authorizedConnectionDescription());
+    allTypes.insert("User", userDescription());
     return allTypes;
 }
 
@@ -734,6 +741,15 @@ QVariantMap JsonTypes::packAuthorizedConnection(const AuthorizedConnection &conn
     return connectionMap;
 }
 
+QVariantMap JsonTypes::packUser(const User &user)
+{
+    QVariantMap userMap;
+    userMap.insert("userId", user.userId());
+    userMap.insert("userName", user.userName());
+    userMap.insert("isAdmin", user.isAdmin());
+    return userMap;
+}
+
 QVariantList JsonTypes::packSupportedVendors()
 {
     QVariantList supportedVendors;
@@ -1118,6 +1134,12 @@ QPair<bool, QString> JsonTypes::validateVariant(const QVariant &templateVariant,
                 QPair<bool, QString> result = validateMap(authorizedConnectionDescription(), variant.toMap());
                 if (!result.first) {
                     qCWarning(dcJsonRpc) << "Error validating authorized connection.";
+                    return result;
+                }
+            } else if (refName == userRef()) {
+                QPair<bool, QString> result = validateMap(userDescription(), variant.toMap());
+                if (!result.first) {
+                    qCWarning(dcJsonRpc) << "Error validating user.";
                     return result;
                 }
             } else if (refName == eventRef()) {

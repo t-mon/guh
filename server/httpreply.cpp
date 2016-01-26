@@ -49,6 +49,8 @@
         The resource was found.
     \value BadRequest
         The request was bad formatted. Also if a \l{Param} was not understood or the header is not correct.
+    \value Unauthorized
+        The client is not authorized to access the resource.
     \value Forbidden
         The request tries to get access to a forbidden space.
     \value NotFound
@@ -343,6 +345,8 @@ QByteArray HttpReply::getHttpReasonPhrase(const HttpReply::HttpStatusCode &statu
         return "Found";
     case BadRequest:
         return "Bad Request";
+    case Unauthorized:
+        return "Unauthorized";
     case Forbidden:
         return "Forbidden";
     case NotFound:

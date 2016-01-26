@@ -103,7 +103,7 @@ WebServer::WebServer(const QSslConfiguration &sslConfiguration, QObject *parent)
 {
     // load webserver settings
     GuhSettings settings(GuhSettings::SettingsRoleGlobal);
-    qCDebug(dcWebSocketServer) << "Loading web socket server settings from" << settings.fileName();
+    qCDebug(dcWebServer) << "Loading web server settings from" << settings.fileName();
 
     settings.beginGroup("WebServer");
     // 3333 Official free according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
@@ -131,7 +131,7 @@ WebServer::WebServer(const QSslConfiguration &sslConfiguration, QObject *parent)
 /*! Destructor of this \l{WebServer}. */
 WebServer::~WebServer()
 {
-    qCDebug(dcApplication) << "Shutting down \"Webserver\"";
+    qCDebug(dcApplication) << "Shutting down \"Web Server\"";
     this->close();
 }
 
@@ -139,11 +139,11 @@ WebServer::~WebServer()
  *
  * \sa HttpReply
  */
-void WebServer::sendHttpReply(HttpReply *reply)
+void WebServer::sendHttpReply(HttpReply *reply, const QUuid &clientId)
 {
     // get the right socket
     QSslSocket *socket = 0;
-    socket = m_clientList.value(reply->clientId());
+    socket = m_clientList.value(clientId);
     if (!socket) {
         qCWarning(dcWebServer) << "Invalid socket pointer! This should never happen!!! Missing clientId in reply?";
         return;
@@ -153,6 +153,7 @@ void WebServer::sendHttpReply(HttpReply *reply)
     reply->packReply();
     qCDebug(dcWebServer) << "respond" << reply->httpStatusCode() << reply->httpReasonPhrase();
     socket->write(reply->data());
+    reply->deleteLater();
 }
 
 
@@ -185,9 +186,7 @@ bool WebServer::verifyFile(QSslSocket *socket, const QString &fileName)
     if (!file.exists()) {
         qCWarning(dcWebServer) << "requested file" << file.filePath() << "does not exist.";
         HttpReply *reply = RestResource::createErrorReply(HttpReply::NotFound);
-        reply->setClientId(m_clientList.key(socket));
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, m_clientList.key(socket));
         return false;
     }
 
@@ -195,9 +194,7 @@ bool WebServer::verifyFile(QSslSocket *socket, const QString &fileName)
     if (!file.canonicalFilePath().startsWith(m_webinterfaceDir.path())) {
         qCWarning(dcWebServer) << "requested file" << file.fileName() << "is outside the public folder.";
         HttpReply *reply = RestResource::createErrorReply(HttpReply::Forbidden);
-        reply->setClientId(m_clientList.key(socket));
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, m_clientList.key(socket));
         return false;
     }
 
@@ -205,12 +202,41 @@ bool WebServer::verifyFile(QSslSocket *socket, const QString &fileName)
     if (!file.isReadable()) {
         qCWarning(dcWebServer) << "requested file" << file.fileName() << "is not readable.";
         HttpReply *reply = RestResource::createErrorReply(HttpReply::Forbidden);
-        reply->setClientId(m_clientList.key(socket));
         reply->setPayload("403 Forbidden. File not readable");
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, m_clientList.key(socket));
         return false;
     }
+    return true;
+}
+
+bool WebServer::verifyAuthentication(const HttpRequest &request)
+{
+    if (!request.rawHeaderList().keys().contains("Authorization")) {
+        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        return false;
+    }
+
+    QList<QByteArray> authorizationTokens = request.rawHeaderList().value("Authorization").split(' ');
+
+    if (authorizationTokens.count() != 2) {
+        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        return false;
+    }
+
+    if (authorizationTokens.first() != "Basic") {
+        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        return false;
+    }
+
+    //        qCWarning(dcWebServer) << "Invalid Authorization header.";
+    //        HttpReply *reply = RestResource::createErrorReply(HttpReply::BadRequest);
+    //        reply->setClientId(clientId);
+    //        sendHttpReply(reply);
+    //        reply->deleteLater();
+
+    QString plainText = QString(QByteArray::fromBase64(authorizationTokens.last())).replace(':', "");
+    qCDebug(dcWebServer) << "Token = " << plainText;
+
     return true;
 }
 
@@ -353,9 +379,7 @@ void WebServer::readClient()
     if (!request.isValid()) {
         qCWarning(dcWebServer) << "Got invalid request:" << request.url().path();
         HttpReply *reply = RestResource::createErrorReply(HttpReply::BadRequest);
-        reply->setClientId(clientId);
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, clientId);
         return;
     }
 
@@ -363,9 +387,7 @@ void WebServer::readClient()
     if (request.httpVersion() != "HTTP/1.1" && request.httpVersion() != "HTTP/1.0") {
         qCWarning(dcWebServer) << "HTTP version is not supported." << request.httpVersion();
         HttpReply *reply = RestResource::createErrorReply(HttpReply::HttpVersionNotSupported);
-        reply->setClientId(clientId);
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, clientId);
         return;
     }
 
@@ -383,15 +405,25 @@ void WebServer::readClient()
     // verify method
     if (request.method() == HttpRequest::Unhandled) {
         HttpReply *reply = RestResource::createErrorReply(HttpReply::MethodNotAllowed);
-        reply->setClientId(clientId);
         reply->setHeader(HttpReply::AllowHeader, "GET, PUT, POST, DELETE, OPTIONS");
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, clientId);
         return;
     }
 
     // verify API query
     if (request.url().path().startsWith("/api/v1")) {
+
+        // verify authentication
+
+        //qCDebug(dcWebServer) << request;
+
+//        bool authorized = verifyAuthentication(request);
+//        if (!authorized) {
+//            HttpReply *reply = RestResource::createAuthenticationErrorReply(HttpReply::Unauthorized, AuthenticationManager::AuthenticationErrorAuthenicationFailed);
+//            sendHttpReply(reply, clientId);
+//            return;
+//        }
+
         emit httpRequestReady(clientId, request);
         return;
     }
@@ -399,9 +431,7 @@ void WebServer::readClient()
     // check icon call
     if (request.url().path().startsWith("/icons/") && request.method() == HttpRequest::Get) {
         HttpReply *reply = processIconRequest(request.url().path());
-        reply->setClientId(clientId);
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, clientId);
         return;
     }
 
@@ -412,12 +442,9 @@ void WebServer::readClient()
         reply->setHeader(HttpReply::ContentTypeHeader, "text/xml");
         QHostAddress serverAddress = getServerAddress(socket->peerAddress());
         reply->setPayload(createServerXmlDocument(serverAddress));
-        reply->setClientId(clientId);
-        sendHttpReply(reply);
-        reply->deleteLater();
+        sendHttpReply(reply, clientId);
         return;
     }
-
 
     // request for a file...
     if (request.method() == HttpRequest::Get) {
@@ -425,9 +452,7 @@ void WebServer::readClient()
         if (!m_webinterfaceDir.exists()) {
             qCWarning(dcWebServer) << "webinterface folder" << m_webinterfaceDir.path() << "does not exist.";
             HttpReply *reply = RestResource::createErrorReply(HttpReply::NotFound);
-            reply->setClientId(clientId);
-            sendHttpReply(reply);
-            reply->deleteLater();
+            sendHttpReply(reply, clientId);
             return;
         }
 
@@ -466,9 +491,7 @@ void WebServer::readClient()
             }
 
             reply->setPayload(file.readAll());
-            reply->setClientId(clientId);
-            sendHttpReply(reply);
-            reply->deleteLater();
+            sendHttpReply(reply, clientId);
             return;
         }
     }
@@ -476,9 +499,7 @@ void WebServer::readClient()
     // reject everything else...
     qCWarning(dcWebServer) << "Unknown message received.";
     HttpReply *reply = RestResource::createErrorReply(HttpReply::NotImplemented);
-    reply->setClientId(clientId);
-    sendHttpReply(reply);
-    reply->deleteLater();
+    sendHttpReply(reply, clientId);
 }
 
 void WebServer::onDisconnected()

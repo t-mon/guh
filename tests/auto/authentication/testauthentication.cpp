@@ -159,6 +159,17 @@ void TestAuthentication::changePassword()
 
 void TestAuthentication::removeAuthorizedConnections()
 {
+    // authorize some times
+    QVariantMap params;
+    params.insert("clientDescription", "guh-tests");
+    params.insert("userName", testUserName);
+    params.insert("password", testUserPassword);
+
+    for (int i = 0; i < 10; i++) {
+        QVariant response = injectAndWait("Authentication.Authenticate", params);
+        verifyAuthenticationError(response);
+    }
+
     // get authorized connections
     QVariant response = injectAndWait("Authentication.GetAuthorizedConnections");
     verifyAuthenticationError(response);
@@ -173,7 +184,7 @@ void TestAuthentication::removeAuthorizedConnections()
 
     }
 
-    QVariantMap params;
+    params.clear(); response.clear();
     params.insert("tokens", tokenList);
     response = injectAndWait("Authentication.RemoveAuthorizedConnections", params);
     verifyAuthenticationError(response);
@@ -182,6 +193,15 @@ void TestAuthentication::removeAuthorizedConnections()
     response = injectAndWait("Authentication.GetAuthorizedConnections");
     verifyAuthenticationError(response);
     QCOMPARE(response.toMap().value("params").toMap().value("connections").toList().count(), 1);
+
+    qDebug() << tokenList.count();
+
+    // verify that removed tokens not working any more
+    foreach (const QVariant tokenVariant, tokenList) {
+        response = injectAndWait("JSONRPC.Introspect", QVariantMap(), tokenVariant.toString());
+        QVERIFY(response.toMap().value("status").toString() == "error");
+        QVERIFY(response.toMap().value("error").toString() == "Authentication failed");
+    }
 
     restartServer();
 

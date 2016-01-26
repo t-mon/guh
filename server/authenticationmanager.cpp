@@ -40,7 +40,6 @@ AuthenticationManager::AuthenticationManager(QObject *parent) :
 
     loadUsers();
     loadAuthorizedConnections();
-
 }
 
 AuthenticationManager::~AuthenticationManager()

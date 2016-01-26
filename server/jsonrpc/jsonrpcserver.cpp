@@ -83,6 +83,7 @@ JsonRPCServer::JsonRPCServer(const QSslConfiguration &sslConfiguration, QObject 
     #ifdef WEBSOCKET
     m_websocketServer(new WebSocketServer(sslConfiguration, this)),
     #endif
+    m_authenticationRequired(true),
     m_notificationId(0)
 {
     // First, define our own JSONRPC methods
@@ -293,6 +294,7 @@ void JsonRPCServer::clientConnected(const QUuid &clientId)
     handshake.insert("server", "guh JSONRPC interface");
     handshake.insert("version", GUH_VERSION_STRING);
     handshake.insert("protocol version", JSON_PROTOCOL_VERSION);
+    handshake.insert("authenticationRequired", m_authenticationRequired);
     interface->sendData(clientId, handshake);
 }
 

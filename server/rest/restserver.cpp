@@ -95,9 +95,7 @@ void RestServer::processHttpRequest(const QUuid &clientId, const HttpRequest &re
     // check token count
     if (urlTokens.count() < 3) {
         HttpReply *reply = RestResource::createErrorReply(HttpReply::BadRequest);
-        reply->setClientId(clientId);
-        m_webserver->sendHttpReply(reply);
-        reply->deleteLater();
+        m_webserver->sendHttpReply(reply, clientId);
         return;
     }
 
@@ -105,34 +103,28 @@ void RestServer::processHttpRequest(const QUuid &clientId, const HttpRequest &re
     QString resourceName = urlTokens.at(2);
     if (!m_resources.contains(resourceName)) {
         HttpReply *reply = RestResource::createErrorReply(HttpReply::BadRequest);
-        reply->setClientId(clientId);
-        m_webserver->sendHttpReply(reply);
-        reply->deleteLater();
+        m_webserver->sendHttpReply(reply, clientId);
         return;
     }
 
     // check CORS call for main resource
     if (request.method() == HttpRequest::Options && urlTokens.count() == 3) {
         HttpReply *reply = RestResource::createCorsSuccessReply();
-        reply->setClientId(clientId);
-        m_webserver->sendHttpReply(reply);
-        reply->deleteLater();
+        m_webserver->sendHttpReply(reply, clientId);
         return;
     }
-
 
     // process request in corresponding resource
     RestResource *resource = m_resources.value(resourceName);
     HttpReply *reply = resource->proccessRequest(request, urlTokens);
-    reply->setClientId(clientId);
     if (reply->type() == HttpReply::TypeAsync) {
         connect(reply, &HttpReply::finished, this, &RestServer::asyncReplyFinished);
         m_asyncReplies.insert(clientId, reply);
         reply->startWait();
         return;
     }
-    m_webserver->sendHttpReply(reply);
-    reply->deleteLater();
+
+    m_webserver->sendHttpReply(reply, clientId);
 }
 
 void RestServer::asyncReplyFinished()
@@ -152,11 +144,11 @@ void RestServer::asyncReplyFinished()
     // check if client is still connected
     if (!m_clientList.contains(clientId)) {
         qCWarning(dcWebServer) << "Client for async reply not longer connected.";
+        reply->deleteLater();
     } else {
-        reply->setClientId(clientId);
-        m_webserver->sendHttpReply(reply);
+        m_webserver->sendHttpReply(reply, clientId);
+        return;
     }
-    reply->deleteLater();
 }
 
 }

@@ -41,7 +41,6 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
     setReturns("Authenticate", returns);
 
-
     params.clear(); returns.clear();
     setDescription("ChangePassword", "This method can be called to change the password of the given user name.");
     params.insert("userName", JsonTypes::basicTypeToString(JsonTypes::String));
@@ -67,6 +66,13 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     setParams("RemoveAuthorizedConnections", params);
     returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
     setReturns("RemoveAuthorizedConnections", returns);
+
+    params.clear(); returns.clear();
+    setDescription("GetUsers", "This method allows receive information about the users from the system.");
+    setParams("GetUsers", params);
+    returns.insert("users", QVariantList() << JsonTypes::userRef());
+    returns.insert("authenticationError", JsonTypes::authenticationErrorRef());
+    setReturns("GetUsers", returns);
 }
 
 QString AuthenticationHandler::name() const
@@ -76,6 +82,7 @@ QString AuthenticationHandler::name() const
 
 JsonReply *AuthenticationHandler::Authenticate(const QVariantMap &params)
 {
+    qCDebug(dcJsonRpc) << "Authenticate user";
     QString clientDescription = params.value("clientDescription").toString();
     QString userName = params.value("userName").toString();
     QString password = params.value("password").toString();
@@ -92,6 +99,7 @@ JsonReply *AuthenticationHandler::Authenticate(const QVariantMap &params)
 
 JsonReply *AuthenticationHandler::ChangePassword(const QVariantMap &params)
 {
+    qCDebug(dcJsonRpc) << "Change password";
     QString userName = params.value("userName").toString();
     QString currentPassword = params.value("password").toString();
     QString newPassword = params.value("newPassword").toString();
@@ -108,6 +116,10 @@ JsonReply *AuthenticationHandler::ChangePassword(const QVariantMap &params)
 JsonReply *AuthenticationHandler::GetAuthorizedConnections(const QVariantMap &params)
 {
     Q_UNUSED(params)
+
+    // TODO: parse optional userId
+
+    qCDebug(dcJsonRpc) << "Get authorized connections";
     QVariantList connectionList;
     foreach (const AuthorizedConnection &connection, GuhCore::instance()->authenticationManager()->authorizedConnections()) {
         connectionList.append(JsonTypes::packAuthorizedConnection(connection));
@@ -121,10 +133,29 @@ JsonReply *AuthenticationHandler::GetAuthorizedConnections(const QVariantMap &pa
 
 JsonReply *AuthenticationHandler::RemoveAuthorizedConnections(const QVariantMap &params)
 {
-    qCDebug(dcJsonRpc) << "Remove authorized connections with tokens" << params;
+    qCDebug(dcJsonRpc) << "Remove authorized connections";
     QList<QString> tokenList = params.value("tokens").toStringList();
     GuhCore::instance()->authenticationManager()->removeAuthorizedConnections(tokenList);
     return createReply(statusToReply(AuthenticationManager::AuthenticationErrorNoError));
+}
+
+JsonReply *AuthenticationHandler::GetUsers(const QVariantMap &params)
+{
+    Q_UNUSED(params)
+
+    // TODO: parse optional userId
+
+    qCDebug(dcJsonRpc) << "Get user information";
+
+    QVariantList userList;
+    foreach (const User &user, GuhCore::instance()->authenticationManager()->users()) {
+        userList.append(JsonTypes::packUser(user));
+    }
+
+    QVariantMap returnParams;
+    returnParams.insert("users", userList);
+    returnParams.insert("authenticationError", JsonTypes::authenticationErrorToString(AuthenticationManager::AuthenticationErrorNoError));
+    return createReply(returnParams);
 }
 
 }

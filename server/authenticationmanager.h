@@ -38,7 +38,8 @@ public:
         AuthenticationErrorNoError,
         AuthenticationErrorAuthenicationFailed,
         AuthenticationErrorWeakPassword,
-        AuthenticationErrorPermissionDenied
+        AuthenticationErrorPermissionDenied,
+        AuthenticationErrorAuthenticationDisabled
     };
 
     explicit AuthenticationManager(QObject *parent = 0);

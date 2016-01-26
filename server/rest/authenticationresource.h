@@ -18,36 +18,36 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef AUTHENTICATIONHANDLER_H
-#define AUTHENTICATIONHANDLER_H
+#ifndef AUTHENTICATIONRESOURCE_H
+#define AUTHENTICATIONRESOURCE_H
 
 #include <QObject>
 
-#include "jsonhandler.h"
+#include "jsontypes.h"
+#include "httpreply.h"
+#include "restresource.h"
 
 namespace guhserver {
 
-class AuthenticationHandler : public JsonHandler
+class HttpRequest;
+
+class AuthenticationResource : public RestResource
 {
     Q_OBJECT
+
 public:
-    explicit AuthenticationHandler(QObject *parent = 0);
+    AuthenticationResource(QObject *parent = 0);
 
     QString name() const override;
 
-    Q_INVOKABLE JsonReply *Authenticate(const QVariantMap &params);
+    HttpReply *proccessRequest(const HttpRequest &request, const QStringList &urlTokens) override;
 
-    Q_INVOKABLE JsonReply *ChangePassword(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *GetAuthorizedConnections(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *RemoveAuthorizedConnections(const QVariantMap &params);
-
-    Q_INVOKABLE JsonReply *GetUsers(const QVariantMap &params);
-
+private:
+    // Process method
+    HttpReply *proccessPostRequest(const HttpRequest &request, const QStringList &urlTokens) override;
 
 };
 
 }
 
-#endif // AUTHENTICATIONHANDLER_H
+#endif // AUTHENTICATIONRESOURCE_H

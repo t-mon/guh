@@ -74,7 +74,7 @@ public:
     explicit WebServer(const QSslConfiguration &sslConfiguration = QSslConfiguration(), QObject *parent = 0);
     ~WebServer();
 
-    void sendHttpReply(HttpReply *reply);
+    void sendHttpReply(HttpReply *reply, const QUuid &clientId);
     int port() const;
     QList<QHostAddress> serverAddressList();
 
@@ -92,6 +92,7 @@ private:
     QDir m_webinterfaceDir;
 
     bool verifyFile(QSslSocket *socket, const QString &fileName);
+    bool verifyAuthentication(const HttpRequest &request);
     QString fileName(const QString &query);
 
     QByteArray createServerXmlDocument(QHostAddress address);
