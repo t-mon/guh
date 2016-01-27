@@ -44,7 +44,8 @@ namespace guhserver {
 /*! Constructs a \l{ServerManager} with the given \a parent. */
 ServerManager::ServerManager(QObject *parent) :
     QObject(parent),
-    m_sslConfiguration(QSslConfiguration())
+    m_sslConfiguration(QSslConfiguration()),
+    m_authenticationEnabled(false)
 {
     // check SSL
     if (!QSslSocket::supportsSsl()) {
@@ -61,6 +62,12 @@ ServerManager::ServerManager(QObject *parent) :
         QString keyFileName = settings.value("certificate-key", QVariant("/etc/ssl/private/guhd-certificate.key")).toString();
         settings.endGroup();
 
+        // check if authentication is enabled
+        settings.beginGroup("Authentication");
+        m_authenticationEnabled = settings.value("enabled", true).toBool();
+        qCDebug(dcConnection) << "Authentication" << (m_authenticationEnabled ? "enabled" : "disabled");
+        settings.endGroup();
+
         if (!loadCertificate(keyFileName, certificateFileName)) {
             qCWarning(dcConnection) << "SSL encryption disabled";
         } else {
@@ -71,7 +78,7 @@ ServerManager::ServerManager(QObject *parent) :
     }
 
     qCDebug(dcApplication) << "Starting JSON RPC Server";
-    m_jsonServer = new JsonRPCServer(m_sslConfiguration, this);
+    m_jsonServer = new JsonRPCServer(m_authenticationEnabled, m_sslConfiguration, this);
 
     qCDebug(dcApplication) << "Starting REST Server";
     m_restServer = new RestServer(m_sslConfiguration, this);
@@ -93,20 +100,20 @@ bool ServerManager::loadCertificate(const QString &certificateKeyFileName, const
 {
     QFile certificateKeyFile(certificateKeyFileName);
     if (!certificateKeyFile.open(QIODevice::ReadOnly)) {
-        qCWarning(dcWebServer) << "Could not open" << certificateKeyFile.fileName() << ":" << certificateKeyFile.errorString();
+        qCWarning(dcConnection) << "Could not open" << certificateKeyFile.fileName() << ":" << certificateKeyFile.errorString();
         return false;
     }
     m_certificateKey = QSslKey(certificateKeyFile.readAll(), QSsl::Rsa);
-    qCDebug(dcWebServer) << "Loaded successfully private certificate key " << certificateKeyFileName;
+    qCDebug(dcConnection) << "Loaded successfully private certificate key " << certificateKeyFileName;
     certificateKeyFile.close();
 
     QFile certificateFile(certificateFileName);
     if (!certificateFile.open(QIODevice::ReadOnly)) {
-        qCWarning(dcWebServer) << "Could not open" << certificateFile.fileName() << ":" << certificateFile.errorString();
+        qCWarning(dcConnection) << "Could not open" << certificateFile.fileName() << ":" << certificateFile.errorString();
         return false;
     }
     m_certificate = QSslCertificate(certificateFile.readAll());
-    qCDebug(dcWebServer) << "Loaded successfully certificate file " << certificateFileName;
+    qCDebug(dcConnection) << "Loaded successfully certificate file " << certificateFileName;
     certificateFile.close();
 
     return true;

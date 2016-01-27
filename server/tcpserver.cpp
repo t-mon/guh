@@ -48,8 +48,8 @@ namespace guhserver {
  *
  *  \sa ServerManager
  */
-TcpServer::TcpServer(QObject *parent) :
-    TransportInterface(parent)
+TcpServer::TcpServer(const bool &authenticationEnabled, QObject *parent) :
+    TransportInterface(authenticationEnabled, parent)
 {       
     // Timer for scanning network interfaces ever 5 seconds
     // Note: QNetworkConfigurationManager does not work on embedded platforms
@@ -61,6 +61,8 @@ TcpServer::TcpServer(QObject *parent) :
     // load JSON-RPC server settings
     GuhSettings settings(GuhSettings::SettingsRoleGlobal);
     qCDebug(dcTcpServer) << "Loading Tcp server settings from" << settings.fileName();
+    qCDebug(dcTcpServer) << "Authentication" << (authenticationEnabled ? "enabled" : "disabled");
+
     settings.beginGroup("JSONRPC");
 
     // load port

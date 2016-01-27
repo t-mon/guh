@@ -35,7 +35,7 @@ class MockTcpServer : public TransportInterface
 {
     Q_OBJECT
 public:
-    explicit MockTcpServer(QObject *parent = 0);
+    explicit MockTcpServer(const bool &authenticationEnabled, QObject *parent = 0);
     ~MockTcpServer();
 
     void sendData(const QUuid &clientId, const QVariantMap &data) override;

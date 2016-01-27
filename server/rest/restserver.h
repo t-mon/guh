@@ -31,6 +31,7 @@
 #include "pluginsresource.h"
 #include "rulesresource.h"
 #include "logsresource.h"
+#include "authenticationresource.h"
 
 class QSslConfiguration;
 
@@ -58,6 +59,7 @@ private:
     PluginsResource *m_pluginsResource;
     RulesResource *m_rulesResource;
     LogsResource *m_logsResource;
+    AuthenticationResource *m_authenticationResource;
 
 private slots:
     void setup();

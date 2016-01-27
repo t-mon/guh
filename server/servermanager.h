@@ -49,10 +49,9 @@ private:
     QSslConfiguration m_sslConfiguration;
     QSslKey m_certificateKey;
     QSslCertificate m_certificate;
-
+    bool m_authenticationEnabled;
 
     bool loadCertificate(const QString &certificateKeyFileName, const QString &certificateFileName);
-
 };
 
 }

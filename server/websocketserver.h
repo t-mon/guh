@@ -41,7 +41,7 @@ class WebSocketServer : public TransportInterface
 {
     Q_OBJECT
 public:
-    explicit WebSocketServer(const QSslConfiguration &sslConfiguration = QSslConfiguration(), QObject *parent = 0);
+    explicit WebSocketServer(const bool &authenticationEnabled, const QSslConfiguration &sslConfiguration = QSslConfiguration(), QObject *parent = 0);
     ~WebSocketServer();
 
     void sendData(const QUuid &clientId, const QVariantMap &data) override;

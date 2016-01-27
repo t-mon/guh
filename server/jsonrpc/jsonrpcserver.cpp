@@ -73,17 +73,9 @@
 namespace guhserver {
 
 /*! Constructs a \l{JsonRPCServer} with the given \a sslConfiguration and \a parent. */
-JsonRPCServer::JsonRPCServer(const QSslConfiguration &sslConfiguration, QObject *parent):
+JsonRPCServer::JsonRPCServer(const bool &authenticationEnabled, const QSslConfiguration &sslConfiguration, QObject *parent):
     JsonHandler(parent),
-    #ifdef TESTING_ENABLED
-    m_tcpServer(new MockTcpServer(this)),
-    #else
-    m_tcpServer(new TcpServer(this)),
-    #endif
-    #ifdef WEBSOCKET
-    m_websocketServer(new WebSocketServer(sslConfiguration, this)),
-    #endif
-    m_authenticationRequired(true),
+    m_authenticationEnabled(authenticationEnabled),
     m_notificationId(0)
 {
     // First, define our own JSONRPC methods
@@ -105,27 +97,35 @@ JsonRPCServer::JsonRPCServer(const QSslConfiguration &sslConfiguration, QObject 
     setReturns("Version", returns);
 
     params.clear(); returns.clear();
-    setDescription("SetNotificationStatus", "Enable/Disable notifications for this connections.");
+    setDescription("SetNotificationStatus", "Enable/Disable notifications for this connections. "
+                   "By default the notifications are disabled.");
     params.insert("enabled", JsonTypes::basicTypeToString(JsonTypes::Bool));
     setParams("SetNotificationStatus", params);
     returns.insert("enabled", JsonTypes::basicTypeToString(JsonTypes::Bool));
     setReturns("SetNotificationStatus", returns);
 
-    // Now set up the logic
+    // Create the TCP server
+#ifdef TESTING_ENABLED
+    m_tcpServer = new MockTcpServer(authenticationEnabled, this);
+#else
+    m_tcpServer = new TcpServer(authenticationEnabled, this);
+#endif
+
     connect(m_tcpServer, SIGNAL(clientConnected(const QUuid &)), this, SLOT(clientConnected(const QUuid &)));
     connect(m_tcpServer, SIGNAL(clientDisconnected(const QUuid &)), this, SLOT(clientDisconnected(const QUuid &)));
     connect(m_tcpServer, SIGNAL(dataAvailable(QUuid, QString, QString, QVariantMap)), this, SLOT(processData(QUuid, QString, QString, QVariantMap)));
+    m_interfaces.append(m_tcpServer);
     m_tcpServer->startServer();
 
-    m_interfaces.append(m_tcpServer);
-
 #ifdef WEBSOCKET
+    // Create the Websocket server
+    m_websocketServer = new WebSocketServer(authenticationEnabled, sslConfiguration, this);
     connect(m_websocketServer, SIGNAL(clientConnected(const QUuid &)), this, SLOT(clientConnected(const QUuid &)));
     connect(m_websocketServer, SIGNAL(clientDisconnected(const QUuid &)), this, SLOT(clientDisconnected(const QUuid &)));
     connect(m_websocketServer, SIGNAL(dataAvailable(QUuid, QString, QString, QVariantMap)), this, SLOT(processData(QUuid, QString, QString, QVariantMap)));
 
-    m_websocketServer->startServer();
     m_interfaces.append(m_websocketServer);
+    m_websocketServer->startServer();
 #else
     Q_UNUSED(sslConfiguration)
 #endif
@@ -284,7 +284,7 @@ void JsonRPCServer::registerHandler(JsonHandler *handler)
 
 void JsonRPCServer::clientConnected(const QUuid &clientId)
 {
-    // Notifications enabled by default
+    // Notifications disabled by default
     m_clients.insert(clientId, false);
 
     TransportInterface *interface = qobject_cast<TransportInterface *>(sender());
@@ -294,7 +294,7 @@ void JsonRPCServer::clientConnected(const QUuid &clientId)
     handshake.insert("server", "guh JSONRPC interface");
     handshake.insert("version", GUH_VERSION_STRING);
     handshake.insert("protocol version", JSON_PROTOCOL_VERSION);
-    handshake.insert("authenticationRequired", m_authenticationRequired);
+    handshake.insert("authenticationRequired", m_authenticationEnabled);
     interface->sendData(clientId, handshake);
 }
 

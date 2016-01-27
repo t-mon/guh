@@ -114,6 +114,11 @@ QByteArray HttpRequest::httpVersion() const
     return m_httpVersion;
 }
 
+QString HttpRequest::userAgent() const
+{
+    return m_userAgent;
+}
+
 /*! Returns the URL of this \l{HttpRequest}.*/
 QUrl HttpRequest::url() const
 {
@@ -215,9 +220,12 @@ void HttpRequest::validate()
     }
 
     // check User-Agent
-    if (!m_rawHeaderList.contains("User-Agent"))
+    if (!m_rawHeaderList.contains("User-Agent")) {
         qWarning() << "User-Agent header is missing";
+        return;
+    }
 
+    m_userAgent = QString(m_rawHeaderList.value("User-Agent"));
 
     // verify content length with actual payload
     if (m_rawHeaderList.contains("Content-Length")) {

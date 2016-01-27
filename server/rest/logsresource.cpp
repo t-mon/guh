@@ -82,7 +82,7 @@ HttpReply *LogsResource::proccessRequest(const HttpRequest &request, const QStri
 
 HttpReply *LogsResource::proccessGetRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
-    // GET /api/v1/logs?filter={ogFilter}
+    // GET /api/v1/logs?filter={logFilter}
     if (urlTokens.count() == 3) {
         // check filter
         QString filterString;

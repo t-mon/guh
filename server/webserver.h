@@ -86,6 +86,7 @@ private:
 
     QSslConfiguration m_sslConfiguration;
     bool m_useSsl;
+    bool m_authenticationEnabled;
 
     bool m_enabled;
     qint16 m_port;

@@ -32,7 +32,7 @@ class TransportInterface : public QObject
 {
     Q_OBJECT
 public:
-    explicit TransportInterface(QObject *parent = 0);
+    explicit TransportInterface(const bool &authenticationEnabled, QObject *parent = 0);
     virtual ~TransportInterface() = 0;
 
     virtual void sendData(const QUuid &clientId, const QVariantMap &data) = 0;
@@ -42,6 +42,7 @@ public:
     void sendErrorResponse(const QUuid &clientId, int commandId, const QString &error);
 
 protected:
+    bool m_authenticationEnabled;
     void validateMessage(const QUuid &clientId, const QByteArray &data);
 
 signals:

@@ -37,7 +37,7 @@ class TcpServer : public TransportInterface
 {
     Q_OBJECT
 public:
-    explicit TcpServer(QObject *parent = 0);
+    explicit TcpServer(const bool &authenticationEnabled, QObject *parent = 0);
     ~TcpServer();
 
     void sendData(const QUuid &clientId, const QVariantMap &data) override;

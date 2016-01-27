@@ -60,22 +60,24 @@ namespace guhserver {
  *
  *  \sa ServerManager
  */
-WebSocketServer::WebSocketServer(const QSslConfiguration &sslConfiguration, QObject *parent) :
-    TransportInterface(parent),
+WebSocketServer::WebSocketServer(const bool &authenticationEnabled, const QSslConfiguration &sslConfiguration, QObject *parent) :
+    TransportInterface(authenticationEnabled, parent),
     m_server(0),
     m_sslConfiguration(sslConfiguration),
     m_useSsl(false),
     m_enabled(false)
 {
-    // load webserver settings
+    // load websocket settings
     GuhSettings settings(GuhSettings::SettingsRoleGlobal);
-    qCDebug(dcWebServer) << "Loading webserver settings from" << settings.fileName();
+    qCDebug(dcWebSocketServer) << "Loading webserver settings from" << settings.fileName();
 
     settings.beginGroup("WebSocketServer");
     // 4444 Official free according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
     m_port = settings.value("port", 4444).toInt();
     m_useSsl = settings.value("https", false).toBool();
     settings.endGroup();
+
+    qCDebug(dcWebSocketServer) << "Authentication" << (m_authenticationEnabled ? "enabled" : "disabled");
 
     // check SSL
     if (m_useSsl && m_sslConfiguration.isNull())
@@ -86,6 +88,10 @@ WebSocketServer::WebSocketServer(const QSslConfiguration &sslConfiguration, QObj
 WebSocketServer::~WebSocketServer()
 {
     qCDebug(dcApplication) << "Shutting down \"Websocket server\"";
+    foreach (QWebSocket *client, m_clientList.values()) {
+        client->close(QWebSocketProtocol::CloseCodeGoingAway, "Shutting down");
+    }
+
     stopServer();
 }
 
@@ -200,14 +206,14 @@ bool WebSocketServer::startServer()
     connect (m_server, &QWebSocketServer::acceptError, this, &WebSocketServer::onServerError);
 
     if (!m_server->listen(QHostAddress::Any, m_port)) {
-        qCWarning(dcConnection) << "Websocket server" << m_server->serverName() << QString("could not listen on %1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
+        qCWarning(dcWebSocketServer) << "Websocket server" << m_server->serverName() << QString("could not listen on %1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
         return false;
     }
 
     if (m_server->secureMode() == QWebSocketServer::NonSecureMode) {
-        qCDebug(dcConnection) << "Started websocket server" << m_server->serverName() << QString("on ws://%1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
+        qCDebug(dcWebSocketServer) << "Started websocket server" << m_server->serverName() << QString("on ws://%1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
     } else {
-        qCDebug(dcConnection) << "Started websocket server" << m_server->serverName() << QString("on wss://%1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
+        qCDebug(dcWebSocketServer) << "Started websocket server" << m_server->serverName() << QString("on wss://%1:%2").arg(m_server->serverAddress().toString()).arg(m_port);
     }
     return true;
 }

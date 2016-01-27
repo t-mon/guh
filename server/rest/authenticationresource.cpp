@@ -19,6 +19,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "authenticationresource.h"
+#include "loggingcategories.h"
+#include "guhcore.h"
+
+#include <QJsonDocument>
 
 namespace guhserver {
 
@@ -33,15 +37,14 @@ QString AuthenticationResource::name() const
     return "authentication";
 }
 
-
 guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
 {
     // check method
     HttpReply *reply;
     switch (request.method()) {
-//    case HttpRequest::Get:
-//        reply = proccessGetRequest(request, urlTokens);
-//        break;
+    case HttpRequest::Get:
+        reply = proccessGetRequest(request, urlTokens);
+        break;
     case HttpRequest::Post:
         reply = proccessPostRequest(request, urlTokens);
         break;
@@ -58,7 +61,22 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const g
         reply = createErrorReply(HttpReply::BadRequest);
         break;
     }
+
     return reply;
+}
+
+HttpReply *AuthenticationResource::proccessGetRequest(const HttpRequest &request, const QStringList &urlTokens)
+{
+    // GET /api/v1/authentication
+    if (urlTokens.count() == 3)
+        return createErrorReply(HttpReply::NotImplemented);
+
+    // GET /api/v1/authentication/login
+    if (urlTokens.count() == 4 && urlTokens.at(3) == "login")
+        return getLogin(request);
+
+
+    return createErrorReply(HttpReply::NotImplemented);
 }
 
 guhserver::HttpReply *guhserver::AuthenticationResource::proccessPostRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
@@ -67,6 +85,45 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessPostRequest(con
     Q_UNUSED(urlTokens)
 
     return createSuccessReply();
+}
+
+HttpReply *AuthenticationResource::getLogin(const HttpRequest &request) const
+{
+    if (!request.rawHeaderList().keys().contains("Authorization")) {
+        qCWarning(dcRest) << "Authorization header missing.";
+        return createErrorReply(HttpReply::BadRequest);
+    }
+
+    QList<QByteArray> authorizationParts = request.rawHeaderList().value("Authorization").split(' ');
+    if (authorizationParts.count() != 2) {
+        qCWarning(dcRest) << "Invalid Authorization header format.";
+        return createErrorReply(HttpReply::BadRequest);
+    }
+
+    if (authorizationParts.first() != "Basic") {
+        qCWarning(dcRest) << "Invalid Authorization header format.";
+        return createErrorReply(HttpReply::BadRequest);
+    }
+
+    // Note: base64 has no character ':', so it should alway be splited correctly if the token is authorized...
+    QStringList loginParts = QString(QByteArray::fromBase64(authorizationParts.last())).split(':');
+
+    if (loginParts.count() != 2) {
+        qCWarning(dcRest) << "Invalid login format.";
+        return createErrorReply(HttpReply::BadRequest);
+    }
+
+    // authenticate and get token
+    QString token = GuhCore::instance()->authenticationManager()->authenticate(request.userAgent(), loginParts.first(), loginParts.last());
+    if (token.isEmpty())
+        return createAuthenticationErrorReply(HttpReply::Unauthorized, AuthenticationManager::AuthenticationErrorAuthenicationFailed);
+
+    QVariantMap params;
+    params.insert("token", token);
+
+    HttpReply *reply = createSuccessReply();
+    reply->setPayload(QJsonDocument::fromVariant(params).toJson());
+    return reply;
 }
 
 }

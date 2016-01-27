@@ -72,6 +72,7 @@
 
 #include "transportinterface.h"
 #include "loggingcategories.h"
+#include "guhsettings.h"
 #include "jsonhandler.h"
 #include "guhcore.h"
 
@@ -80,9 +81,11 @@
 namespace guhserver {
 
 /*! Constructs a \l{TransportInterface} with the given \a parent. */
-TransportInterface::TransportInterface(QObject *parent) :
-    QObject(parent)
+TransportInterface::TransportInterface(const bool &authenticationEnabled, QObject *parent) :
+    QObject(parent),
+    m_authenticationEnabled(authenticationEnabled)
 {
+
 }
 
 /*! Pure virtual destructor for \l{TransportInterface}. */
@@ -164,10 +167,14 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
         return;
     }
 
-    // verify authentication
-    if (message.value("method").toString() != "Authentication.Authenticate") {
-        // TODO: check if authentication enables
+    // forbid the "Authentication" namespace if authentication disabled
+    if (targetNamespace == "Authentication" && !m_authenticationEnabled) {
+        sendErrorResponse(clientId, commandId, "Authentication is disabled");
+        return;
+    }
 
+    // verify authentication
+    if (m_authenticationEnabled && message.value("method").toString() != "Authentication.Authenticate") {
         // check token key
         if (!message.contains("token")) {
             qCWarning(dcJsonRpc) << "Error parsing command. Missing \"token\":\n" << message;
@@ -181,8 +188,6 @@ void TransportInterface::validateMessage(const QUuid &clientId, const QByteArray
             sendErrorResponse(clientId, commandId, "Authentication failed");
             return;
         }
-
-        // TODO: verify permissions
     }
 
     emit dataAvailable(clientId, targetNamespace, method, message);

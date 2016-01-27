@@ -71,6 +71,7 @@
 */
 
 #include "webserver.h"
+#include "guhcore.h"
 #include "loggingcategories.h"
 #include "guhsettings.h"
 #include "httpreply.h"
@@ -99,6 +100,7 @@ WebServer::WebServer(const QSslConfiguration &sslConfiguration, QObject *parent)
     QTcpServer(parent),
     m_sslConfiguration(sslConfiguration),
     m_useSsl(false),
+    m_authenticationEnabled(true),
     m_enabled(false)
 {
     // load webserver settings
@@ -110,6 +112,12 @@ WebServer::WebServer(const QSslConfiguration &sslConfiguration, QObject *parent)
     m_port = settings.value("port", 3333).toInt();
     m_useSsl = settings.value("https", false).toBool();
     m_webinterfaceDir = QDir(settings.value("publicFolder", "/usr/share/guh-webinterface/public/").toString());
+    settings.endGroup();
+
+    // check if authentication is enabled
+    settings.beginGroup("Authentication");
+    m_authenticationEnabled = settings.value("enabled").toBool();
+    qCDebug(dcWebServer) << "Authentication" << (m_authenticationEnabled ? "enabled" : "disabled");
     settings.endGroup();
 
     // check public directory
@@ -212,32 +220,27 @@ bool WebServer::verifyFile(QSslSocket *socket, const QString &fileName)
 bool WebServer::verifyAuthentication(const HttpRequest &request)
 {
     if (!request.rawHeaderList().keys().contains("Authorization")) {
-        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        qCWarning(dcWebServer) << "Missing \"Authorization\" header.";
         return false;
     }
 
     QList<QByteArray> authorizationTokens = request.rawHeaderList().value("Authorization").split(' ');
 
     if (authorizationTokens.count() != 2) {
-        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        qCWarning(dcWebServer) << "Invalid Authorization header format.";
         return false;
     }
 
     if (authorizationTokens.first() != "Basic") {
-        qCWarning(dcWebServer) << "Invalid Authorization header.";
+        qCWarning(dcWebServer) << "Invalid Authorization header format. Keyword \"Basic\" missing.";
         return false;
     }
 
-    //        qCWarning(dcWebServer) << "Invalid Authorization header.";
-    //        HttpReply *reply = RestResource::createErrorReply(HttpReply::BadRequest);
-    //        reply->setClientId(clientId);
-    //        sendHttpReply(reply);
-    //        reply->deleteLater();
+    // Note: base64 has no character ':', so it should alway be splited correctly if the token is authorized...
+    QString plainTextToken = QString(QByteArray::fromBase64(authorizationTokens.last())).replace(':', "");
+    qCDebug(dcWebServer) << "Token = " << plainTextToken;
 
-    QString plainText = QString(QByteArray::fromBase64(authorizationTokens.last())).replace(':', "");
-    qCDebug(dcWebServer) << "Token = " << plainText;
-
-    return true;
+    return GuhCore::instance()->authenticationManager()->verifyToken(plainTextToken);
 }
 
 QString WebServer::fileName(const QString &query)
@@ -412,18 +415,23 @@ void WebServer::readClient()
 
     // verify API query
     if (request.url().path().startsWith("/api/v1")) {
+        if (m_authenticationEnabled) {
+            // verify authentication for api requests
+            if (request.url().path() != "/api/v1/authentication/login") {
+                if (!verifyAuthentication(request)) {
+                    HttpReply *reply = RestResource::createAuthenticationErrorReply(HttpReply::Unauthorized, AuthenticationManager::AuthenticationErrorAuthenicationFailed);
+                    sendHttpReply(reply, clientId);
+                    return;
+                }
+            }
+        } else if (request.url().path().startsWith("/api/v1/authentication")) {
+            // if authentication disabled, this resource is not accessable
+            HttpReply *reply = RestResource::createAuthenticationErrorReply(HttpReply::Forbidden, AuthenticationManager::AuthenticationErrorAuthenticationDisabled);
+            sendHttpReply(reply, clientId);
+            return;
+        }
 
-        // verify authentication
-
-        //qCDebug(dcWebServer) << request;
-
-//        bool authorized = verifyAuthentication(request);
-//        if (!authorized) {
-//            HttpReply *reply = RestResource::createAuthenticationErrorReply(HttpReply::Unauthorized, AuthenticationManager::AuthenticationErrorAuthenicationFailed);
-//            sendHttpReply(reply, clientId);
-//            return;
-//        }
-
+        // authentication verification passed, process the API request
         emit httpRequestReady(clientId, request);
         return;
     }
@@ -722,6 +730,8 @@ QByteArray WebServer::createServerXmlDocument(QHostAddress address)
     writer.writeEndDocument();
     return data;
 }
+
+
 
 
 /*!

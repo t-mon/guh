@@ -49,6 +49,7 @@ public:
     RequestMethod method() const;
     QString methodString() const;
     QByteArray httpVersion() const;
+    QString userAgent() const;
 
     QUrl url() const;
     QUrlQuery urlQuery() const;
@@ -69,6 +70,7 @@ private:
     RequestMethod m_method;
     QString m_methodString;
     QByteArray m_httpVersion;
+    QString m_userAgent;
 
     QUrl m_url;
     QUrlQuery m_urlQuery;

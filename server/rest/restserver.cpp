@@ -68,6 +68,8 @@ void RestServer::setup()
     m_pluginsResource = new PluginsResource(this);
     m_rulesResource = new RulesResource(this);
     m_logsResource = new LogsResource(this);
+    m_logsResource = new LogsResource(this);
+    m_authenticationResource = new AuthenticationResource(this);
 
     m_resources.insert(m_deviceResource->name(), m_deviceResource);
     m_resources.insert(m_deviceClassesResource->name(), m_deviceClassesResource);
@@ -75,6 +77,7 @@ void RestServer::setup()
     m_resources.insert(m_pluginsResource->name(), m_pluginsResource);
     m_resources.insert(m_rulesResource->name(), m_rulesResource);
     m_resources.insert(m_logsResource->name(), m_logsResource);
+    m_resources.insert(m_authenticationResource->name(), m_authenticationResource);
 }
 
 void RestServer::clientConnected(const QUuid &clientId)

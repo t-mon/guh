@@ -31,8 +31,8 @@ using namespace guhserver;
 
 QList<MockTcpServer*> MockTcpServer::s_allServers;
 
-MockTcpServer::MockTcpServer(QObject *parent):
-    TransportInterface(parent)
+MockTcpServer::MockTcpServer(const bool &authenticationEnabled, QObject *parent):
+    TransportInterface(authenticationEnabled, parent)
 {
     s_allServers.append(this);
 }
@@ -101,8 +101,14 @@ void MockTcpServer::injectData(const QUuid &clientId, const QByteArray &data)
         return;
     }
 
+    // forbid the "Authentication" namespace if authentication disabled
+    if (targetNamespace == "Authentication" && !m_authenticationEnabled) {
+        sendErrorResponse(clientId, commandId, "Authentication is disabled");
+        return;
+    }
+
     // verify authentication
-    if (targetNamespace != "Authentication" && method != "Authenticate") {
+    if (m_authenticationEnabled && message.value("method").toString() != "Authentication.Authenticate") {
         // check token key
 
         // TODO: check if authentication enables

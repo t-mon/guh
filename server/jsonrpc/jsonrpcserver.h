@@ -55,7 +55,7 @@ class JsonRPCServer: public JsonHandler
 {
     Q_OBJECT
 public:
-    JsonRPCServer(const QSslConfiguration &sslConfiguration = QSslConfiguration(), QObject *parent = 0);
+    JsonRPCServer(const bool &authenticationEnabled, const QSslConfiguration &sslConfiguration = QSslConfiguration(), QObject *parent = 0);
 
     // JsonHandler API implementation
     QString name() const;
@@ -92,7 +92,7 @@ private:
     QHash<QString, JsonHandler *> m_handlers;
     QHash<JsonReply *, TransportInterface *> m_asyncReplies;
 
-    bool m_authenticationRequired;
+    bool m_authenticationEnabled;
 
     // clientId, notificationsEnabled
     QHash<QUuid, bool> m_clients;
