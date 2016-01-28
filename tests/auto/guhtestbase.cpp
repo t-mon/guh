@@ -36,6 +36,7 @@
 #include <QDebug>
 #include <QMetaType>
 #include <QNetworkReply>
+#include <QAuthenticator>
 
 using namespace guhserver;
 
@@ -186,12 +187,17 @@ QVariant GuhTestBase::checkNotification(const QSignalSpy &spy, const QString &no
     return QVariant();
 }
 
-QVariant GuhTestBase::getAndWait(const QNetworkRequest &request, const int &expectedStatus)
+QVariant GuhTestBase::getAndWait(const QNetworkRequest &request, const int &expectedStatus, const QString &userName, const QString &password)
 {
+    //prepare request with authentication
+    QNetworkRequest r(request);
+    r.setRawHeader("Authorization", createAuthenticationHeader(userName, password));
+    r.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkAccessManager nam;
     QSignalSpy clientSpy(&nam, SIGNAL(finished(QNetworkReply*)));
 
-    QNetworkReply *reply = nam.get(request);
+    QNetworkReply *reply = nam.get(r);
 
     clientSpy.wait();
 
@@ -216,12 +222,17 @@ QVariant GuhTestBase::getAndWait(const QNetworkRequest &request, const int &expe
     return jsonDoc.toVariant();
 }
 
-QVariant GuhTestBase::deleteAndWait(const QNetworkRequest &request, const int &expectedStatus)
+QVariant GuhTestBase::deleteAndWait(const QNetworkRequest &request, const int &expectedStatus, const QString &userName, const QString &password)
 {
+    //prepare request with authentication
+    QNetworkRequest r(request);
+    r.setRawHeader("Authorization", createAuthenticationHeader(userName, password));
+    r.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkAccessManager nam;
     QSignalSpy clientSpy(&nam, SIGNAL(finished(QNetworkReply*)));
 
-    QNetworkReply *reply = nam.deleteResource(request);
+    QNetworkReply *reply = nam.deleteResource(r);
 
     clientSpy.wait();
 
@@ -246,14 +257,19 @@ QVariant GuhTestBase::deleteAndWait(const QNetworkRequest &request, const int &e
     return jsonDoc.toVariant();
 }
 
-QVariant GuhTestBase::postAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus)
+QVariant GuhTestBase::postAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus, const QString &userName, const QString &password)
 {
+    //prepare request with authentication
+    QNetworkRequest r(request);
+    r.setRawHeader("Authorization", createAuthenticationHeader(userName, password));
+    r.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkAccessManager nam;
     QSignalSpy clientSpy(&nam, SIGNAL(finished(QNetworkReply*)));
 
     QByteArray payload = QJsonDocument::fromVariant(params).toJson(QJsonDocument::Compact);
 
-    QNetworkReply *reply = nam.post(request, payload);
+    QNetworkReply *reply = nam.post(r, payload);
 
     clientSpy.wait();
 
@@ -279,14 +295,19 @@ QVariant GuhTestBase::postAndWait(const QNetworkRequest &request, const QVariant
 }
 
 
-QVariant GuhTestBase::putAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus)
+QVariant GuhTestBase::putAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus, const QString &userName, const QString &password)
 {
+    //prepare request with authentication
+    QNetworkRequest r(request);
+    r.setRawHeader("Authorization", createAuthenticationHeader(userName, password));
+    r.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkAccessManager nam;
     QSignalSpy clientSpy(&nam, SIGNAL(finished(QNetworkReply*)));
 
     QByteArray payload = QJsonDocument::fromVariant(params).toJson(QJsonDocument::Compact);
 
-    QNetworkReply *reply = nam.put(request, payload);
+    QNetworkReply *reply = nam.put(r, payload);
 
     clientSpy.wait();
 
@@ -358,5 +379,12 @@ void GuhTestBase::restartServer()
 void GuhTestBase::clearLoggingDatabase()
 {
     GuhCore::instance()->logEngine()->clearDatabase();
+}
+
+QByteArray GuhTestBase::createAuthenticationHeader(const QString &userName, const QString &password) const
+{
+    QByteArray data = "Basic ";
+    data.append(QByteArray(userName.toUtf8() + ":" + password.toUtf8()).toBase64());
+    return data;
 }
 

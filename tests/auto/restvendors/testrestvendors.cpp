@@ -75,6 +75,9 @@ void TestRestVendors::invalidMethod()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/vendors"));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam.post(request, QByteArray());
 
     clientSpy.wait();
@@ -95,6 +98,9 @@ void TestRestVendors::invalidPath()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/vendors/" + QUuid::createUuid().toString() + "/" + QUuid::createUuid().toString()));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam.get(request);
 
     clientSpy.wait();

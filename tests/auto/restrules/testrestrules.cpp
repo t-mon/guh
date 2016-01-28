@@ -268,6 +268,9 @@ void TestRestRules::invalidPath()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/rules/" + QUuid::createUuid().toString() + "/" + QUuid::createUuid().toString()));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam.get(request);
 
     clientSpy.wait();
@@ -294,6 +297,9 @@ void TestRestRules::checkOptionCall()
     QSignalSpy clientSpy(&nam, SIGNAL(finished(QNetworkReply*)));
 
     request.setUrl(QUrl(QString("http://localhost:3333/api/v1/rules/%1").arg(ruleId.toString())));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam.sendCustomRequest(request, "OPTIONS");
 
     clientSpy.wait();
@@ -510,6 +516,7 @@ void TestRestRules::addRemoveRules()
     QNetworkRequest request(QUrl("http://localhost:3333/api/v1/rules"));
     QVariant response = getAndWait(request);
     QVariantList rulesList = response.toList();
+    qDebug() << response;
     QVERIFY2(rulesList.count() == 0, "there should be no rules.");
 
     // ADD rule

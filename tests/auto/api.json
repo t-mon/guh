@@ -53,6 +53,40 @@
                 "authenticationError": "$ref:AuthenticationError"
             }
         },
+        "Authentication.GetAuthorizedConnections": {
+            "description": "This method returns the list of authorized connection in guh. Each connection represents an access token.",
+            "params": {
+                "o:userId": "Uuid"
+            },
+            "returns": {
+                "authenticationError": "$ref:AuthenticationError",
+                "o:connections": [
+                    "$ref:AuthorizedConnection"
+                ]
+            }
+        },
+        "Authentication.GetUsers": {
+            "description": "This method allows receive information about the users from the system.",
+            "params": {
+            },
+            "returns": {
+                "authenticationError": "$ref:AuthenticationError",
+                "users": [
+                    "$ref:User"
+                ]
+            }
+        },
+        "Authentication.RemoveAuthorizedConnections": {
+            "description": "This method allows to remove authorized connections from the system. The connection will be represented by the token. This forces the client to re-authenticate.",
+            "params": {
+                "tokens": [
+                    "String"
+                ]
+            },
+            "returns": {
+                "authenticationError": "$ref:AuthenticationError"
+            }
+        },
         "Devices.AddConfiguredDevice": {
             "description": "Add a configured device with a setupMethod of SetupMethodJustAdd. For devices with a setupMethod different than SetupMethodJustAdd, use PairDevice. Use deviceDescriptorId or deviceParams, depending on the createMethod of the device class. CreateMethodJustAdd takes the parameters you want to have with that device. CreateMethodDiscovery requires the use of a deviceDescriptorId.",
             "params": {
@@ -285,7 +319,7 @@
             }
         },
         "JSONRPC.SetNotificationStatus": {
-            "description": "Enable/Disable notifications for this connections.",
+            "description": "Enable/Disable notifications for this connections. By default the notifications are disabled.",
             "params": {
                 "enabled": "Bool"
             },
@@ -559,8 +593,16 @@
         "AuthenticationError": [
             "AuthenticationErrorNoError",
             "AuthenticationErrorAuthenicationFailed",
-            "AuthenticationErrorPermissionDenied"
+            "AuthenticationErrorWeakPassword",
+            "AuthenticationErrorPermissionDenied",
+            "AuthenticationErrorAuthenticationDisabled"
         ],
+        "AuthorizedConnection": {
+            "clientDescription": "String",
+            "lastUpdate": "Int",
+            "token": "String",
+            "userName": "String"
+        },
         "BasicTag": [
             "BasicTagService",
             "BasicTagDevice",
@@ -902,6 +944,11 @@
             "UnitEuro",
             "UnitDollar"
         ],
+        "User": {
+            "isAdmin": "Bool",
+            "userId": "String",
+            "userName": "String"
+        },
         "ValueOperator": [
             "ValueOperatorEquals",
             "ValueOperatorNotEquals",

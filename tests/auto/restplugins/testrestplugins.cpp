@@ -80,6 +80,9 @@ void TestRestPlugins::invalidMethod()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/plugins"));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam->deleteResource(request);
 
     clientSpy.wait();
@@ -101,6 +104,9 @@ void TestRestPlugins::invalidPath()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/plugins/" + QUuid::createUuid().toString() + "/" + QUuid::createUuid().toString()));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam->get(request);
 
     clientSpy.wait();

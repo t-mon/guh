@@ -176,6 +176,9 @@ void TestWebserver::checkAllowedMethodCall()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333"));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = 0;
 
     clientSpy.clear();
@@ -238,7 +241,7 @@ void TestWebserver::badRequests_data()
 
     QTest::newRow("wrong content length") << wrongContentLength << 400;
     QTest::newRow("invalid header formatting") << wrongHeaderFormatting << 400;
-    QTest::newRow("user agent missing") << userAgentMissing << 404;
+    QTest::newRow("user agent missing") << userAgentMissing << 400;
 
 }
 
@@ -301,6 +304,8 @@ void TestWebserver::getOptions()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333" + path));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
     QNetworkReply *reply = nam.sendCustomRequest(request, "OPTIONS");
 
     clientSpy.wait();

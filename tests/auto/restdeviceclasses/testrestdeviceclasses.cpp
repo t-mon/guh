@@ -106,6 +106,9 @@ void TestRestDeviceClasses::invalidMethod()
 
     QNetworkRequest request;
     request.setUrl(QUrl("http://localhost:3333/api/v1/deviceclasses/"));
+    request.setRawHeader("Authorization", createAuthenticationHeader(testToken));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "guh-tests");
+
     QNetworkReply *reply = nam.post(request, QByteArray());
 
     clientSpy.wait();

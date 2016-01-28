@@ -79,10 +79,10 @@ protected:
     QVariant injectAndWait(const QString &method, const QVariantMap &params = QVariantMap(), const QString &token = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE");
     QVariant checkNotification(const QSignalSpy &spy, const QString &notification);
 
-    QVariant getAndWait(const QNetworkRequest &request, const int &expectedStatus = 200);
-    QVariant deleteAndWait(const QNetworkRequest &request, const int &expectedStatus = 200);
-    QVariant postAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus = 200);
-    QVariant putAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus = 200);
+    QVariant getAndWait(const QNetworkRequest &request, const int &expectedStatus = 200, const QString &userName = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE", const QString &password = QString());
+    QVariant deleteAndWait(const QNetworkRequest &request, const int &expectedStatus = 200, const QString &userName = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE", const QString &password = QString());
+    QVariant postAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus = 200, const QString &userName = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE", const QString &password = QString());
+    QVariant putAndWait(const QNetworkRequest &request, const QVariant &params, const int &expectedStatus = 200, const QString &userName = "4VzMAR3PozoPKkwCb0x0-pBWESwdL5YdRGbJn4I9TRE", const QString &password = QString());
 
     void verifyReply(QNetworkReply *reply, const QByteArray &data, const int &expectedStatus);
 
@@ -147,6 +147,7 @@ protected:
 
     void restartServer();
     void clearLoggingDatabase();
+    QByteArray createAuthenticationHeader(const QString &userName, const QString &password = QString()) const;
 
 protected:
     PluginId mockPluginId = PluginId("727a4a9a-c187-446f-aadf-f1b2220607d1");
