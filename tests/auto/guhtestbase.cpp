@@ -87,6 +87,8 @@ void GuhTestBase::initTestCase()
     deviceSettings.clear();
     GuhSettings pluginsSettings(GuhSettings::SettingsRolePlugins);
     pluginsSettings.clear();
+    GuhSettings userSettings(GuhSettings::SettingsRoleUsers);
+    userSettings.clear();
 
     GuhCore::instance();
 
