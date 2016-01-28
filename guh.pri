@@ -22,9 +22,9 @@ equals(QT_MAJOR_VERSION, 5):greaterThan(QT_MINOR_VERSION, 3) {
 
 # Enable coverage option    
 coverage {
-    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
     LIBS += -lgcov
-    QMAKE_LFLAGS += -fprofile-arcs
+    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
+    QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage -O0
 }
 
 # Enable Radio 433 MHz for GPIO's

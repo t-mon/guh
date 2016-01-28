@@ -49,6 +49,7 @@ private:
 
     // Get methods
     HttpReply *getLogin(const HttpRequest &request) const;
+    //HttpReply *getAuthorizedConnections(const HttpRequest &request) const;
 
 };
 

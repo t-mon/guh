@@ -19,4 +19,5 @@ SUBDIRS = versioning \
         logging \
         restlogging \
         authentication \
+        restauthentication \
 

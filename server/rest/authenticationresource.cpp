@@ -75,6 +75,10 @@ HttpReply *AuthenticationResource::proccessGetRequest(const HttpRequest &request
     if (urlTokens.count() == 4 && urlTokens.at(3) == "login")
         return getLogin(request);
 
+//    // GET /api/v1/authentication/authorizedconnections
+//    if (urlTokens.count() == 4 && urlTokens.at(3) == "authorizedconnections")
+//        return getAuthorizedConnections(request);
+
 
     return createErrorReply(HttpReply::NotImplemented);
 }
@@ -125,5 +129,10 @@ HttpReply *AuthenticationResource::getLogin(const HttpRequest &request) const
     reply->setPayload(QJsonDocument::fromVariant(params).toJson());
     return reply;
 }
+
+//HttpReply *AuthenticationResource::getAuthorizedConnections(const HttpRequest &request) const
+//{
+
+//}
 
 }
