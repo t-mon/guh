@@ -116,7 +116,7 @@ WebServer::WebServer(const QSslConfiguration &sslConfiguration, QObject *parent)
 
     // check if authentication is enabled
     settings.beginGroup("Authentication");
-    m_authenticationEnabled = settings.value("enabled").toBool();
+    m_authenticationEnabled = settings.value("enabled", true).toBool();
     qCDebug(dcWebServer) << "Authentication" << (m_authenticationEnabled ? "enabled" : "disabled");
     settings.endGroup();
 
