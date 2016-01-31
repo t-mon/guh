@@ -10,12 +10,11 @@ DEFINES += GUH_VERSION_STRING=\\\"$${GUH_VERSION_STRING}\\\" \
            REST_API_VERSION=\\\"$${REST_API_VERSION}\\\"
 
 QT+= network
-CONFIG += c++11
 
 QMAKE_CXXFLAGS += -Werror -std=c++11
 QMAKE_LFLAGS += -std=c++11
 
-# Check for Bluetoot LE support (Qt >= 5.4)
+# Check for Bluetooth LE support (Qt >= 5.4)
 equals(QT_MAJOR_VERSION, 5):greaterThan(QT_MINOR_VERSION, 3) {
     QT += bluetooth
     DEFINES += BLUETOOTH_LE
