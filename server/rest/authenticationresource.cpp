@@ -37,7 +37,7 @@ QString AuthenticationResource::name() const
     return "authentication";
 }
 
-guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
+guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
     // check method
     HttpReply *reply;
@@ -48,15 +48,9 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const g
     case HttpRequest::Post:
         reply = proccessPostRequest(request, urlTokens);
         break;
-//    case HttpRequest::Put:
-//        reply = proccessPutRequest(request, urlTokens);
-//        break;
-//    case HttpRequest::Delete:
-//        reply = proccessDeleteRequest(request, urlTokens);
-//        break;
-//    case HttpRequest::Options:
-//        reply = proccessOptionsRequest(request, urlTokens);
-//        break;
+    case HttpRequest::Put:
+        reply = proccessPutRequest(request, urlTokens);
+        break;
     default:
         reply = createErrorReply(HttpReply::BadRequest);
         break;
@@ -67,28 +61,33 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const g
 
 HttpReply *AuthenticationResource::proccessGetRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
-    // GET /api/v1/authentication
-    if (urlTokens.count() == 3)
-        return createErrorReply(HttpReply::NotImplemented);
-
     // GET /api/v1/authentication/login
     if (urlTokens.count() == 4 && urlTokens.at(3) == "login")
         return getLogin(request);
 
-//    // GET /api/v1/authentication/authorizedconnections
-//    if (urlTokens.count() == 4 && urlTokens.at(3) == "authorizedconnections")
-//        return getAuthorizedConnections(request);
-
+    // GET /api/v1/authentication/authorizedconnections
+    if (urlTokens.count() == 4 && urlTokens.at(3) == "authorizedconnections")
+        return getAuthorizedConnections(request);
 
     return createErrorReply(HttpReply::NotImplemented);
 }
 
-guhserver::HttpReply *guhserver::AuthenticationResource::proccessPostRequest(const guhserver::HttpRequest &request, const QStringList &urlTokens)
+guhserver::HttpReply *guhserver::AuthenticationResource::proccessPutRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
-    Q_UNUSED(request)
-    Q_UNUSED(urlTokens)
+    // PUT /api/v1/authentication/changepassword
+    if (urlTokens.count() == 4 && urlTokens.at(3) == "changepassword")
+        return changePassword(request);
 
-    return createSuccessReply();
+    return createErrorReply(HttpReply::NotImplemented);
+}
+
+HttpReply *AuthenticationResource::proccessPostRequest(const HttpRequest &request, const QStringList &urlTokens)
+{
+    // DELETE /api/v1/authentication/authorizedconnections
+    if (urlTokens.count() == 4 && urlTokens.at(3) == "removeconnections")
+        return getAuthorizedConnections(request);
+
+    return createErrorReply(HttpReply::NotImplemented);
 }
 
 HttpReply *AuthenticationResource::getLogin(const HttpRequest &request) const
@@ -130,9 +129,58 @@ HttpReply *AuthenticationResource::getLogin(const HttpRequest &request) const
     return reply;
 }
 
-//HttpReply *AuthenticationResource::getAuthorizedConnections(const HttpRequest &request) const
-//{
+HttpReply *AuthenticationResource::getAuthorizedConnections(const HttpRequest &request) const
+{
+    Q_UNUSED(request)
 
-//}
+    // TODO: parse optional userId
+
+    qCDebug(dcRest) << "Get authorized connections";
+    QVariantList connectionList;
+    foreach (const AuthorizedConnection &connection, GuhCore::instance()->authenticationManager()->authorizedConnections()) {
+        connectionList.append(JsonTypes::packAuthorizedConnection(connection));
+    }
+
+    HttpReply *reply = createSuccessReply();
+    reply->setPayload(QJsonDocument::fromVariant(connectionList).toJson());
+    return reply;
+}
+
+HttpReply *AuthenticationResource::changePassword(const HttpRequest &request) const
+{
+    qCDebug(dcRest) << "Change password";
+    QPair<bool, QVariant> verification = RestResource::verifyPayload(request.payload());
+    if (!verification.first)
+        return createErrorReply(HttpReply::BadRequest);
+
+    QVariantMap params = verification.second.toMap();
+
+    // TODO: check permissions if this user is allowed to change the password of the given username
+
+    QString userName = params.value("userName").toString();
+    QString currentPassword = params.value("password").toString();
+    QString newPassword = params.value("newPassword").toString();
+
+    if (!GuhCore::instance()->authenticationManager()->verifyPasswordStrength(newPassword))
+        return createAuthenticationErrorReply(HttpReply::BadRequest, AuthenticationManager::AuthenticationErrorWeakPassword);
+
+    if (!GuhCore::instance()->authenticationManager()->changePassword(userName, currentPassword, newPassword))
+        return createAuthenticationErrorReply(HttpReply::Unauthorized, AuthenticationManager::AuthenticationErrorAuthenicationFailed);
+
+    return createSuccessReply();
+}
+
+HttpReply *AuthenticationResource::removeConnections(const HttpRequest &request) const
+{
+    qCDebug(dcRest) << "Remove authorized connections";
+    QPair<bool, QVariant> verification = RestResource::verifyPayload(request.payload());
+    if (!verification.first)
+        return createErrorReply(HttpReply::BadRequest);
+
+    QStringList tokenList = verification.second.toMap().value("tokens").toStringList();
+    GuhCore::instance()->authenticationManager()->removeAuthorizedConnections(tokenList);
+
+    return createSuccessReply();
+}
 
 }

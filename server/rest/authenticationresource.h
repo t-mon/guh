@@ -45,11 +45,19 @@ public:
 private:
     // Process method
     HttpReply *proccessGetRequest(const HttpRequest &request, const QStringList &urlTokens) override;
+    HttpReply *proccessPutRequest(const HttpRequest &request, const QStringList &urlTokens) override;
     HttpReply *proccessPostRequest(const HttpRequest &request, const QStringList &urlTokens) override;
 
     // Get methods
     HttpReply *getLogin(const HttpRequest &request) const;
-    //HttpReply *getAuthorizedConnections(const HttpRequest &request) const;
+    HttpReply *getAuthorizedConnections(const HttpRequest &request) const;
+
+    // Put methods
+    HttpReply *changePassword(const HttpRequest &request) const;
+
+    // Post methods
+    HttpReply *removeConnections(const HttpRequest &request) const;
+
 
 };
 
