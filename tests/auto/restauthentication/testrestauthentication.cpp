@@ -47,6 +47,9 @@ private slots:
 
     void testAccessTokens_data();
     void testAccessTokens();
+
+    void changePassword_data();
+    void changePassword();
 };
 
 void TestRestAuthentication::testAuthenticate_data()
@@ -107,6 +110,43 @@ void TestRestAuthentication::testAccessTokens()
 
     if (expectedStatusCode != 200)
         QVERIFY(response.toMap().value("error").toString() == "AuthenticationErrorAuthenicationFailed");
+
+}
+
+void TestRestAuthentication::changePassword_data()
+{
+    QTest::addColumn<QString>("userName");
+    QTest::addColumn<QString>("password");
+    QTest::addColumn<QString>("newPassword");
+    QTest::addColumn<int>("expectedStatusCode");
+    QTest::addColumn<AuthenticationManager::AuthenticationError>("error");
+
+    QTest::newRow("Change password successfully") << testUserName << testUserPassword << "!!@12Bla.$$||" << 200 << AuthenticationManager::AuthenticationErrorNoError;
+    QTest::newRow("Change password back") << testUserName << "!!@12Bla.$$||" << testUserPassword << 200 << AuthenticationManager::AuthenticationErrorNoError;
+    QTest::newRow("Invalid username") << "blub blub" << testUserPassword << testUserPassword << 401 << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Invalid password") << testUserName << "blub blub" << "something_else" << 401 << AuthenticationManager::AuthenticationErrorAuthenicationFailed;
+    QTest::newRow("Weak password - empty") << testUserName << testUserPassword << QString() << 400 << AuthenticationManager::AuthenticationErrorWeakPassword;
+    QTest::newRow("Weak password - to short") << testUserName << testUserPassword << "1234" << 400 << AuthenticationManager::AuthenticationErrorWeakPassword;
+}
+
+void TestRestAuthentication::changePassword()
+{
+    QFETCH(QString, userName);
+    QFETCH(QString, password);
+    QFETCH(QString, newPassword);
+    QFETCH(int, expectedStatusCode);
+    QFETCH(AuthenticationManager::AuthenticationError, error);
+
+    QVariantMap params;
+    params.insert("userName", userName);
+    params.insert("password", password);
+    params.insert("newPassword", newPassword);
+
+    QNetworkRequest request(QUrl(QString("http://localhost:3333/api/v1/authentication/changepassword")));
+    QVariant response = putAndWait(request, params, expectedStatusCode);
+
+    if (expectedStatusCode != 200)
+        QVERIFY(response.toMap().value("error").toString() == JsonTypes::authenticationErrorToString(error));
 
 }
 

@@ -83,7 +83,7 @@ RestResource::~RestResource()
 HttpReply *RestResource::createSuccessReply()
 {
     HttpReply *reply = new HttpReply(HttpReply::Ok, HttpReply::TypeSync);
-    reply->setPayload("200 Ok");
+    //reply->setPayload("200 Ok");
     return reply;
 }
 
