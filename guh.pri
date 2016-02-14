@@ -14,6 +14,8 @@ QT+= network
 QMAKE_CXXFLAGS += -Werror -std=c++11
 QMAKE_LFLAGS += -std=c++11
 
+CONFIG += object_parallel_to_source
+
 # Check for Bluetoot LE support (Qt >= 5.4)
 equals(QT_MAJOR_VERSION, 5):greaterThan(QT_MINOR_VERSION, 3) {
     QT += bluetooth
