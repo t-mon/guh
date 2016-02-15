@@ -212,6 +212,7 @@ RuleEngine::RuleEngine(QObject *parent) :
     }
 }
 
+/*! Destructor of this \l{RuleEngine}. */
 RuleEngine::~RuleEngine()
 {
     qCDebug(dcApplication) << "Shutting down \"Rule Engine\"";

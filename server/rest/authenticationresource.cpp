@@ -18,6 +18,23 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class guhserver::AuthenticationResource
+    \brief This subclass of \l{RestResource} processes the REST requests for the \tt Authentication namespace.
+
+    \ingroup json
+    \inmodule core
+
+    This \l{RestResource} will be created in the \l{RestServer} and used to handle REST requests
+    for the \tt {Authentication} namespace of the API.
+
+    \code
+        http://localhost:3333/api/v1/authentication
+    \endcode
+
+    \sa AuthenticationManager, RestResource, RestServer
+*/
+
 #include "authenticationresource.h"
 #include "loggingcategories.h"
 #include "guhcore.h"
@@ -26,17 +43,27 @@
 
 namespace guhserver {
 
+/*! Constructs an \l AuthenticationResource with the given \a parent. */
 AuthenticationResource::AuthenticationResource(QObject *parent) :
     RestResource(parent)
 {
 
 }
 
+/*! Returns the name of the \l{RestResource}. In this case \b authentication.
+
+    \sa RestResource::name()
+*/
 QString AuthenticationResource::name() const
 {
     return "authentication";
 }
 
+/*! This method will be used to process the given \a request and the given \a urlTokens. The request
+    has to be in this namespace. Returns the resulting \l HttpReply.
+
+    \sa HttpRequest, HttpReply, RestResource::proccessRequest()
+*/
 guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
     // check method

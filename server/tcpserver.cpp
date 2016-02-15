@@ -44,7 +44,7 @@
 
 namespace guhserver {
 
-/*! Constructs a \l{TcpServer} with the given \a parent.
+/*! Constructs a \l{TcpServer} with the given \a authenticationEnabled and \a parent.
  *
  *  \sa ServerManager
  */

@@ -18,6 +18,42 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class guhserver::AuthenticationManager
+    \brief Manager for all API authentications and authorized connection.
+
+    \inmodule core
+
+    The AuthenticationManager takes care of all API authentications, users and connections.
+
+    \sa User, AuthorizedConnection
+*/
+
+/*! \enum guhserver::AuthenticationManager::AuthenticationError
+
+    \value AuthenticationErrorNoError
+        No error happened. Everything is fine.
+    \value AuthenticationErrorAuthenicationFailed
+        The given username, password or token is not valid.
+    \value AuthenticationErrorWeakPassword
+        The given password is to weak. The user has to take a stronger password.
+    \value AuthenticationErrorPermissionDenied
+        The authentication was valid, but this user has not the needed permission.
+    \value AuthenticationErrorAuthenticationDisabled
+        The authentication API is disabled.
+*/
+
+/*! \fn void guhserver::AuthenticationManager::authorizedConnectionAdded(const AuthorizedConnection &connection);
+    Will be emitted whenever an \l{AuthorizedConnection} was added to the system.
+    The parameter \a connection holds the new \l{AuthorizedConnection}.
+*/
+
+/*! \fn void guhserver::AuthenticationManager::authorizedConnectionRemoved(const AuthorizedConnection &connection);
+    Will be emitted whenever an \l{AuthorizedConnection} was removed from the system.
+    The parameter \a connection holds the removed \l{AuthorizedConnection}.
+*/
+
+
 #include "authenticationmanager.h"
 #include "loggingcategories.h"
 #include "guhsettings.h"
@@ -27,6 +63,7 @@
 
 namespace guhserver {
 
+/*! Constructs an AuthenticationManager with the given \a parent. */
 AuthenticationManager::AuthenticationManager(QObject *parent) :
     QObject(parent)
 {
@@ -42,17 +79,20 @@ AuthenticationManager::AuthenticationManager(QObject *parent) :
     loadAuthorizedConnections();
 }
 
+/*! Destructs this AuthenticationManager. */
 AuthenticationManager::~AuthenticationManager()
 {
     qCDebug(dcApplication) << "Shutting down \"Authentication Manager\"";
     saveAuthorizedConnections();
 }
 
+/*! Returns the list of available \l{User}{Users}. */
 QList<User> AuthenticationManager::users() const
 {
     return m_users;
 }
 
+/*! Returns the \l{User} with the given \a userId. */
 User AuthenticationManager::getUser(const UserId &userId) const
 {
     foreach (const User &user, m_users) {
@@ -63,6 +103,7 @@ User AuthenticationManager::getUser(const UserId &userId) const
     return User();
 }
 
+/*! Returns the \l{User} with the given \a userName. */
 User AuthenticationManager::getUser(const QString &userName) const
 {
     foreach (const User &user, m_users) {
@@ -73,6 +114,8 @@ User AuthenticationManager::getUser(const QString &userName) const
     return User();
 }
 
+/*! Returns true if the \a currentPassword of the \l{User} with the given \a userName
+ * could be changed to the \a newPassword. */
 bool AuthenticationManager::changePassword(const QString &userName, const QString &currentPassword, const QString &newPassword)
 {
     bool loginVerfied = verifyLogin(userName, currentPassword);
@@ -94,12 +137,19 @@ bool AuthenticationManager::changePassword(const QString &userName, const QStrin
     return false;
 }
 
+/*! Returns the list of authorized connections.
 
+    \sa AuthorizedConnection
+*/
 QList<AuthorizedConnection> AuthenticationManager::authorizedConnections() const
 {
     return m_connections;
 }
 
+/*! Returns the list of authorized connections for the given \a userId.
+
+    \sa AuthorizedConnection
+*/
 QList<AuthorizedConnection> AuthenticationManager::getAuthorizedConnections(const UserId &userId) const
 {
     QList<AuthorizedConnection> connections;
@@ -111,6 +161,7 @@ QList<AuthorizedConnection> AuthenticationManager::getAuthorizedConnections(cons
     return connections;
 }
 
+/*! Removes the given \a tokenList from the list of authorized connections. */
 void AuthenticationManager::removeAuthorizedConnections(const QList<QString> tokenList)
 {
     GuhSettings settings(GuhSettings::SettingsRoleUsers);
@@ -130,6 +181,7 @@ void AuthenticationManager::removeAuthorizedConnections(const QList<QString> tok
     }
 }
 
+/*! Returns true, if the given \a password is strong enough. */
 bool AuthenticationManager::verifyPasswordStrength(const QString &password) const
 {
     if (password.isEmpty()) {
@@ -145,6 +197,7 @@ bool AuthenticationManager::verifyPasswordStrength(const QString &password) cons
     return true;
 }
 
+/*! Returns true, if the given \a token is authorized. */
 bool AuthenticationManager::verifyToken(const QString &token)
 {
     qCDebug(dcAuthentication) << "Verify token" << token;
@@ -162,6 +215,7 @@ bool AuthenticationManager::verifyToken(const QString &token)
     return false;
 }
 
+/*! Returns true, if the given \a userName and \a password are valid. */
 bool AuthenticationManager::verifyLogin(const QString &userName, const QString &password)
 {
     if (!userExists(userName)) {
@@ -180,6 +234,8 @@ bool AuthenticationManager::verifyLogin(const QString &userName, const QString &
     return false;
 }
 
+/*! Returns a new generated token, if the given \a userName and \a password for the client with the given \a clientDescription are authenticated successfully.
+ Otherwise returns QString(). */
 QString AuthenticationManager::authenticate(const QString &clientDescription, const QString &userName, const QString &password)
 {
     bool loginVerfied = verifyLogin(userName, password);

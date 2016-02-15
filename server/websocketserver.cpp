@@ -56,7 +56,7 @@
 
 namespace guhserver {
 
-/*! Constructs a \l{WebSocketServer} with the given \a sslConfiguration and \a parent.
+/*! Constructs a \l{WebSocketServer} with the given \a authenticationEnabled, \a sslConfiguration and \a parent.
  *
  *  \sa ServerManager
  */

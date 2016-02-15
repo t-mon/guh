@@ -306,5 +306,7 @@
     \section2 PairingTransactionId
    This class is a subclass of \l{http://doc.qt.io/qt-5/quuid.html}{QUuid} and represents the \e id of a pairing transaction.
 
+    \section2 UserId
+   This class is a subclass of \l{http://doc.qt.io/qt-5/quuid.html}{QUuid} and represents the \e id of a \l{guhserver::User}.
 */
 

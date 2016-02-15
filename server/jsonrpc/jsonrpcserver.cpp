@@ -72,7 +72,7 @@
 
 namespace guhserver {
 
-/*! Constructs a \l{JsonRPCServer} with the given \a sslConfiguration and \a parent. */
+/*! Constructs a \l{JsonRPCServer} with the given \a authenticationEnabled, \a sslConfiguration and \a parent. */
 JsonRPCServer::JsonRPCServer(const bool &authenticationEnabled, const QSslConfiguration &sslConfiguration, QObject *parent):
     JsonHandler(parent),
     m_authenticationEnabled(authenticationEnabled),

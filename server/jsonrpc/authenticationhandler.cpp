@@ -18,12 +18,26 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class guhserver::AuthenticationHandler
+    \brief This subclass of \l{JsonHandler} processes the JSON requests for the \tt Authentication namespace.
+
+    \ingroup json
+    \inmodule core
+
+    This \l{JsonHandler} will be created in the \l{JsonRPCServer} and used to handle JSON-RPC requests
+    for the \tt {Authentication} namespace of the API.
+
+    \sa AuthenticationManager, JsonHandler, JsonRPCServer
+*/
+
 #include "authenticationhandler.h"
 #include "loggingcategories.h"
 #include "guhcore.h"
 
 namespace guhserver {
 
+/*! Constructs an \l{AuthenticationHandler} with the given \a parent. */
 AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -75,6 +89,7 @@ AuthenticationHandler::AuthenticationHandler(QObject *parent) :
     setReturns("GetUsers", returns);
 }
 
+/*! Returns the name of this \l{JsonHandler} namespace which is \b Authentication. */
 QString AuthenticationHandler::name() const
 {
     return "Authentication";

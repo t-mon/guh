@@ -143,7 +143,7 @@ WebServer::~WebServer()
     this->close();
 }
 
-/*! Send the given \a reply map to the corresponding client.
+/*! Send the given \a reply to the client with the corresponding \a clientId.
  *
  * \sa HttpReply
  */

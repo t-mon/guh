@@ -201,7 +201,7 @@ QVariant GuhTestBase::getAndWait(const QNetworkRequest &request, const int &expe
 
     QNetworkReply *reply = nam.get(r);
 
-    clientSpy.wait(500);
+    clientSpy.wait();
 
     if (clientSpy.count() != 1) {
         qWarning() << "Got no response for get request";

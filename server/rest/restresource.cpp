@@ -142,6 +142,8 @@ HttpReply *RestResource::createLoggingErrorReply(const HttpReply::HttpStatusCode
     return reply;
 }
 
+/*! Returns the pointer to a new created \l{HttpReply} with the given \a statusCode and \a authenticationError. This method will
+ *  be used to create an error response for the \l{guhserver::AuthenticationResource}{AuthenticationResource}. The \a authenticationError will be written in the payload of this reply.*/
 HttpReply *RestResource::createAuthenticationErrorReply(const HttpReply::HttpStatusCode &statusCode, const AuthenticationManager::AuthenticationError &authenticationError)
 {
     HttpReply *reply = new HttpReply(statusCode, HttpReply::TypeSync);

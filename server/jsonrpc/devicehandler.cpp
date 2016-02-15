@@ -45,6 +45,7 @@
 
 namespace guhserver {
 
+/*! Constructs a \l{DeviceHandler} with the given \a parent. */
 DeviceHandler::DeviceHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -270,6 +271,7 @@ DeviceHandler::DeviceHandler(QObject *parent) :
     connect(GuhCore::instance(), &GuhCore::pairingFinished, this, &DeviceHandler::pairingFinished);
 }
 
+/*! Returns the name of this \l{JsonHandler} namespace which is \b Devices. */
 QString DeviceHandler::name() const
 {
     return "Devices";

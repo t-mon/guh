@@ -80,7 +80,7 @@
 
 namespace guhserver {
 
-/*! Constructs a \l{TransportInterface} with the given \a parent. */
+/*! Constructs a \l{TransportInterface} with the given \a authenticationEnabled and \a parent. */
 TransportInterface::TransportInterface(const bool &authenticationEnabled, QObject *parent) :
     QObject(parent),
     m_authenticationEnabled(authenticationEnabled)

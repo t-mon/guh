@@ -40,6 +40,7 @@
 
 namespace guhserver {
 
+/*! Constructs a \l{LoggingHandler} with the given \a parent. */
 LoggingHandler::LoggingHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -84,6 +85,7 @@ LoggingHandler::LoggingHandler(QObject *parent) :
     connect(GuhCore::instance()->logEngine(), &LogEngine::logDatabaseUpdated, this, &LoggingHandler::logDatabaseUpdated);
 }
 
+/*! Returns the name of this \l{JsonHandler} namespace which is \b Logging. */
 QString LoggingHandler::name() const
 {
     return "Logging";

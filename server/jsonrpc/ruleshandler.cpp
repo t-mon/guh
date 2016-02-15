@@ -41,6 +41,7 @@
 
 namespace guhserver {
 
+/*! Constructs a \l{RulesHandler} with the given \a parent. */
 RulesHandler::RulesHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -173,6 +174,7 @@ RulesHandler::RulesHandler(QObject *parent) :
     connect(GuhCore::instance(), &GuhCore::ruleConfigurationChanged, this, &RulesHandler::ruleConfigurationChangedNotification);
 }
 
+/*! Returns the name of this \l{JsonHandler} namespace which is \b Rules. */
 QString RulesHandler::name() const
 {
     return "Rules";

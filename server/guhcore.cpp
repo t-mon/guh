@@ -648,6 +648,7 @@ RestServer *GuhCore::restServer() const
     return m_serverManager->restServer();
 }
 
+/*! Returns the pointer to the \l{AuthenticationManager} of this instance. */
 AuthenticationManager *GuhCore::authenticationManager() const
 {
     return m_authenticationManager;

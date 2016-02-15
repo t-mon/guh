@@ -38,6 +38,7 @@
 
 namespace guhserver {
 
+/*! Constructs an \l{EventHandler} with the given \a parent. */
 EventHandler::EventHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -61,6 +62,7 @@ EventHandler::EventHandler(QObject *parent) :
     connect(GuhCore::instance(), &GuhCore::eventTriggered, this, &EventHandler::eventTriggered);
 }
 
+/*! Returns the name of this \l{JsonHandler} namespace which is \b Events. */
 QString EventHandler::name() const
 {
     return "Events";
