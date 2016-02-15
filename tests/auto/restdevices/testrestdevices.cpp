@@ -155,16 +155,13 @@ void TestRestDevices::addConfiguredDevice()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QVariant response = postAndWait(request, params, expectedStatusCode);
-    QVERIFY2(!response.isNull(), "Could not add device");
 
     if (expectedStatusCode == 200) {
         // remove added device
         DeviceId deviceId = DeviceId(response.toMap().value("id").toString());
-        QVERIFY2(!deviceId.isNull(), "invalid device id for removing");
 
         QNetworkRequest  deleteRequest(QUrl(QString("http://localhost:3333/api/v1/devices/%1").arg(deviceId.toString())));
         response = deleteAndWait(deleteRequest);
-        QVERIFY2(!response.isNull(), "Could not delete device");
     }
 }
 
@@ -235,7 +232,6 @@ void TestRestDevices::addPushButtonDevices()
     confirmPairingRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/json");
 
     response = postAndWait(confirmPairingRequest, params, expectedStatusCode);
-    QVERIFY2(!response.isNull(), "Could not confirm pairing device");
 
     if (expectedStatusCode == 200) {
         // remove added device
@@ -313,7 +309,6 @@ void TestRestDevices::addDisplayPinDevices()
     confirmPairingRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/json");
 
     response = postAndWait(confirmPairingRequest, params, expectedStatusCode);
-    QVERIFY2(!response.isNull(), "Could not confirm pairing device");
 
     if (expectedStatusCode == 200) {
         // remove added device
@@ -442,7 +437,6 @@ void TestRestDevices::executeAction()
     QNetworkRequest request(QUrl(QString("http://localhost:3333/api/v1/devices/%1/execute/%2").arg(deviceId.toString()).arg(actionTypeId.toString())));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "text/json");
     QVariant response = postAndWait(request, params, expectedStatusCode);
-    QVERIFY2(!response.isNull(), "Could not read execute action response");
     QCOMPARE(JsonTypes::deviceErrorToString(error), response.toMap().value("error").toString());
 
     // Fetch action execution history from mock device
@@ -619,7 +613,6 @@ void TestRestDevices::editDevices()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "text/json");
 
     response = putAndWait(request, editParams, expectedStatusCode);
-    QVERIFY2(!response.isNull(), "Could not read edit device response");
 
     // if the edit should have been successfull
     if (expectedStatusCode == 200) {
