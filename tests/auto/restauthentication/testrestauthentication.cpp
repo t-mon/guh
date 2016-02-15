@@ -50,6 +50,9 @@ private slots:
 
     void changePassword_data();
     void changePassword();
+
+    void removeAuthorizedConnections();
+
 };
 
 void TestRestAuthentication::testAuthenticate_data()
@@ -148,6 +151,54 @@ void TestRestAuthentication::changePassword()
     if (expectedStatusCode != 200)
         QVERIFY(response.toMap().value("error").toString() == JsonTypes::authenticationErrorToString(error));
 
+}
+
+void TestRestAuthentication::removeAuthorizedConnections()
+{
+    // authorize some times
+    for (int i = 0; i < 10; i++) {
+        QNetworkRequest request(QUrl(QString("http://localhost:3333/api/v1/authentication/login")));
+        QVariant response = getAndWait(request, 200, testUserName, testUserPassword);
+        QVERIFY(response.toMap().contains("token"));
+    }
+
+    // get authorized connections
+    QStringList tokenList;
+    QNetworkRequest request(QUrl(QString("http://localhost:3333/api/v1/authentication/authorizedconnections")));
+    QVariant response = getAndWait(request);
+    foreach (const QVariant connectionVariant, response.toList()) {
+        QVariantMap connection = connectionVariant.toMap();
+        QString token = connection.value("token").toString();
+        if (token != testToken) {
+            tokenList.append(token);
+        }
+    }
+
+    response.clear();
+    QVariantMap params;
+    params.insert("tokens", tokenList);
+    qDebug() << QJsonDocument::fromVariant(params).toJson();
+    request = QNetworkRequest(QUrl(QString("http://localhost:3333/api/v1/authentication/removeconnections")));
+    response = postAndWait(request, params);
+
+    response.clear();
+    request = QNetworkRequest(QUrl(QString("http://localhost:3333/api/v1/authentication/authorizedconnections")));
+    response = getAndWait(request);
+    QCOMPARE(response.toList().count(), 1);
+
+    // verify that removed tokens not working any more
+    foreach (const QVariant tokenVariant, tokenList) {
+        QNetworkRequest request(QUrl(QString("http://localhost:3333/api/v1/devices")));
+        QVariant response = getAndWait(request, 401, tokenVariant.toString());
+        QVERIFY(response.toMap().value("error").toString() == "AuthenticationErrorAuthenicationFailed");
+    }
+
+    restartServer();
+
+    response.clear();
+    request = QNetworkRequest(QUrl(QString("http://localhost:3333/api/v1/authentication/authorizedconnections")));
+    response = getAndWait(request);
+    QCOMPARE(response.toList().count(), 1);
 }
 
 #include "testrestauthentication.moc"

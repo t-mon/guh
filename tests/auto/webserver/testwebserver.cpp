@@ -293,6 +293,7 @@ void TestWebserver::getOptions_data()
     QTest::newRow("get OPTIONS /api/v1/logs") << "/api/v1/logs";
     QTest::newRow("get OPTIONS /api/v1/deviceclasses") << "/api/v1/deviceclasses";
     QTest::newRow("get OPTIONS /api/v1/vendors") << "/api/v1/vendors";
+    QTest::newRow("get OPTIONS /api/v1/authentication") << "/api/v1/authentication";
 }
 
 void TestWebserver::getOptions()

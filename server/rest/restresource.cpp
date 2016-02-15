@@ -83,7 +83,6 @@ RestResource::~RestResource()
 HttpReply *RestResource::createSuccessReply()
 {
     HttpReply *reply = new HttpReply(HttpReply::Ok, HttpReply::TypeSync);
-    //reply->setPayload("200 Ok");
     return reply;
 }
 
@@ -96,6 +95,7 @@ HttpReply *RestResource::createCorsSuccessReply()
     reply->setRawHeader("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS");
     reply->setRawHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
     reply->setRawHeader("Access-Control-Max-Age", "1728000");
+    reply->setPayload("200 Ok");
     return reply;
 }
 

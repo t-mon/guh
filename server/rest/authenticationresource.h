@@ -47,6 +47,7 @@ private:
     HttpReply *proccessGetRequest(const HttpRequest &request, const QStringList &urlTokens) override;
     HttpReply *proccessPutRequest(const HttpRequest &request, const QStringList &urlTokens) override;
     HttpReply *proccessPostRequest(const HttpRequest &request, const QStringList &urlTokens) override;
+    HttpReply *proccessOptionsRequest(const HttpRequest &request, const QStringList &urlTokens) override;
 
     // Get methods
     HttpReply *getLogin(const HttpRequest &request) const;

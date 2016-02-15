@@ -51,6 +51,9 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessRequest(const H
     case HttpRequest::Put:
         reply = proccessPutRequest(request, urlTokens);
         break;
+    case HttpRequest::Options:
+        reply = proccessOptionsRequest(request, urlTokens);
+        break;
     default:
         reply = createErrorReply(HttpReply::BadRequest);
         break;
@@ -83,11 +86,18 @@ guhserver::HttpReply *guhserver::AuthenticationResource::proccessPutRequest(cons
 
 HttpReply *AuthenticationResource::proccessPostRequest(const HttpRequest &request, const QStringList &urlTokens)
 {
-    // DELETE /api/v1/authentication/authorizedconnections
+    // POST /api/v1/authentication/removeconnections
     if (urlTokens.count() == 4 && urlTokens.at(3) == "removeconnections")
-        return getAuthorizedConnections(request);
+        return removeConnections(request);
 
     return createErrorReply(HttpReply::NotImplemented);
+}
+
+HttpReply *AuthenticationResource::proccessOptionsRequest(const HttpRequest &request, const QStringList &urlTokens)
+{
+    Q_UNUSED(request)
+    Q_UNUSED(urlTokens)
+    return RestResource::createCorsSuccessReply();
 }
 
 HttpReply *AuthenticationResource::getLogin(const HttpRequest &request) const
