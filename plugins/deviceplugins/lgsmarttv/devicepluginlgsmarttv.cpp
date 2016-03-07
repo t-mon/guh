@@ -119,7 +119,7 @@ void DevicePluginLgSmartTv::deviceRemoved(Device *device)
     }
 
     TvDevice *tvDevice= m_tvList.key(device);
-    qCDebug(dcLgSmartTv) << "Remove device" << device->paramValue("name").toString();
+    qCDebug(dcLgSmartTv) << "Remove device" << device->name();
     unpairTvDevice(device);
     m_tvList.remove(tvDevice);
     delete tvDevice;
@@ -129,6 +129,8 @@ void DevicePluginLgSmartTv::upnpDiscoveryFinished(const QList<UpnpDeviceDescript
 {
     QList<DeviceDescriptor> deviceDescriptors;
     foreach (UpnpDeviceDescriptor upnpDeviceDescriptor, upnpDeviceDescriptorList) {
+        if (!upnpDeviceDescriptor.friendlyName().contains("LG") || !upnpDeviceDescriptor.deviceType().contains("TV"))
+            continue;
         qCDebug(dcLgSmartTv) << upnpDeviceDescriptor;
         DeviceDescriptor descriptor(lgSmartTvDeviceClassId, "Lg Smart Tv", upnpDeviceDescriptor.modelName());
         ParamList params;

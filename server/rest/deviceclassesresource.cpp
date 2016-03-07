@@ -76,7 +76,7 @@ HttpReply *DeviceClassesResource::proccessRequest(const HttpRequest &request, co
             qCWarning(dcRest) << "Could not parse DeviceClassId:" << urlTokens.at(3);
             return createDeviceErrorReply(HttpReply::BadRequest, DeviceManager::DeviceErrorDeviceClassNotFound);
         }
-        m_deviceClass = GuhCore::instance()->findDeviceClass(deviceClassId);
+        m_deviceClass = GuhCore::instance()->deviceManager()->findDeviceClass(deviceClassId);
         if (!m_deviceClass.isValid()) {
             qCWarning(dcRest) << "DeviceClassId" << deviceClassId.toString() << "not found";
             return createDeviceErrorReply(HttpReply::NotFound, DeviceManager::DeviceErrorDeviceClassNotFound);
@@ -265,7 +265,7 @@ HttpReply *DeviceClassesResource::getDiscoverdDevices(const ParamList &discovery
     qCDebug(dcRest) << "Discover devices for DeviceClass" << m_deviceClass.id();
     qCDebug(dcRest) << discoveryParams;
 
-    DeviceManager::DeviceError status = GuhCore::instance()->discoverDevices(m_deviceClass.id(), discoveryParams);
+    DeviceManager::DeviceError status = GuhCore::instance()->deviceManager()->discoverDevices(m_deviceClass.id(), discoveryParams);
 
     if (status == DeviceManager::DeviceErrorAsync) {
         HttpReply *reply = createAsyncReply();
@@ -285,6 +285,11 @@ void DeviceClassesResource::devicesDiscovered(const DeviceClassId &deviceClassId
         return; // Not the discovery we are waiting for.
 
     qCDebug(dcRest) << "Discovery finished. Found" << deviceDescriptors.count() << "devices.";
+
+    if (m_discoverRequests.value(deviceClassId).isNull()) {
+        qCWarning(dcRest) << "Async reply for discovery does not exist any more (timeout).";
+        return;
+    }
 
     HttpReply *reply = m_discoverRequests.take(deviceClassId);
     reply->setHeader(HttpReply::ContentTypeHeader, "application/json; charset=\"utf-8\";");

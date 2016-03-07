@@ -120,7 +120,15 @@ public:
         UnitPercentage,
         UnitPartsPerMillion,
         UnitEuro,
-        UnitDollar
+        UnitDollar,
+        UnitHerz,
+        UnitAmpere,
+        UnitMilliAmpere,
+        UnitVolt,
+        UnitMilliVolt,
+        UnitVoltAmpere,
+        UnitVoltAmpereReactive,
+        UnitAmpereHour
     };
 
     enum ValueOperator {

@@ -50,7 +50,7 @@ private slots:
 
 void TestEvents::triggerEvent()
 {
-    QList<Device*> devices = GuhCore::instance()->findConfiguredDevices(mockDeviceClassId);
+    QList<Device*> devices = GuhCore::instance()->deviceManager()->findConfiguredDevices(mockDeviceClassId);
     QVERIFY2(devices.count() > 0, "There needs to be at least one configured Mock Device for this test");
     Device *device = devices.first();
 
@@ -67,17 +67,19 @@ void TestEvents::triggerEvent()
 
     // Lets wait for the notification
     spy.wait();
-    QCOMPARE(spy.count(), 1);
-
-    // Make sure the event contains all the stuff we expect
-    Event event = spy.at(0).at(0).value<Event>();
-    QCOMPARE(event.eventTypeId(), mockEvent1Id);
-    QCOMPARE(event.deviceId(), device->id());
+    QVERIFY(spy.count() > 0);
+    for (int i = 0; i < spy.count(); i++ ){
+        Event event = spy.at(i).at(0).value<Event>();
+        if (event.deviceId() == device->id()) {
+            // Make sure the event contains all the stuff we expect
+            QCOMPARE(event.eventTypeId(), mockEvent1Id);
+        }
+    }
 }
 
 void TestEvents::triggerStateChangeEvent()
 {
-    QList<Device*> devices = GuhCore::instance()->findConfiguredDevices(mockDeviceClassId);
+    QList<Device*> devices = GuhCore::instance()->deviceManager()->findConfiguredDevices(mockDeviceClassId);
     QVERIFY2(devices.count() > 0, "There needs to be at least one configured Mock Device for this test");
     Device *device = devices.first();
 
@@ -94,13 +96,15 @@ void TestEvents::triggerStateChangeEvent()
 
     // Lets wait for the notification
     spy.wait();
-    QCOMPARE(spy.count(), 1);
-
-    // Make sure the event contains all the stuff we expect
-    Event event = spy.at(0).at(0).value<Event>();
-    QCOMPARE(event.eventTypeId().toString(), mockIntStateId.toString());
-    QCOMPARE(event.deviceId(), device->id());
-    QCOMPARE(event.param("value").value().toInt(), 11);
+    QVERIFY(spy.count() > 0);
+    for (int i = 0; i < spy.count(); i++ ){
+        Event event = spy.at(i).at(0).value<Event>();
+        if (event.deviceId() == device->id()) {
+            // Make sure the event contains all the stuff we expect
+            QCOMPARE(event.eventTypeId().toString(), mockIntStateId.toString());
+            QCOMPARE(event.param("value").value().toInt(), 11);
+        }
+    }
 }
 
 void TestEvents::params()

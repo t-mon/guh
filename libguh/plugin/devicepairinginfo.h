@@ -1,7 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
- *  Copyright (C) 2014 Michael Zanetti <michael_zanetti@gmx.net>           *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -19,43 +18,33 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef BOBCLIENT_H
-#define BOBCLIENT_H
+#ifndef DEVICEPAIRINGINFO_H
+#define DEVICEPAIRINGINFO_H
 
-#include <QObject>
-#include <QTimer>
-#include <QMap>
-#include <QColor>
-#include <QTime>
+#include "libguh.h"
+#include "typeutils.h"
+#include "types/param.h"
 
-class BobClient : public QObject
+class LIBGUH_EXPORT DevicePairingInfo
 {
-    Q_OBJECT
 public:
-    explicit BobClient(QObject *parent = 0);
-    bool connect(const QString &hostname, int port);
-    bool connected() const;
+    DevicePairingInfo();
+    DevicePairingInfo(const DeviceClassId &deviceClassId, const QString &deviceName, const ParamList &params);
+    DevicePairingInfo(const DeviceClassId &deviceClassId, const QString &deviceName, const DeviceDescriptorId &deviceDescriptorId);
 
-    int lightsCount();
-    QColor currentColor(int channel);
+    DeviceClassId deviceClassId() const;
 
-    void setPriority(int priority);
-    
-signals:
-    
-public slots:
-    void setColor(int channel, QColor color);
-    void sync();
+    QString deviceName() const;
+
+    ParamList params() const;
+
+    DeviceDescriptorId deviceDescriptorId() const;
 
 private:
-    QMap<int, QColor> m_colors; //channel, color
-    void *m_boblight;
-    bool m_connected;
-    QString m_hostname;
-    int m_port;
-
-    QTime m_lastSyncTime;
-    QTimer m_resyncTimer;
+    DeviceClassId m_deviceClassId;
+    QString m_deviceName;
+    ParamList m_params;
+    DeviceDescriptorId m_deviceDescriptorId;
 };
 
-#endif // BOBCLIENT_H
+#endif // DEVICEPAIRINGINFO_H

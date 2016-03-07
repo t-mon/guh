@@ -20,6 +20,7 @@
                     "deviceClassId": "29cd8265-d8bb-4cf9-9080-bfc2cf9787bc",
                     "name": "aWATTar",
                     "createMethods": ["user"],
+                    "deviceIcon": "Energy",
                     "basicTags": [
                         "Service",
                         "Actuator",
@@ -28,12 +29,6 @@
                     ],
                     "paramTypes": [
                         {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Heating system"
-                        },
-                        {
                             "name": "user uuid",
                             "type": "QString",
                             "inputType": "TextLine"
@@ -41,7 +36,7 @@
                         {
                             "name": "token",
                             "type": "QString",
-                            "inputType": "TextLine"
+                            "inputType": "Password"
                         }
                     ],
                     "stateTypes": [

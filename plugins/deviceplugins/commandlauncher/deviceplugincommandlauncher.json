@@ -18,14 +18,9 @@
                     ],
                     "paramTypes": [
                         {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
-                        {
                             "name": "command",
                             "type": "QString",
-                            "inputType": "Url"
+                            "inputType": "TextLine"
                         }
                     ],
                     "stateTypes": [
@@ -60,11 +55,6 @@
                     ],
                     "createMethods": ["user"],
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
                         {
                             "name": "script",
                             "type": "QString",

@@ -23,8 +23,8 @@
 #define DEVICEDESCRIPTION_H
 
 #include "libguh.h"
-#include <typeutils.h>
-#include <types/param.h>
+#include "typeutils.h"
+#include "types/param.h"
 
 #include <QVariantMap>
 

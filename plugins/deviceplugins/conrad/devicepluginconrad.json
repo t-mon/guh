@@ -11,20 +11,15 @@
                 {
                     "deviceClassId": "2bb14180-aa5d-4999-992d-e6d464cff486",
                     "name": "Shutter (RSM900R)",
+                    "idName": "conradShutter",
+                    "deviceIcon": "Blinds",
                     "basicTags": [
                         "Device",
                         "Actuator",
                         "Shading"
                     ],
-                    "idName": "conradShutter",
                     "createMethods": ["user"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        }
-                    ],
+                    "paramTypes": [ ],
                     "actionTypes": [
                         {
                             "id": "e015419c-9df9-4bf5-a439-f1f32aedd1db",

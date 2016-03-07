@@ -11,17 +11,13 @@
                 {
                     "deviceClassId": "3c8f2447-dcd0-4882-8c09-99e579e4d24c",
                     "name": "Wake On Lan",
+                    "deviceIcon": "Network",
                     "basicTags": [
                         "Device",
                         "Actuator"
                     ],
                     "createMethods": ["user"],
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
                         {
                             "name": "mac",
                             "type": "QString",

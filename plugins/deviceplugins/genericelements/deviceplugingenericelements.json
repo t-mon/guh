@@ -12,18 +12,13 @@
                     "deviceClassId": "c0f511f9-70f5-499b-bd70-2c0e9ddd68c4",
                     "idName": "toggleButton",
                     "name": "Toggle Button",
+                    "deviceIcon": "Switch",
                     "basicTags": [
                         "Device",
                         "Actuator"
                     ],
                     "createMethods": ["user"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        }
-                    ],
+                    "paramTypes": [ ],
                     "stateTypes": [
                         {
                             "id": "b5e90567-54aa-49bd-a78a-3c19fb38aaf5",
@@ -39,18 +34,13 @@
                     "deviceClassId": "820b2f2d-0d92-48c8-8fd4-f94ce8fc4103",
                     "idName": "button",
                     "name": "Button",
+                    "deviceIcon": "Switch",
                     "basicTags": [
                         "Device",
                         "Actuator"
                     ],
                     "createMethods": ["user"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        }
-                    ],
+                    "paramTypes": [ ],
                     "actionTypes": [
                         {
                             "id": "01f38af1-b2ab-4ec3-844e-ef52f0f229a9",
@@ -70,18 +60,13 @@
                     "deviceClassId": "430d188c-476d-4825-a9bd-86dfa3094b56",
                     "idName": "onOffButton",
                     "name": "ON/OFF Button",
+                    "deviceIcon": "Switch",
                     "basicTags": [
                         "Device",
                         "Actuator"
                     ],
                     "createMethods": ["user"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        }
-                    ],
+                    "paramTypes": [ ],
                     "actionTypes": [
                         {
                             "id": "892596d2-0863-4807-97da-469b9f7003f2",

@@ -108,6 +108,7 @@ void GuhTestBase::initTestCase()
     // Lets add one instance of the mockdevice
     QVariantMap params;
     params.insert("deviceClassId", "{753f0d32-0468-4d08-82ed-1964aab03298}");
+    params.insert("name", "Test Mock Device");
 
     QVariantList deviceParams;
     QVariantMap httpPortParam;
@@ -171,7 +172,7 @@ QVariant GuhTestBase::injectAndWait(const QString &method, const QVariantMap &pa
 
 QVariant GuhTestBase::checkNotification(const QSignalSpy &spy, const QString &notification)
 {
-    qDebug() << "Got" << spy.count() << "notifications while waiting for" << notification;
+    //qDebug() << "Got" << spy.count() << "notifications while waiting for" << notification;
     for (int i = 0; i < spy.count(); i++) {
         // Make sure the response it a valid JSON string
         QJsonParseError error;
@@ -187,6 +188,27 @@ QVariant GuhTestBase::checkNotification(const QSignalSpy &spy, const QString &no
         }
     }
     return QVariant();
+}
+
+QVariantList GuhTestBase::checkNotifications(const QSignalSpy &spy, const QString &notification)
+{
+    //qDebug() << "Got" << spy.count() << "notifications while waiting for" << notification;
+    QVariantList notificationList;
+    for (int i = 0; i < spy.count(); i++) {
+        // Make sure the response it a valid JSON string
+        QJsonParseError error;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(spy.at(i).last().toByteArray(), &error);
+        if (error.error != QJsonParseError::NoError) {
+            qWarning() << "JSON parser error" << error.errorString();
+            return notificationList;
+        }
+
+        QVariantMap response = jsonDoc.toVariant().toMap();
+        if (response.value("notification").toString() == notification) {
+            notificationList.append(jsonDoc.toVariant());
+        }
+    }
+    return notificationList;
 }
 
 QVariant GuhTestBase::getAndWait(const QNetworkRequest &request, const int &expectedStatus, const QString &userName, const QString &password)
@@ -355,6 +377,7 @@ bool GuhTestBase::enableNotifications()
     if (response.toMap().value("params").toMap().value("enabled").toBool() != true) {
         return false;
     }
+    qDebug() << "Notifications enabled.";
     return true;
 }
 
@@ -366,6 +389,7 @@ bool GuhTestBase::disableNotifications()
     if (response.toMap().value("params").toMap().value("enabled").toBool() != false) {
         return false;
     }
+    qDebug() << "Notifications disabled.";
     return true;
 }
 

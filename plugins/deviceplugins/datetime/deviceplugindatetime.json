@@ -12,33 +12,52 @@
                     "deviceClassId": "fbf665fb-9aca-423f-a5f2-924e50ebe6ca",
                     "idName": "today",
                     "name": "Today",
+                    "deviceIcon": "Time",
                     "basicTags": [
                         "Service",
-                        "Sensor",
                         "Time"
                     ],
                     "createMethods": ["auto"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        }
-                    ],
+                    "paramTypes": [ ],
                     "stateTypes": [
+                        {
+                            "id": "ab16997c-be29-438e-b588-2507d723d264",
+                            "idName": "timeZone",
+                            "name": "timezone",
+                            "type": "QString",
+                            "defaultValue": "-"
+                        },
+                        {
+                            "id": "65d2a5ff-bcab-43a8-b043-f88cf01586f4",
+                            "idName": "city",
+                            "name": "city",
+                            "type": "QString",
+                            "defaultValue": "-"
+                        },
+                        {
+                            "id": "a534bd8b-6826-4d71-b9f9-df1433964b94",
+                            "idName": "country",
+                            "name": "country",
+                            "type": "QString",
+                            "defaultValue": "-"
+                        },
                         {
                             "id": "eb5231ea-6a1b-4d7e-a95f-d49e7b25122e",
                             "name": "day",
                             "idName": "day",
                             "type": "int",
-                            "defaultValue": "1"
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 31
                         },
                         {
                             "id": "fcd8ec96-4488-438a-8b30-58bfe2a7fae2",
                             "name": "month",
                             "idName": "month",
                             "type": "int",
-                            "defaultValue": "1"
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 12
                         },
                         {
                             "id": "a37acc9c-5cfb-4687-adce-e56beb32586f",
@@ -59,7 +78,9 @@
                             "idName": "weekday",
                             "name": "weekday",
                             "type": "int",
-                            "defaultValue": "1"
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 7
                         },
                         {
                             "id": "f627d052-cee6-4727-b9c6-0e935d41e04a",
@@ -148,6 +169,7 @@
                     "deviceClassId": "3f3c7ecc-9915-4e4e-95a1-e11f4f9d174d",
                     "idName": "alarm",
                     "name": "Alarm",
+                    "deviceIcon": "Time",
                     "basicTags": [
                         "Service",
                         "Actuator",
@@ -155,11 +177,6 @@
                     ],
                     "createMethods": ["user"],
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
                         {
                             "name": "monday",
                             "type": "bool",
@@ -245,6 +262,7 @@
                     "deviceClassId": "805c8948-e663-4ba6-aa67-df7446ed7098",
                     "idName": "countdown",
                     "name": "Countdown",
+                    "deviceIcon": "Time",
                     "basicTags": [
                         "Service",
                         "Actuator",
@@ -252,11 +270,6 @@
                     ],
                     "createMethods": ["user"],
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
                         {
                             "name": "seconds",
                             "type": "int",

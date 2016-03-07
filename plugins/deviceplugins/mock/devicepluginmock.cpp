@@ -69,7 +69,6 @@ DeviceManager::DeviceSetupStatus DevicePluginMock::setupDevice(Device *device)
 {
     if (device->deviceClassId() == mockDeviceClassId || device->deviceClassId() == mockDeviceAutoDeviceClassId) {
         qCDebug(dcMockDevice) << "Mockdevice created returning true"
-                              << device->paramValue("name").toString()
                               << device->paramValue("httpport").toInt()
                               << device->paramValue("async").toBool()
                               << device->paramValue("broken").toBool();
@@ -119,7 +118,13 @@ DeviceManager::DeviceSetupStatus DevicePluginMock::setupDevice(Device *device)
 
 void DevicePluginMock::postSetupDevice(Device *device)
 {
+    qCDebug(dcMockDevice) << "Postsetup mockdevice" << device->name();
     if (device->deviceClassId() == mockParentDeviceClassId) {
+        foreach (Device *d, myDevices()) {
+            if (d->deviceClassId() == mockChildDeviceClassId && d->parentId() == device->id()) {
+                return;
+            }
+        }
         onChildDeviceDiscovered(device->id());
     }
 }
@@ -225,6 +230,12 @@ DeviceManager::DeviceError DevicePluginMock::executeAction(Device *device, const
         } else if (action.actionTypeId() == allowedValuesActionTypeId) {
             device->setStateValue(allowedValuesStateTypeId, action.param("allowed values").value().toString());
             return DeviceManager::DeviceErrorNoError;
+        } else if (action.actionTypeId() == doubleActionTypeId) {
+            device->setStateValue(doubleStateTypeId, action.param("double value").value().toDouble());
+            return DeviceManager::DeviceErrorNoError;
+        } else if (action.actionTypeId() == boolActionTypeId) {
+            device->setStateValue(boolStateTypeId, action.param("bool value").value().toBool());
+            return DeviceManager::DeviceErrorNoError;
         } else if (action.actionTypeId() == timeoutActionTypeId) {
             return DeviceManager::DeviceErrorAsync;
         }
@@ -270,9 +281,7 @@ void DevicePluginMock::emitDevicesDiscovered()
     if (m_discoveredDeviceCount > 0) {
         DeviceDescriptor d1(mockDeviceClassId, "Mock Device 1 (Discovered)", "55555");
         ParamList params;
-        Param name("name", "Discovered Mock Device 1");
         Param httpParam("httpport", "55555");
-        params.append(name);
         params.append(httpParam);
         d1.setParams(params);
         deviceDescriptors.append(d1);
@@ -281,9 +290,7 @@ void DevicePluginMock::emitDevicesDiscovered()
     if (m_discoveredDeviceCount > 1) {
         DeviceDescriptor d2(mockDeviceClassId, "Mock Device 2 (Discovered)", "55556");
         ParamList params;
-        Param name("name", "Discovered Mock Device 2");
         Param httpParam("httpport", "55556");
-        params.append(name);
         params.append(httpParam);
         d2.setParams(params);
         deviceDescriptors.append(d2);
@@ -298,19 +305,11 @@ void DevicePluginMock::emitPushButtonDevicesDiscovered()
 
     if (m_discoveredDeviceCount > 0) {
         DeviceDescriptor d1(mockPushButtonDeviceClassId, "Mock Device (Push Button)", "1");
-        ParamList params;
-        Param name("name", "PushButton Mock Device 1");
-        params.append(name);
-        d1.setParams(params);
         deviceDescriptors.append(d1);
     }
 
     if (m_discoveredDeviceCount > 1) {
         DeviceDescriptor d2(mockPushButtonDeviceClassId, "Mock Device (Push Button)", "2");
-        ParamList params;
-        Param name("name", "PushButton Mock Device 2");
-        params.append(name);
-        d2.setParams(params);
         deviceDescriptors.append(d2);
     }
     emit devicesDiscovered(mockPushButtonDeviceClassId, deviceDescriptors);
@@ -326,19 +325,11 @@ void DevicePluginMock::emitDisplayPinDevicesDiscovered()
 
     if (m_discoveredDeviceCount > 0) {
         DeviceDescriptor d1(mockDisplayPinDeviceClassId, "Mock Device (Display Pin)", "1");
-        ParamList params;
-        Param name("name", "DisplayPin Mock Device 1");
-        params.append(name);
-        d1.setParams(params);
         deviceDescriptors.append(d1);
     }
 
     if (m_discoveredDeviceCount > 1) {
         DeviceDescriptor d2(mockDisplayPinDeviceClassId, "Mock Device (Display Pin)", "2");
-        ParamList params;
-        Param name("name", "DisplayPin Mock Device 2");
-        params.append(name);
-        d2.setParams(params);
         deviceDescriptors.append(d2);
     }
 
@@ -390,7 +381,6 @@ void DevicePluginMock::onChildDeviceDiscovered(const DeviceId &parentId)
     qCDebug(dcMockDevice) << "Child device discovered for parent" << parentId.toString();
     DeviceDescriptor mockDescriptor(mockChildDeviceClassId, "Child Mock Device (Auto created)");
     ParamList params;
-    params.append(Param("name", "Child"));
     params.append(Param("parent uuid", parentId));
     mockDescriptor.setParams(params);
 

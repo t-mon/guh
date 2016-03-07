@@ -26,6 +26,7 @@
                     "deviceClassId": "753f0d32-0468-4d08-82ed-1964aab03298",
                     "idName": "mock",
                     "name": "Mock Device",
+                    "deviceIcon": "Tune",
                     "basicTags": [
                         "Device",
                         "Actuator",
@@ -42,20 +43,14 @@
                     ],
                     "paramTypes": [
                         {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Mock device",
-                            "readOnly": true
-                        },
-                        {
                             "name": "httpport",
                             "type": "int"
                         },
                         {
                             "name": "async",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "readOnly": true
                         },
                         {
                             "name": "broken",
@@ -140,14 +135,8 @@
                         "Gateway"
                     ],
                     "createMethods": ["auto"],
+                    "deviceIcon": "Tune",
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Mock device",
-                            "readOnly": true
-                        },
                         {
                             "name": "httpport",
                             "type": "int"
@@ -155,7 +144,8 @@
                         {
                             "name": "async",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "readOnly": true
                         },
                         {
                             "name": "broken",
@@ -238,6 +228,7 @@
                     ],
                     "createMethods": ["discovery"],
                     "setupMethod": "pushButton",
+                    "deviceIcon": "Tune",
                     "pairingInfo": "Wait 3 second before you continue, the push button will be pressed automatically.",
                     "discoveryParamTypes": [
                         {
@@ -245,15 +236,6 @@
                             "type": "int",
                             "defaultValue": 2,
                             "allowedValues": [1, 2]
-                        }
-                    ],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Mock device",
-                            "readOnly": true
                         }
                     ],
                     "stateTypes": [
@@ -281,7 +263,7 @@
                             "idName": "allowedValues",
                             "name": "allowed values",
                             "type": "QString",
-                            "defaultValue": "String value 1",
+                            "defaultValue": "String value 2",
                             "possibleValues": [
                                 "String value 1",
                                 "String value 2",
@@ -289,13 +271,31 @@
                                 "String value 4"
                             ],
                             "writable": true
+                        },
+                        {
+                            "id": "53cd7c55-49b7-441b-b970-9048f20f0e2c",
+                            "idName": "double",
+                            "name": "double value",
+                            "type": "double",
+                            "defaultValue": 0.0,
+                            "minValue": -100.0,
+                            "maxValue": 100.0,
+                            "writable": true
+                        },
+                        {
+                            "id": "e680f7a4-b39e-46da-be41-fa3170fe3768",
+                            "idName": "bool",
+                            "name": "bool value",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
                         }
                     ],
                     "actionTypes": [
                         {
                             "id": "54646e7c-bc54-4895-81a2-590d72d120f9",
                             "idName": "timeout",
-                            "name": "Timout action"
+                            "name": "Timeout action"
                         }
                     ]
                 },
@@ -303,6 +303,7 @@
                     "deviceClassId": "296f1fd4-e893-46b2-8a42-50d1bceb8730",
                     "idName": "mockDisplayPin",
                     "name": "Mock Device (Display Pin)",
+                    "deviceIcon": "Tune",
                     "basicTags": [
                         "Device",
                         "Actuator",
@@ -320,13 +321,6 @@
                         }
                     ],
                     "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Mock device",
-                            "readOnly": true
-                        },
                         {
                             "name": "pin",
                             "type": "QString",
@@ -368,13 +362,31 @@
                                 "String value 4"
                             ],
                             "writable": true
+                        },
+                        {
+                            "id": "53cd7c55-49b7-441b-b970-9048f20f0e2c",
+                            "idName": "double",
+                            "name": "double value",
+                            "type": "double",
+                            "defaultValue": 0.0,
+                            "minValue": -100.0,
+                            "maxValue": 100.0,
+                            "writable": true
+                        },
+                        {
+                            "id": "e680f7a4-b39e-46da-be41-fa3170fe3768",
+                            "idName": "bool",
+                            "name": "bool value",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
                         }
                     ],
                     "actionTypes": [
                         {
                             "id": "54646e7c-bc54-4895-81a2-590d72d120f9",
                             "idName": "timeout",
-                            "name": "Timout action"
+                            "name": "Timeout action"
                         }
                     ]
                 },
@@ -382,20 +394,13 @@
                     "deviceClassId": "a71fbde9-9a38-4bf8-beab-c8aade2608ba",
                     "idName": "mockParent",
                     "name": "Mock Device (Parent)",
+                    "deviceIcon": "Tune",
                     "basicTags": [
                         "Device",
                         "Actuator",
                         "Gateway"
                     ],
                     "createMethods": ["user"],
-                    "paramTypes": [
-                        {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Parent Mock Device"
-                        }
-                    ],
                     "stateTypes": [
                         {
                             "id": "d24ede5f-4064-4898-bb84-cfb533b1fbc0",
@@ -418,12 +423,6 @@
                     ],
                     "paramTypes": [
                         {
-                            "name": "name",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "Child Mock Device"
-                        },
-                        {
                             "name": "parent uuid",
                             "type": "QUuid",
                             "readOnly": true
@@ -444,6 +443,7 @@
                     "deviceClassId": "515ffdf1-55e5-498d-9abc-4e2fe768f3a9",
                     "idName": "mockInputType",
                     "name": "Mock Device (InputTypes)",
+                    "deviceIcon": "Tune",
                     "basicTags": [
                         "Device"
                     ],

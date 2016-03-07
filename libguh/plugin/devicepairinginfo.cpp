@@ -1,7 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
- *  Copyright (C) 2014 Michael Zanetti <michael_zanetti@gmx.net>           *
+ *  Copyright (C) 2016 Simon Stuerz <simon.stuerz@guh.guru>                *
  *                                                                         *
  *  This file is part of guh.                                              *
  *                                                                         *
@@ -19,43 +18,46 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef DEVICEPLUGINBOBLIGHT_H
-#define DEVICEPLUGINBOBLIGHT_H
+#include "devicepairinginfo.h"
 
-#include "plugin/deviceplugin.h"
-
-#include <QProcess>
-
-class BobClient;
-
-class DevicePluginBoblight : public DevicePlugin
+DevicePairingInfo::DevicePairingInfo()
 {
-    Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "guru.guh.DevicePlugin" FILE "devicepluginboblight.json")
-    Q_INTERFACES(DevicePlugin)
+}
 
-public:
-    explicit DevicePluginBoblight();
+DevicePairingInfo::DevicePairingInfo(const DeviceClassId &deviceClassId, const QString &deviceName, const ParamList &params) :
+    m_deviceClassId(deviceClassId),
+    m_deviceName(deviceName),
+    m_params(params)
+{
 
-    DeviceManager::HardwareResources requiredHardware() const override;
+}
 
-    void startMonitoringAutoDevices() override;
-    QPair<DeviceManager::DeviceSetupStatus, QString> setupDevice(Device *device) override;
+DevicePairingInfo::DevicePairingInfo(const DeviceClassId &deviceClassId, const QString &deviceName, const DeviceDescriptorId &deviceDescriptorId) :
+    m_deviceClassId(deviceClassId),
+    m_deviceName(deviceName),
+    m_deviceDescriptorId(deviceDescriptorId)
+{
 
-    QString pluginName() const override;
-    PluginId pluginId() const override;
+}
 
-    QList<ParamType> configurationDescription() const override;
+DeviceClassId DevicePairingInfo::deviceClassId() const
+{
+    return m_deviceClassId;
+}
 
-public slots:
-    QPair<DeviceManager::DeviceError, QString> executeAction(Device *device, const Action &action);
+QString DevicePairingInfo::deviceName() const
+{
+    return m_deviceName;
+}
 
-private slots:
-    void connectToBoblight();
+ParamList DevicePairingInfo::params() const
+{
+    return m_params;
+}
 
-private:
-    BobClient *m_bobClient;
-};
+DeviceDescriptorId DevicePairingInfo::deviceDescriptorId() const
+{
+    return m_deviceDescriptorId;
+}
 
-#endif // DEVICEPLUGINBOBLIGHT_H
