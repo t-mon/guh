@@ -38,11 +38,7 @@
 
 namespace guhserver {
 
-<<<<<<< HEAD
-/*! Constructs an \l{StateHandler} with the given \a parent. */
-=======
 /*! Constructs a new \l{StateHandler} with the given \a parent. */
->>>>>>> e146dfdd6059b8d4b62c3d32733747d121698ba0
 StateHandler::StateHandler(QObject *parent) :
     JsonHandler(parent)
 {
@@ -58,11 +54,7 @@ StateHandler::StateHandler(QObject *parent) :
     setReturns("GetStateType", returns);
 }
 
-<<<<<<< HEAD
-/*! Returns the name of this \l{JsonHandler} namespace which is \b States. */
-=======
 /*! Returns the name of the \l{StateHandler}. In this case \b States.*/
->>>>>>> e146dfdd6059b8d4b62c3d32733747d121698ba0
 QString StateHandler::name() const
 {
     return "States";
