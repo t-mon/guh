@@ -67,7 +67,7 @@ ActionHandler::ActionHandler(QObject *parent) :
     connect(GuhCore::instance(), &GuhCore::actionExecuted, this, &ActionHandler::actionExecuted);
 }
 
-/*! Returns the name of this \l{JsonHandler} namespace which is \b Actions. */
+/*! Returns the name of the \l{ActionHandler}. In this case \b Actions.*/
 QString ActionHandler::name() const
 {
     return "Actions";

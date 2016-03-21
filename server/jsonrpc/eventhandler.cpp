@@ -32,6 +32,11 @@
     \sa Event, JsonHandler, JsonRPCServer
 */
 
+/*! \fn void guhserver::EventHandler::EventTriggered(const QVariantMap &params);
+    This signal is emitted to the API notifications when an \l{Event} triggered.
+    The \a params contain the map for the notification.
+*/
+
 #include "eventhandler.h"
 #include "guhcore.h"
 #include "loggingcategories.h"
@@ -62,7 +67,7 @@ EventHandler::EventHandler(QObject *parent) :
     connect(GuhCore::instance(), &GuhCore::eventTriggered, this, &EventHandler::eventTriggered);
 }
 
-/*! Returns the name of this \l{JsonHandler} namespace which is \b Events. */
+/*! Returns the name of the \l{EventHandler}. In this case \b Events.*/
 QString EventHandler::name() const
 {
     return "Events";
