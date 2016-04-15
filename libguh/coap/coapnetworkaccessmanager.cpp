@@ -709,7 +709,7 @@ void CoapNetworkAccessManager::processBlock2Notification(CoapTarget *target, con
 CoapTarget *CoapNetworkAccessManager::findTarget(const QHostAddress &address)
 {
     foreach (CoapTarget *target, m_coapTargets) {
-        if (target->address() == address)
+        if (QHostAddress(target->address().toIPv6Address()) == QHostAddress(address.toIPv6Address()))
             return target;
     }
     return NULL;
@@ -790,8 +790,7 @@ void CoapNetworkAccessManager::onReadyRead()
         m_socket->readDatagram(data.data(), data.size(), &hostAddress, &port);
     }
 
-    CoapPdu pdu(data);
-    processResponse(pdu, QHostAddress(hostAddress.toIPv6Address()), port);
+    processResponse(CoapPdu(data), QHostAddress(hostAddress.toIPv6Address()), port);
 }
 
 void CoapNetworkAccessManager::onReplyTimeout()
