@@ -24,7 +24,7 @@
 
 CoapTests::CoapTests(QObject *parent) : QObject(parent)
 {
-    m_coap = new Coap(this);
+    m_coap = new CoapNetworkAccessManager(this);
     m_uploadData = QByteArray("                   GNU GENERAL PUBLIC LICENSE \n"
                               "                    Version 3, 29 June 2007 \n"
                               "\n"
@@ -105,9 +105,6 @@ void CoapTests::observeLargeResource()
 
     CoapReply *reply = m_coap->enableResourceNotifications(request);
     spy.wait();
-
-    qDebug() << "====================================";
-    qDebug() << reply;
 
     QVERIFY2(spy.count() > 0, "Did not get a response.");
     QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);

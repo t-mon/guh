@@ -24,7 +24,7 @@
 #include <QLoggingCategory>
 
 // Include dcCoap
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 
 // Core / libguh
 Q_DECLARE_LOGGING_CATEGORY(dcApplication)

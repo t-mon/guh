@@ -162,7 +162,6 @@ QVariant GuhTestBase::injectAndWait(const QString &method, const QVariantMap &pa
 
 QVariant GuhTestBase::checkNotification(const QSignalSpy &spy, const QString &notification)
 {
-    //qDebug() << "Got" << spy.count() << "notifications while waiting for" << notification;
     for (int i = 0; i < spy.count(); i++) {
         // Make sure the response it a valid JSON string
         QJsonParseError error;
@@ -182,7 +181,6 @@ QVariant GuhTestBase::checkNotification(const QSignalSpy &spy, const QString &no
 
 QVariantList GuhTestBase::checkNotifications(const QSignalSpy &spy, const QString &notification)
 {
-    //qDebug() << "Got" << spy.count() << "notifications while waiting for" << notification;
     QVariantList notificationList;
     for (int i = 0; i < spy.count(); i++) {
         // Make sure the response it a valid JSON string
@@ -283,8 +281,6 @@ QVariant GuhTestBase::postAndWait(const QNetworkRequest &request, const QVariant
         reply->deleteLater();
         return QVariant();
     }
-
-
 
     QByteArray data = reply->readAll();
     verifyReply(reply, data, expectedStatus);

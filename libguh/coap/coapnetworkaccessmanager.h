@@ -18,8 +18,8 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef COAP_H
-#define COAP_H
+#ifndef COAPNETWORKACCESSMANAGER_H
+#define COAPNETWORKACCESSMANAGER_H
 
 #include <QObject>
 #include <QHostInfo>
@@ -45,11 +45,11 @@
 
 Q_DECLARE_LOGGING_CATEGORY(dcCoap)
 
-class Coap : public QObject
+class CoapNetworkAccessManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit Coap(QObject *parent = 0, const quint16 &port = 5683);
+    explicit CoapNetworkAccessManager(QObject *parent = 0, const quint16 &port = 5683);
 
     // Methods
     CoapReply *ping(const CoapRequest &request);
@@ -103,4 +103,4 @@ private slots:
     void onReplyFinished();
 };
 
-#endif // COAP_H
+#endif // COAPNETWORKACCESSMANAGER_H

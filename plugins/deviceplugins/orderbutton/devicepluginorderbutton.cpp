@@ -64,7 +64,7 @@ DeviceManager::DeviceSetupStatus DevicePluginOrderButton::setupDevice(Device *de
 
     // Create the CoAP socket if not already created
     if (m_coap.isNull()) {
-        m_coap = new Coap(this);
+        m_coap = new CoapNetworkAccessManager(this);
         connect(m_coap.data(), SIGNAL(replyFinished(CoapReply*)), this, SLOT(coapReplyFinished(CoapReply*)));
         connect(m_coap.data(), SIGNAL(notificationReceived(CoapObserveResource,int,QByteArray)), this, SLOT(onNotificationReceived(CoapObserveResource,int,QByteArray)));
     }

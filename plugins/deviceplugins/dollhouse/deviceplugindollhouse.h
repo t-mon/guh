@@ -24,7 +24,7 @@
 #include "plugin/deviceplugin.h"
 #include "devicemanager.h"
 
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 #include "dollhouselight.h"
 
 #include <QHash>
@@ -47,7 +47,7 @@ public:
 
     void networkManagerReplyReady(QNetworkReply *reply) override;
 private:
-    Coap *m_coap;
+    CoapNetworkAccessManager *m_coap;
 
     QHash<int, Device *> m_asyncSetup;
     QHash<QNetworkReply *, Device *> m_asyncNodeScan;

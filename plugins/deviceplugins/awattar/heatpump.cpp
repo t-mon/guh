@@ -29,7 +29,7 @@ HeatPump::HeatPump(QHostAddress address, QObject *parent) :
     m_reachable(false),
     m_sgMode(0)
 {
-    m_coap = new Coap(this);
+    m_coap = new CoapNetworkAccessManager(this);
     connect(m_coap, SIGNAL(replyFinished(CoapReply*)), this, SLOT(onReplyFinished(CoapReply*)));
 
     QUrl url;

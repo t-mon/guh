@@ -45,7 +45,7 @@
 DevicePluginDollHouse::DevicePluginDollHouse() :
     m_houseReachable(false)
 {
-    m_coap = new Coap(this);
+    m_coap = new CoapNetworkAccessManager(this);
     connect(m_coap, SIGNAL(replyFinished(CoapReply*)), this, SLOT(coapReplyFinished(CoapReply*)));
 }
 

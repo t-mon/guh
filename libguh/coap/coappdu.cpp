@@ -24,7 +24,6 @@
 
     \inmodule libguh
     \ingroup coap
-
 */
 
 /*! \enum CoapPdu::MessageType
@@ -373,6 +372,20 @@ bool CoapPdu::hasOption(const CoapOption::Option &option) const
             return true;
     }
     return false;
+}
+
+/*! Resets this \l{CoapPdu} to the default values. */
+void CoapPdu::clear()
+{
+    m_version = 1;
+    m_messageType = Confirmable;
+    m_statusCode = Empty;
+    m_messageId = 0;
+    m_contentType = TextPlain;
+    m_token.clear();
+    m_payload.clear();
+    m_options.clear();
+    m_error = NoError;
 }
 
 /*! Returns true if this \l{CoapPdu} has no errors. */

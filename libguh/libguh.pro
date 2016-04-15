@@ -43,7 +43,7 @@ HEADERS += devicemanager.h \
            network/upnpdiscovery/upnpdiscoveryrequest.h \
            network/networkmanager.h \
            network/oauth2.h \
-           coap/coap.h \
+           coap/coapnetworkaccessmanager.h \
            coap/coappdu.h \
            coap/coapoption.h \
            coap/coaprequest.h \
@@ -89,7 +89,7 @@ SOURCES += devicemanager.cpp \
            network/upnpdiscovery/upnpdiscoveryrequest.cpp \
            network/networkmanager.cpp \
            network/oauth2.cpp \
-           coap/coap.cpp \
+           coap/coapnetworkaccessmanager.cpp \
            coap/coappdu.cpp \
            coap/coapoption.cpp \
            coap/coaprequest.cpp \

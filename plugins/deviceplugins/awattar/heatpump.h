@@ -25,7 +25,7 @@
 #include <QHostAddress>
 
 
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 #include "coap/coapreply.h"
 #include "coap/coaprequest.h"
 
@@ -44,7 +44,7 @@ private:
     bool m_reachable;
     int m_sgMode;
 
-    Coap *m_coap;
+    CoapNetworkAccessManager *m_coap;
 
     QList<CoapReply *> m_discoverReplies;
     QList<CoapReply *> m_sgModeReplies;

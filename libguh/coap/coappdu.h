@@ -146,7 +146,10 @@ public:
     CoapPduBlock block() const;
 
     bool hasOption(const CoapOption::Option &option) const;
+
+    void clear();
     bool isValid() const;
+    bool isNull() const;
 
     QByteArray pack() const;
 

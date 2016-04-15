@@ -26,7 +26,7 @@
 #include <QHash>
 #include <QDebug>
 
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 
 class DevicePluginOsdomotics : public DevicePlugin
 {
@@ -48,7 +48,7 @@ public:
     DeviceManager::DeviceError executeAction(Device *device, const Action &action) override;
 
 private:
-    Coap *m_coap;
+    CoapNetworkAccessManager *m_coap;
     QHash<QNetworkReply *, Device *> m_asyncSetup;
     QHash<QNetworkReply *, Device *> m_asyncNodeRescans;
 

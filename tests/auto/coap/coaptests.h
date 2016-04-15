@@ -29,7 +29,7 @@
 #include <QSignalSpy>
 #include <QtTest>
 
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 #include "coap/coappdu.h"
 #include "coap/coapreply.h"
 #include "coap/corelinkparser.h"
@@ -43,7 +43,7 @@ public:
     explicit CoapTests(QObject *parent = 0);
 
 private:
-    Coap *m_coap;
+    CoapNetworkAccessManager *m_coap;
     QByteArray m_uploadData;
 
 private slots:

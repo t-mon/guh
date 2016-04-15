@@ -24,7 +24,7 @@
 
 #include "plugin/deviceplugin.h"
 #include "types/action.h"
-#include "coap/coap.h"
+#include "coap/coapnetworkaccessmanager.h"
 
 #include <QHash>
 
@@ -49,7 +49,7 @@ public:
     DeviceManager::DeviceError executeAction(Device *device, const Action &action) override;
 
 private:
-    QPointer<Coap> m_coap;
+    QPointer<CoapNetworkAccessManager> m_coap;
     QHash<QNetworkReply *, DeviceClassId> m_asyncNodeScans;
     QHash<CoapReply *, Device *> m_enableNotification;
     QHash<CoapReply *, Device *> m_pingReplies;

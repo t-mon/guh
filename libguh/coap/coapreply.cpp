@@ -25,14 +25,14 @@
     \inmodule libguh
     \ingroup coap
 
-    The CoapReply class contains the data and headers for a request sent with \l{Coap} client.
+    The CoapReply class contains the data and headers for a request sent with \l{CoapNetworkAccessManager} client.
 
     \note Please don't forget to delete the reply once it is finished.
 
     \section2 Example
 
     \code
-        Coap *coap = new Coap(this);
+        CoapNetworkAccessManager *coap = new CoapNetworkAccessManager(this);
         connect(coap, SIGNAL(replyFinished(CoapReply*)), this, SLOT(onReplyFinished(CoapReply*)));
 
         CoapRequest request(QUrl("coap://example.com/"));
@@ -54,7 +54,7 @@
         }
     \endcode
 
-    \sa Coap, CoapRequest
+    \sa CoapNetworkAccessManager, CoapRequest
 
 */
 

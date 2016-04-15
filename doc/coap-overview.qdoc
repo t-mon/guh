@@ -1,6 +1,6 @@
 /*!
     \page coap-overview.html
-    \title CoAP
+    \title CoAP overview
 
     In order to interact with a CoAP (Constrained Application Protocol) server guh provides following classes:    
 
