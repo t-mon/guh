@@ -22,8 +22,8 @@
     \class Coap
     \brief The client connection class to a CoAP server.
 
-    \ingroup coap
     \inmodule libguh
+    \ingroup coap
 
     The Coap class provides a signal solt based communication with a \l{https://tools.ietf.org/html/rfc7252}{CoAP (Constrained Application Protocol)}
     server. The API of this class was inspired by the \l{http://doc.qt.io/qt-5/qnetworkaccessmanager.html}{QNetworkAccessManager} and was
@@ -79,14 +79,15 @@ Q_LOGGING_CATEGORY(dcCoap, "Coap")
 /*! Constructs a coap access manager with the given \a parent and \a port. */
 Coap::Coap(QObject *parent, const quint16 &port) :
     QObject(parent),
-    m_reply(0)
+    m_port(port)
 {
     m_socket = new QUdpSocket(this);
 
-    if (!m_socket->bind(QHostAddress::Any, port))
-        qCWarning(dcCoap) << "Could not bind to port" << port << m_socket->errorString();
+    if (!m_socket->bind(QHostAddress::Any, m_port))
+        qCWarning(dcCoap) << "Could not bind to port" << m_port << m_socket->errorString();
 
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 }
 
 /*! Performs a ping request to the CoAP server specified in the given \a request.
@@ -99,19 +100,7 @@ CoapReply *Coap::ping(const CoapRequest &request)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply == 0) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
@@ -126,19 +115,8 @@ CoapReply *Coap::get(const CoapRequest &request)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
+    lookupHost(reply);
 
-    // check if there is a request running
-    if (m_reply == 0) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
     return reply;
 }
 
@@ -153,19 +131,7 @@ CoapReply *Coap::put(const CoapRequest &request, const QByteArray &data)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply == 0) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
@@ -181,19 +147,7 @@ CoapReply *Coap::post(const CoapRequest &request, const QByteArray &data)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply == 0) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
@@ -208,19 +162,7 @@ CoapReply *Coap::deleteResource(const CoapRequest &request)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply.isNull()) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
@@ -238,19 +180,7 @@ CoapReply *Coap::enableResourceNotifications(const CoapRequest &request)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply.isNull()) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
@@ -269,27 +199,15 @@ CoapReply *Coap::disableNotifications(const CoapRequest &request)
     connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
     connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
 
-    if (request.url().scheme() != "coap") {
-        reply->setError(CoapReply::InvalidUrlSchemeError);
-        reply->m_isFinished = true;
-        return reply;
-    }
-
-    // check if there is a request running
-    if (m_reply == 0) {
-        m_reply = reply;
-        lookupHost();
-    } else {
-        m_replyQueue.enqueue(reply);
-    }
+    lookupHost(reply);
 
     return reply;
 }
 
-void Coap::lookupHost()
+void Coap::lookupHost(CoapReply *reply)
 {
-    int lookupId = QHostInfo::lookupHost(m_reply->request().url().host(), this, SLOT(hostLookupFinished(QHostInfo)));
-    m_runningHostLookups.insert(lookupId, m_reply);
+    int lookupId = QHostInfo::lookupHost(reply->request().url().host(), this, SLOT(onHostLookupFinished(QHostInfo)));
+    m_runningHostLookups.insert(lookupId, reply);
 }
 
 void Coap::sendRequest(CoapReply *reply, const bool &lookedUp)
@@ -309,18 +227,16 @@ void Coap::sendRequest(CoapReply *reply, const bool &lookedUp)
         if (reply->observationEnable()) {
             // Option number 6
             pdu.addOption(CoapOption::Observe, 0);
-            m_observeResources.insert(pdu.token(), CoapObserveResource(reply->request().url(), pdu.token()));
         } else {
             // if disable, we should use the sam token as the notifications
-            foreach (const CoapObserveResource &resource, m_observeResources.values()) {
+            CoapTarget *target = findTarget(reply);
+            foreach (const CoapObserveResource &resource, target->observationResources()) {
                 if (resource.url() == reply->request().url()) {
                     pdu.setToken(resource.token());
                 }
             }
             // Option number 6
             pdu.addOption(CoapOption::Observe, QByteArray::number(1));
-            if (m_observeResources.contains(pdu.token()))
-                m_observeResources.remove(pdu.token());
         }
     }
 
@@ -386,55 +302,90 @@ void Coap::sendCoapPdu(const QHostAddress &hostAddress, const quint16 &port, con
 
 void Coap::processResponse(const CoapPdu &pdu, const QHostAddress &address, const quint16 &port)
 {
-    // if we are waiting for a reply response
-    if (m_reply) {
+    CoapTarget *target = findTarget(address);
+    if (!target) {
+        qCDebug(dcCoap) << "Got message without request or registered observe resource from" << address.toString() << endl << "<---" << pdu;
+        CoapPdu responsePdu;
+        responsePdu.setMessageType(CoapPdu::Reset);
+        responsePdu.setMessageId(pdu.messageId());
+        responsePdu.setToken(pdu.token());
+        qCDebug(dcCoap) << "--->" << responsePdu;
+        sendCoapPdu(address, port, responsePdu);
+        return;
+    }
+
+    // Check if this is the current reply for this target
+    if (target->currentReply()) {
+        CoapReply *reply = target->currentReply();
         qCDebug(dcCoap) << "<---" << QString("%1:%2").arg(address.toString()).arg(QString::number(port)) << pdu;
+
+        // Check if PDU is valid
         if (!pdu.isValid()) {
-            qCWarning(dcCoap) << "Got invalid PDU";
-            m_reply->setError(CoapReply::InvalidPduError);
-            m_reply->setFinished();
+            qCWarning(dcCoap) << "Received invalid PDU.";
+            reply->setError(CoapReply::InvalidPduError);
+            reply->setFinished();
             return;
         }
 
-        // check if the message is a response to a reply (message id based check)
-        if (m_reply->messageId() == pdu.messageId()) {
-            processIdBasedResponse(m_reply, pdu);
+        // Check if the message is a response to a reply (message id based check)
+        if (reply->messageId() == pdu.messageId()) {
+            processIdBasedResponse(target, reply, pdu);
             return;
         }
 
-        // check if we know the message by token (message token based check)
-        if (m_reply->messageToken() == pdu.token()) {
-            processTokenBasedResponse(m_reply, pdu);
+        // Check if this is a disable notifications Response
+        if (reply->observation() && !reply->observationEnable()) {
+            reply->setMessageType(pdu.messageType());
+            reply->setStatusCode(pdu.statusCode());
+            reply->setContentType(pdu.contentType());
+            reply->appendPayloadData(pdu.payload());
+            reply->setFinished();
             return;
         }
     }
 
+    // Check if we know the message by token (async response)
+    if (target->hasAsyncReply(pdu.token())) {
+        qCDebug(dcCoap) << "<---" << QString("%1:%2").arg(address.toString()).arg(QString::number(port)) << pdu;
 
-    if (m_observerReply) {
-        processBlock2Notification(m_observerReply, pdu);
+        CoapReply *reply = target->asyncReply(pdu.token());
+        // Separate Response received
+        CoapPdu responsePdu;
+        responsePdu.setMessageType(CoapPdu::Acknowledgement);
+        responsePdu.setStatusCode(CoapPdu::Empty);
+        responsePdu.setMessageId(pdu.messageId());
+        qCDebug(dcCoap) << "--->" << responsePdu;
+        sendCoapPdu(reply->hostAddress(), reply->port(), responsePdu);
+
+        reply->setStatusCode(pdu.statusCode());
+        reply->setContentType(pdu.contentType());
+        reply->appendPayloadData(pdu.payload());
+        reply->setFinished();
+        return;
+    }
+
+    // Check if this is a blocked notification reply
+    if (target->hasRunningObservationReply()) {
+        processBlock2Notification(target, pdu);
         return;
     }
 
     // check if this is a notification
-    if (m_observeResources.keys().contains(pdu.token())) {
-        processNotification(pdu, address, port);
+    if (target->hasObservationResource(pdu.token())) {
+        processNotification(target, pdu, address, port);
         return;
     }
 
-    qCDebug(dcCoap) << "Got message without request or registered observe resource." << endl << "<---" << pdu;
-    CoapPdu responsePdu;
-    responsePdu.setMessageType(CoapPdu::Reset);
-    responsePdu.setMessageId(pdu.messageId());
-    responsePdu.setToken(pdu.token());
-    sendCoapPdu(address, port, responsePdu);
 }
 
-void Coap::processIdBasedResponse(CoapReply *reply, const CoapPdu &pdu)
+void Coap::processIdBasedResponse(CoapTarget *target, CoapReply *reply, const CoapPdu &pdu)
 {
     // check if this is an empty ACK response (which indicates a separated response)
     if (pdu.statusCode() == CoapPdu::Empty && pdu.messageType() == CoapPdu::Acknowledgement) {
-        reply->m_timer->stop();
         qCDebug(dcCoap) << "Got empty ACK. Data will be sent separated.";
+        reply->m_timer->stop();
+        target->clearCurrentReply();
+        target->addAsyncReply(reply);
         return;
     }
 
@@ -451,133 +402,16 @@ void Coap::processIdBasedResponse(CoapReply *reply, const CoapPdu &pdu)
     }
 
     // Piggybacked response
+    reply->setMessageType(pdu.messageType());
     reply->setStatusCode(pdu.statusCode());
     reply->setContentType(pdu.contentType());
     reply->appendPayloadData(pdu.payload());
     reply->setFinished();
-}
-
-void Coap::processTokenBasedResponse(CoapReply *reply, const CoapPdu &pdu)
-{
-    // Separate Response
-    CoapPdu responsePdu;
-    responsePdu.setMessageType(CoapPdu::Acknowledgement);
-    responsePdu.setStatusCode(CoapPdu::Empty);
-    responsePdu.setMessageId(pdu.messageId());
-    sendCoapPdu(reply->hostAddress(), reply->port(), responsePdu);
-
-    reply->setStatusCode(pdu.statusCode());
-    reply->setContentType(pdu.contentType());
-    reply->appendPayloadData(pdu.payload());
-    reply->setFinished();
-}
-
-void Coap::processNotification(const CoapPdu &pdu, const QHostAddress &address, const quint16 &port)
-{
-    CoapObserveResource resource = m_observeResources.value(pdu.token());
-    qCDebug(dcCoap) << "<--- Notification" << endl << pdu;
-
-    // check if it is a blockwise notification
-    if (pdu.hasOption(CoapOption::Block2)) {
-        if (!m_observeReplyResource.values().contains(resource)) {
-
-            qCDebug(dcCoap) << "Got first part of blocked notification";
-
-            // First part of the blocked notification
-            // respond with ACK
-            CoapPdu responsePdu;
-            responsePdu.setMessageType(CoapPdu::Acknowledgement);
-            responsePdu.setStatusCode(CoapPdu::Empty);
-            responsePdu.setMessageId(pdu.messageId());
-            responsePdu.setToken(pdu.token());
-
-            qCDebug(dcCoap) << "---> Notification" << endl << responsePdu;
-            sendCoapPdu(address, port, responsePdu);
-
-            // create reply for blockwise transfere
-            if (!m_observerReply.isNull()) {
-                m_observeBlockwise.remove(m_observerReply);
-                m_observerReply->deleteLater();
-            }
-
-            m_observerReply = new CoapReply(CoapRequest(resource.url()), this);
-            m_observerReply->setRequestMethod(CoapPdu::Get);
-            m_observerReply->appendPayloadData(pdu.payload());
-
-            // Lets store the observation number
-            int notificationNumber = 0;
-            foreach (const CoapOption &option, pdu.options()) {
-                if (option.option() == CoapOption::Observe) {
-                    notificationNumber = option.data().toHex().toInt(0, 16);
-                }
-            }
-
-            m_observeReplyResource.insert(m_observerReply, resource);
-            m_observeBlockwise.insert(m_observerReply, notificationNumber);
-
-            connect(m_observerReply.data(), &CoapReply::timeout, this, &Coap::onReplyTimeout);
-            connect(m_observerReply.data(), &CoapReply::finished, this, &Coap::onReplyFinished);
-
-            CoapPdu pdu;
-            pdu.setMessageType(m_observerReply->request().messageType());
-            pdu.setStatusCode(m_observerReply->requestMethod());
-            pdu.createMessageId();
-            pdu.createToken();
-
-            // Add the options in correct order
-            // Option number 3
-            pdu.addOption(CoapOption::UriHost, m_observerReply->request().url().host().toUtf8());
-
-            QStringList urlTokens = m_observerReply->request().url().path().split("/");
-            urlTokens.removeAll(QString());
-
-            // Option number 11
-            foreach (const QString &token, urlTokens)
-                pdu.addOption(CoapOption::UriPath, token.toUtf8());
-
-            // Option number 15
-            if (m_observerReply->request().url().hasQuery())
-                pdu.addOption(CoapOption::UriQuery, m_observerReply->request().url().query().toUtf8());
-
-            // Option number 23
-            pdu.addOption(CoapOption::Block2, CoapPduBlock::createBlock(1, 2, true));
-
-            QByteArray pduData = pdu.pack();
-            m_observerReply->setRequestData(pduData);
-            m_observerReply->setHostAddress(address);
-            m_observerReply->setPort(port);
-            m_observerReply->m_timer->start();
-
-            qCDebug(dcCoap) << "---> Notification" << endl << pdu;
-            sendData(address, port, pduData);
-
-            return;
-        }
-    }
-
-    // respond with ACK
-    CoapPdu responsePdu;
-    responsePdu.setMessageType(CoapPdu::Acknowledgement);
-    responsePdu.setStatusCode(CoapPdu::Empty);
-    responsePdu.setMessageId(pdu.messageId());
-    responsePdu.setToken(pdu.token());
-
-    qCDebug(dcCoap) << "---> Notification" << endl << responsePdu;
-    sendCoapPdu(address, port, responsePdu);
-
-    int notificationNumber = 0;
-    foreach (const CoapOption &option, pdu.options()) {
-        if (option.option() == CoapOption::Observe) {
-            notificationNumber = option.data().toHex().toInt(0, 16);
-        }
-    }
-
-    emit notificationReceived(resource, notificationNumber, pdu.payload());
 }
 
 void Coap::processBlock1Response(CoapReply *reply, const CoapPdu &pdu)
 {
-    qCDebug(dcCoap) << "Sent successfully block #" << pdu.block().blockNumber();
+    qCDebug(dcCoap) << QString("Sent successfully block #%1").arg(pdu.block().blockNumber());
 
     // create next block
     int index = (pdu.block().blockNumber() * 64) + 64;
@@ -645,6 +479,7 @@ void Coap::processBlock2Response(CoapReply *reply, const CoapPdu &pdu)
 
     // check if this was the last block
     if (!pdu.block().moreFlag()) {
+        reply->setMessageType(pdu.messageType());
         reply->setStatusCode(pdu.statusCode());
         reply->setContentType(pdu.contentType());
         reply->setFinished();
@@ -691,18 +526,24 @@ void Coap::processBlock2Response(CoapReply *reply, const CoapPdu &pdu)
     sendData(reply->hostAddress(), reply->port(), pduData);
 }
 
-void Coap::processBlock2Notification(CoapReply *reply, const CoapPdu &pdu)
+void Coap::processNotification(CoapTarget *target, const CoapPdu &pdu, const QHostAddress &address, const quint16 &port)
 {
-    if (!m_observeReplyResource.contains(reply)) {
-        qCWarning(dcCoap) << "Could not find observation resource for" << reply;
+    qCDebug(dcCoap) << "<--- Notification" << endl << pdu;
+
+    // Check if this target has an observation resource for this token
+    if (!target->hasObservationResource(pdu.token())) {
+        qCWarning(dcCoap()) << "No observe resource for this notification.";
         return;
     }
 
-    CoapObserveResource resource = m_observeReplyResource.value(reply);
+    CoapObserveResource resource = target->getObservationResource(pdu.token());
 
-    // respond Block2
-    // check if this was the last block
-    if (!pdu.block().moreFlag()) {
+    // check if it is a blockwise notification
+    if (pdu.hasOption(CoapOption::Block2)) {
+
+        qCDebug(dcCoap) << "Got first part of blocked notification";
+
+        // First part of the blocked notification
         // respond with ACK
         CoapPdu responsePdu;
         responsePdu.setMessageType(CoapPdu::Acknowledgement);
@@ -710,20 +551,122 @@ void Coap::processBlock2Notification(CoapReply *reply, const CoapPdu &pdu)
         responsePdu.setMessageId(pdu.messageId());
         responsePdu.setToken(pdu.token());
 
+        qCDebug(dcCoap) << "---> Notification:" << responsePdu;
+        sendCoapPdu(address, port, responsePdu);
+
+        // create reply for blockwise transfere
+        if (target->hasRunningObservationReply()) {
+            CoapReply *oldReply = target->currentObservationReply();
+            oldReply->deleteLater();
+            target->removeReply(oldReply);
+        }
+
+        CoapReply *reply = new CoapReply(CoapRequest(resource.url()), this);
+        reply->setRequestMethod(CoapPdu::Get);
+        reply->appendPayloadData(pdu.payload());
+
+        // Lets store the observation number
+        int notificationNumber = 0;
+        foreach (const CoapOption &option, pdu.options()) {
+            if (option.option() == CoapOption::Observe) {
+                notificationNumber = option.data().toHex().toInt(0, 16);
+            }
+        }
+
+        target->setCurrentObservationReply(reply);
+        m_observeBlockwise.insert(reply, notificationNumber);
+
+        connect(reply, &CoapReply::timeout, this, &Coap::onReplyTimeout);
+        connect(reply, &CoapReply::finished, this, &Coap::onReplyFinished);
+
+        CoapPdu pdu;
+        pdu.setMessageType(reply->request().messageType());
+        pdu.setStatusCode(reply->requestMethod());
+        pdu.createMessageId();
+        pdu.createToken();
+
+        // Add the options in correct order
+        // Option number 3
+        pdu.addOption(CoapOption::UriHost, reply->request().url().host().toUtf8());
+
+        QStringList urlTokens = reply->request().url().path().split("/");
+        urlTokens.removeAll(QString());
+
+        // Option number 11
+        foreach (const QString &token, urlTokens)
+            pdu.addOption(CoapOption::UriPath, token.toUtf8());
+
+        // Option number 15
+        if (reply->request().url().hasQuery())
+            pdu.addOption(CoapOption::UriQuery, reply->request().url().query().toUtf8());
+
+        // Option number 23
+        pdu.addOption(CoapOption::Block2, CoapPduBlock::createBlock(1, 2, true));
+
+        QByteArray pduData = pdu.pack();
+        reply->setRequestData(pduData);
+        reply->setHostAddress(address);
+        reply->setPort(port);
+        reply->m_timer->start();
+
+        qCDebug(dcCoap) << "---> Notification" << endl << pdu;
+        sendData(address, port, pduData);
+
+    } else {
+
+        // Respond with ACK
+        CoapPdu responsePdu;
+        responsePdu.setMessageType(CoapPdu::Acknowledgement);
+        responsePdu.setStatusCode(CoapPdu::Empty);
+        responsePdu.setMessageId(pdu.messageId());
+        responsePdu.setToken(pdu.token());
+
+        qCDebug(dcCoap) << "---> Notification" << endl << responsePdu;
+        sendCoapPdu(address, port, responsePdu);
+
+        // Get notification number
+        int notificationNumber = 0;
+        foreach (const CoapOption &option, pdu.options()) {
+            if (option.option() == CoapOption::Observe) {
+                notificationNumber = option.data().toHex().toInt(0, 16);
+            }
+        }
+        emit notificationReceived(resource, notificationNumber, pdu.payload());
+    }
+}
+
+void Coap::processBlock2Notification(CoapTarget *target, const CoapPdu &pdu)
+{
+    CoapObserveResource resource = target->getObservationResource(pdu.token());
+    CoapReply *reply = target->currentObservationReply();
+
+    // Respond Block2
+
+    // Check if this was the last block
+    if (!pdu.block().moreFlag()) {
+        // respond with ACK
+        CoapPdu responsePdu;
+        responsePdu.setMessageType(CoapPdu::Acknowledgement);
+        responsePdu.setStatusCode(CoapPdu::Empty);
+        responsePdu.setMessageId(pdu.messageId());
+        responsePdu.setToken(pdu.token());
         qCDebug(dcCoap) << "---> Notification" << endl << responsePdu;
         sendCoapPdu(reply->hostAddress(), reply->port(), responsePdu);
 
         reply->appendPayloadData(pdu.payload());
 
         emit notificationReceived(resource, m_observeBlockwise.take(reply), reply->payload());
-        m_observeReplyResource.remove(m_observerReply);
-        m_observerReply->deleteLater();
-        m_observerReply.clear();
+
+        // Clean up
+        target->removeReply(reply);
+        reply->deleteLater();
         return;
     }
 
+    // Not the last block
     reply->appendPayloadData(pdu.payload());
 
+    // Request the next block data
     CoapPdu nextBlockRequest;
     nextBlockRequest.setContentType(reply->request().contentType());
     nextBlockRequest.setMessageType(reply->request().messageType());
@@ -764,11 +707,37 @@ void Coap::processBlock2Notification(CoapReply *reply, const CoapPdu &pdu)
     sendData(reply->hostAddress(), reply->port(), pduData);
 }
 
-void Coap::hostLookupFinished(const QHostInfo &hostInfo)
+CoapTarget *Coap::findTarget(const QHostAddress &address)
 {
-    CoapReply *reply = m_runningHostLookups.take(hostInfo.lookupId());;
-    reply->setPort(reply->request().url().port(5683));
+    foreach (CoapTarget *target, m_coapTargets) {
+        if (target->address() == address)
+            return target;
+    }
+    return NULL;
+}
 
+CoapTarget *Coap::findTarget(CoapReply *reply)
+{
+    CoapTarget *target = findTarget(reply->hostAddress());
+    if (target && target->hasReply(reply))
+        return target;
+
+    return NULL;
+}
+
+void Coap::onHostLookupFinished(const QHostInfo &hostInfo)
+{
+    CoapReply *reply = m_runningHostLookups.take(hostInfo.lookupId());
+
+    // Check here (not earlier) the url scheme
+    // to make the reply always async, never sync
+    if (reply->request().url().scheme() != "coap") {
+        reply->setError(CoapReply::InvalidUrlSchemeError);
+        reply->setFinished();
+        return;
+    }
+
+    // Check if host lookup was successfull
     if (hostInfo.error() != QHostInfo::NoError) {
         qCDebug(dcCoap) << "Host lookup for" << reply->request().url().host() << "failed:" << hostInfo.errorString();
         reply->setError(CoapReply::HostNotFoundError);
@@ -776,8 +745,26 @@ void Coap::hostLookupFinished(const QHostInfo &hostInfo)
         return;
     }
 
-    QHostAddress hostAddress = hostInfo.addresses().first();
+    QHostAddress hostAddress(hostInfo.addresses().first().toIPv6Address());
     reply->setHostAddress(hostAddress);
+    reply->setPort(reply->request().url().port(5683));
+
+    // Get the target for this host
+    CoapTarget *target = findTarget(hostAddress);
+    if (!target) {
+        // Create the target for this host address
+        target = new CoapTarget(hostAddress, this);
+        m_coapTargets.append(target);
+    }
+
+    // Check if a reply is still running for this target
+    if (target->hasRunningReply()) {
+        target->enqueueReply(reply);
+        return;
+    } else {
+        // set the current reply of target
+        target->setCurrentReply(reply);
+    }
 
     // check if the url had to be looked up
     if (reply->request().url().host() != hostAddress.toString()) {
@@ -786,6 +773,11 @@ void Coap::hostLookupFinished(const QHostInfo &hostInfo)
     } else {
         sendRequest(reply);
     }
+}
+
+void Coap::onSocketError(QAbstractSocket::SocketError error)
+{
+    qCWarning(dcCoap()) << "Socket error" << error << m_socket->errorString();
 }
 
 void Coap::onReadyRead()
@@ -806,35 +798,76 @@ void Coap::onReadyRead()
 void Coap::onReplyTimeout()
 {
     CoapReply *reply = qobject_cast<CoapReply *>(sender());
-    if (reply->m_retransmissions < 5) {
+    if (reply->m_retransmissions < 5)
         qCDebug(dcCoap) << QString("Reply timeout: resending message %1/4").arg(reply->m_retransmissions);
-    }
+
     reply->resend();
+    qCDebug(dcCoap()) << "--->" << CoapPdu(reply->requestData());
     m_socket->writeDatagram(reply->requestData(), reply->hostAddress(), reply->port());
 }
 
 void Coap::onReplyFinished()
 {
     CoapReply *reply = qobject_cast<CoapReply *>(sender());
+    CoapTarget *target = findTarget(reply);
 
-    if (reply == m_observerReply) {
-        m_observeReplyResource.remove(m_observerReply);
-        m_observerReply->deleteLater();
-        m_observerReply.clear();
+    // If this reply has no target, something went wrong before sending
+    if (!target) {
+        emit replyFinished(reply);
+        return;
+    }
+
+    // Check if this is the current running reply
+    if (target->currentReply().data() == reply) {
+        target->removeReply(reply);
+
+        // Check if this was an enable/disable reply
+        if (reply->observation()) {
+            // Check if enable/disable was successfull
+            if (reply->statusCode() == CoapPdu::Content) {
+                if (reply->observationEnable()) {
+                    target->addObservationResource(CoapObserveResource(reply->request().url(), reply->messageToken()));
+                } else {
+                    target->removeObservationResource(reply->messageToken());
+                }
+            }
+        }
+
+        // Start the next request of the queue
+        if (!target->queue().isEmpty()) {
+            CoapReply *newReply = target->dequeueReply();
+            target->setCurrentReply(newReply);
+            lookupHost(newReply);
+        }
+    }
+
+    // Check if this was an async reply
+    if (target->asyncReplies().contains(reply)) {
+        target->removeReply(reply);
+
+        // Start the next request of the queue
+        if (!target->queue().isEmpty() && !target->hasRunningReply()) {
+            CoapReply *newReply = target->dequeueReply();
+            target->setCurrentReply(newReply);
+            lookupHost(newReply);
+        }
+    }
+
+    if (target->hasRunningObservationReply() && target->currentObservationReply() == reply) {
+        target->removeReply(reply);
+        reply->deleteLater();
         qCWarning(dcCoap) << "Notification reply finished wirh error" << reply->errorString();
         return;
     }
 
-    if (reply != m_reply)
-        qCWarning(dcCoap) << "This should never happen!! Please report a bug if you get this message!";
+    // Remove the whole reply from this targert, it is finished
+    target->removeReply(reply);
 
     emit replyFinished(reply);
-    m_reply.clear();
 
-    // check if there is a request in the queue
-    if (!m_replyQueue.isEmpty()) {
-        m_reply = m_replyQueue.dequeue();
-        if (m_reply)
-            lookupHost();
+    // Remove the target if this was the last reply from it
+    if (target->isEmpty()) {
+        m_coapTargets.removeAll(target);
+        target->deleteLater();
     }
 }

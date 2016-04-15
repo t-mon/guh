@@ -49,9 +49,10 @@ HEADERS += devicemanager.h \
            coap/coaprequest.h \
            coap/coapreply.h \
            coap/coappdublock.h \
+           coap/coaptarget.h \
+           coap/coapobserveresource.h \
            coap/corelinkparser.h \
            coap/corelink.h \
-           coap/coapobserveresource.h \
            types/action.h \
            types/actiontype.h \
            types/state.h \
@@ -94,9 +95,10 @@ SOURCES += devicemanager.cpp \
            coap/coaprequest.cpp \
            coap/coapreply.cpp \
            coap/coappdublock.cpp \
+           coap/coaptarget.cpp \
+           coap/coapobserveresource.cpp \
            coap/corelinkparser.cpp \
            coap/corelink.cpp \
-           coap/coapobserveresource.cpp \
            types/action.cpp \
            types/actiontype.cpp \
            types/state.cpp \

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2015-2016 Simon Stuerz <simon.stuerz@guh.guru>           *
  *                                                                         *
  *  This file is part of QtCoap.                                           *
  *                                                                         *
@@ -33,6 +33,7 @@
 #include "coap/coappdu.h"
 #include "coap/coapreply.h"
 #include "coap/corelinkparser.h"
+#include "coap/coapobserveresource.h"
 
 class CoapTests : public QObject
 {
@@ -46,9 +47,11 @@ private:
     QByteArray m_uploadData;
 
 private slots:
+    void observeResource();
+    void observeLargeResource();
+
     void invalidUrl_data();
     void invalidUrl();
-
     void invalidScheme();
 
     void ping();
@@ -57,7 +60,6 @@ private slots:
     void query();
     void subPath();
     void extendedOptionLength();
-
     void specialCharacters();
 
     void extendedDelta_data();
@@ -77,12 +79,7 @@ private slots:
     void largeUpdate();
 
     void multipleCalls();
-
     void coreLinkParser();
-
-    void observeResource();
-    void observeLargeResource();
-
 };
 
 #endif // COAPTESTS_H

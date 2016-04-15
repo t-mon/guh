@@ -23,9 +23,7 @@
 
 #include <QByteArray>
 
-#include "libguh.h"
-
-class LIBGUH_EXPORT CoapPduBlock
+class CoapPduBlock
 {
 public:
     CoapPduBlock();

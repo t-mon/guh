@@ -24,14 +24,14 @@
 #include <QObject>
 #include <QTimer>
 
-#include "libguh.h"
 #include "coappdu.h"
 #include "coapoption.h"
 #include "coaprequest.h"
 
-class LIBGUH_EXPORT CoapReply : public QObject
+class CoapReply : public QObject
 {
     friend class Coap;
+    friend class CoapTarget;
 
     Q_OBJECT
     Q_ENUMS(Error)

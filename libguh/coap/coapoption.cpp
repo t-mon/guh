@@ -22,8 +22,8 @@
     \class CoapOption
     \brief Represents the option of a \l{CoapPdu}.
 
-    \ingroup coap
     \inmodule libguh
+    \ingroup coap
 
     The CoapOption class provides an easy way to create / parse CoAP options of a \l{CoapPdu} (Protocol Data Unit). An options
     can be compared with a HTTP header.
@@ -78,6 +78,13 @@
 #include <QMetaEnum>
 
 CoapOption::CoapOption()
+{
+
+}
+
+CoapOption::CoapOption(const CoapOption::Option &option, const QByteArray &data) :
+    m_option(option),
+    m_data(data)
 {
 
 }

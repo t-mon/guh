@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- *  Copyright (C) 2015 Simon Stuerz <simon.stuerz@guh.guru>                *
+ *  Copyright (C) 2015-2016 Simon Stuerz <simon.stuerz@guh.guru>           *
  *                                                                         *
  *  This file is part of QtCoap.                                           *
  *                                                                         *
@@ -55,11 +55,94 @@ CoapTests::CoapTests(QObject *parent) : QObject(parent)
 
 }
 
+
+void CoapTests::observeResource()
+{
+    CoapRequest request(QUrl("coap://vs0.inf.ethz.ch/obs"));
+    qDebug() << request.url().toString();
+
+    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
+    QSignalSpy notificationSpy(m_coap, SIGNAL(notificationReceived(CoapObserveResource,int,QByteArray)));
+
+    CoapReply *reply = m_coap->enableResourceNotifications(request);
+    spy.wait();
+
+    QVERIFY2(spy.count() > 0, "Did not get a response.");
+    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
+    QCOMPARE(reply->statusCode(), CoapPdu::Content);
+    QCOMPARE(reply->error(), CoapReply::NoError);
+    reply->deleteLater();
+
+    // Wait for notification from server
+    notificationSpy.wait(6000);
+    QVERIFY2(notificationSpy.count() > 0, "Did not get a notification.");
+
+    // Disable notification
+    spy.clear(); notificationSpy.clear();
+    qDebug() << "DISABLE NOTIFICATION";
+    reply = m_coap->disableNotifications(request);
+    spy.wait();
+
+    qDebug() << reply;
+
+    QVERIFY2(spy.count() > 0, "Did not get a response.");
+    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
+    QCOMPARE(reply->statusCode(), CoapPdu::Content);
+    QCOMPARE(reply->error(), CoapReply::NoError);
+    reply->deleteLater();
+
+    notificationSpy.wait(6000);
+    QVERIFY2(notificationSpy.count() == 0, "Got notification after disabeling.");
+}
+
+void CoapTests::observeLargeResource()
+{
+    CoapRequest request(QUrl("coap://vs0.inf.ethz.ch/obs-large"));
+    qDebug() << request.url().toString();
+
+    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
+    QSignalSpy notificationSpy(m_coap, SIGNAL(notificationReceived(CoapObserveResource,int,QByteArray)));
+
+    CoapReply *reply = m_coap->enableResourceNotifications(request);
+    spy.wait();
+
+    qDebug() << "====================================";
+    qDebug() << reply;
+
+    QVERIFY2(spy.count() > 0, "Did not get a response.");
+    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
+    QCOMPARE(reply->statusCode(), CoapPdu::Content);
+    QCOMPARE(reply->error(), CoapReply::NoError);
+    reply->deleteLater();
+
+    notificationSpy.wait(6000);
+    QVERIFY2(notificationSpy.count() > 0, "Did not get a notification.");
+
+    // Disable notification
+    spy.clear(); notificationSpy.clear();
+    qDebug() << "DISABLE NOTIFICATION";
+    reply = m_coap->disableNotifications(request);
+    spy.wait();
+
+    qDebug() << reply;
+
+    QVERIFY2(spy.count() > 0, "Did not get a response.");
+    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
+    QCOMPARE(reply->statusCode(), CoapPdu::Content);
+    QCOMPARE(reply->error(), CoapReply::NoError);
+    reply->deleteLater();
+
+    notificationSpy.wait(6000);
+    QVERIFY2(notificationSpy.count() == 0, "Got notification after disabeling.");
+
+}
+
+
 void CoapTests::invalidUrl_data()
 {
     QTest::addColumn<QUrl>("url");
 
-    QTest::newRow("missing backslash") << QUrl("coap:/coap.me");
+    QTest::newRow("missing backslash") << QUrl("coap:/coap.me:343434");
     QTest::newRow("invalid host") << QUrl("coap://foo.bar");
 }
 
@@ -82,60 +165,20 @@ void CoapTests::invalidUrl()
 void CoapTests::invalidScheme()
 {
     CoapRequest request(QUrl("http://coap.me"));
+    qDebug() << request.url().toString();
 
     QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
-
-    // Get
     CoapReply *reply = m_coap->get(request);
-    spy.wait(1000);
+    spy.wait();
 
     QVERIFY2(reply->isFinished(), "Reply not finished.");
-    QVERIFY2(spy.count() == 0, "Got a response.");
-    QCOMPARE(reply->error(), CoapReply::InvalidUrlSchemeError);
-
-    reply->deleteLater();
-
-    // Post
-    spy.clear();
-    reply = m_coap->post(request);
-    spy.wait(1000);
-
-    QVERIFY2(reply->isFinished(), "Reply not finished.");
-    QVERIFY2(spy.count() == 0, "Got a response.");
-    QCOMPARE(reply->error(), CoapReply::InvalidUrlSchemeError);
-
-    // Put
-    spy.clear();
-    reply = m_coap->put(request);
-    spy.wait(1000);
-
-    QVERIFY2(reply->isFinished(), "Reply not finished.");
-    QVERIFY2(spy.count() == 0, "Got a response.");
-    QCOMPARE(reply->error(), CoapReply::InvalidUrlSchemeError);
-
-    // Delete
-    spy.clear();
-    reply = m_coap->deleteResource(request);
-    spy.wait(1000);
-
-    QVERIFY2(reply->isFinished(), "Reply not finished.");
-    QVERIFY2(spy.count() == 0, "Got a response.");
-    QCOMPARE(reply->error(), CoapReply::InvalidUrlSchemeError);
-
-    // Ping
-    spy.clear();
-    reply = m_coap->ping(request);
-    spy.wait(1000);
-
-    QVERIFY2(reply->isFinished(), "Reply not finished.");
-    QVERIFY2(spy.count() == 0, "Got a response.");
+    QVERIFY2(spy.count() > 0, "Did not get a response.");
     QCOMPARE(reply->error(), CoapReply::InvalidUrlSchemeError);
 }
 
 void CoapTests::ping()
 {
-    CoapRequest request;
-    request.setUrl(QUrl("coap://coap.me/"));
+    CoapRequest request(QUrl("coap://coap.me/"));
     qDebug() << request.url().toString();
 
     QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
@@ -153,13 +196,10 @@ void CoapTests::ping()
 void CoapTests::hello()
 {
     CoapRequest request(QUrl("coap://coap.me/hello"));
-    request.setMessageType(CoapPdu::Confirmable);
-
     qDebug() << request.url().toString();
 
     QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
     CoapReply *reply = m_coap->get(request);
-    qDebug() << reply->isRunning() << reply->errorString();
     spy.wait();
 
     QVERIFY2(spy.count() > 0, "Did not get a response.");
@@ -320,6 +360,8 @@ void CoapTests::separated()
     CoapReply *reply = m_coap->get(request);
     spy.wait(10000);
 
+    qDebug() << reply;
+
     QVERIFY2(spy.count() > 0, "Did not get a response.");
     QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
     QCOMPARE(reply->statusCode(), CoapPdu::Content);
@@ -350,7 +392,6 @@ void CoapTests::deleteResource()
 void CoapTests::post()
 {
     CoapRequest request(QUrl("coap://coap.me:5683/validate"));
-    request.setContentType();
     qDebug() << request.url().toString();
 
     QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
@@ -403,7 +444,6 @@ void CoapTests::jsonMessage()
     QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->payload(), &error);
     QCOMPARE(error.error, QJsonParseError::NoError);
 
-    qDebug() << "====================================";
     qDebug() << jsonDoc.toJson();
 
     reply->deleteLater();
@@ -496,33 +536,6 @@ void CoapTests::largeUpdate()
     reply->deleteLater();
 }
 
-void CoapTests::multipleCalls()
-{
-    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
-
-    QList<CoapReply *> replies;
-
-    replies.append(m_coap->get(CoapRequest(QUrl("coap://coap.me:5683/separate"))));
-    replies.append(m_coap->ping(CoapRequest(QUrl("coap://coap.me"))));
-    replies.append(m_coap->get(CoapRequest(QUrl("coap://coap.me:5683/large"))));
-    replies.append(m_coap->get(CoapRequest(QUrl("coap://coap.me"))));
-    spy.wait(10000);
-    spy.wait();
-    spy.wait(10000);
-    spy.wait();
-
-    QVERIFY2(spy.count() == 4, "Did not get all responses.");
-    spy.clear();
-
-    foreach (CoapReply *reply, replies) {
-        QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
-        QCOMPARE(reply->error(), CoapReply::NoError);
-        reply->deleteLater();
-    }
-
-    qDeleteAll(replies);
-}
-
 void CoapTests::coreLinkParser()
 {
     CoapRequest request(QUrl("coap://coap.me/.well-known/core"));
@@ -541,59 +554,40 @@ void CoapTests::coreLinkParser()
     CoreLinkParser parser(reply->payload());
     QCOMPARE(parser.links().count(), 28);
 
-    foreach (const CoreLink &link, parser.links()) {
-        qDebug() << link;
+    reply->deleteLater();
+}
+
+void CoapTests::multipleCalls()
+{
+    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
+
+    QList<CoapReply *> replies;
+
+    // Multiple calls on multiple hosts
+    replies.append(m_coap->get(CoapRequest(QUrl("coap://coap.me:5683/separate"))));
+    replies.append(m_coap->get(CoapRequest(QUrl("coap://coap.me:5683/separate"))));
+    replies.append(m_coap->ping(CoapRequest(QUrl("coap://coap.me"))));
+    replies.append(m_coap->get(CoapRequest(QUrl("coap://vs0.inf.ethz.ch:5683/separate"))));
+    replies.append(m_coap->get(CoapRequest(QUrl("coap://vs0.inf.ethz.ch:5683/separate"))));
+    replies.append(m_coap->get(CoapRequest(QUrl("coap://vs0.inf.ethz.ch:5683"))));
+    spy.wait(6000);
+    spy.wait(6000);
+    spy.wait(6000);
+    spy.wait(6000);
+    spy.wait(6000);
+    spy.wait(6000);
+
+    qDebug() << spy.count();
+
+    QVERIFY2(spy.count() == 6, "Did not get all responses.");
+    spy.clear();
+
+    foreach (CoapReply *reply, replies) {
+        QCOMPARE(reply->error(), CoapReply::NoError);
+        reply->deleteLater();
     }
 
-    reply->deleteLater();
-}
-
-void CoapTests::observeResource()
-{
-    CoapRequest request(QUrl("coap://vs0.inf.ethz.ch/obs"));
-    qDebug() << request.url().toString();
-
-    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
-    QSignalSpy notificationSpy(m_coap, SIGNAL(notificationReceived(CoapObserveResource,int,QByteArray)));
-
-    CoapReply *reply = m_coap->enableResourceNotifications(request);
-    spy.wait();
-
-    QVERIFY2(spy.count() > 0, "Did not get a response.");
-    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
-    QCOMPARE(reply->statusCode(), CoapPdu::Content);
-    QCOMPARE(reply->error(), CoapReply::NoError);
-    reply->deleteLater();
-
-    notificationSpy.wait(6000);
-    QVERIFY2(notificationSpy.count() > 0, "Did not get a notification.");
-    qDebug() << notificationSpy.first();
-    m_coap->disableNotifications(request);
-    QTest::qWait(5000);
-}
-
-void CoapTests::observeLargeResource()
-{
-    CoapRequest request(QUrl("coap://vs0.inf.ethz.ch/obs-large"));
-    qDebug() << request.url().toString();
-
-    QSignalSpy spy(m_coap, SIGNAL(replyFinished(CoapReply*)));
-    QSignalSpy notificationSpy(m_coap, SIGNAL(notificationReceived(CoapObserveResource,int,QByteArray)));
-
-    CoapReply *reply = m_coap->enableResourceNotifications(request);
-    spy.wait();
-
-    QVERIFY2(spy.count() > 0, "Did not get a response.");
-    QCOMPARE(reply->messageType(), CoapPdu::Acknowledgement);
-    QCOMPARE(reply->statusCode(), CoapPdu::Content);
-    QCOMPARE(reply->error(), CoapReply::NoError);
-    reply->deleteLater();
-
-    notificationSpy.wait(6000);
-    QVERIFY2(notificationSpy.count() > 0, "Did not get a notification.");
-    qDebug() << notificationSpy.first();
-    m_coap->disableNotifications(request);
-    QTest::qWait(5000);
+    qDeleteAll(replies);
 }
 
 QTEST_MAIN(CoapTests)

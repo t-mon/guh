@@ -22,8 +22,8 @@
     \class CoreLinkParser
     \brief Provides an easy way to parse a CoRE link list.
 
-    \ingroup coap
     \inmodule libguh
+    \ingroup coap
 
     \section2 Example
 

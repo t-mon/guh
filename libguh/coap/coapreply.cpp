@@ -22,8 +22,8 @@
     \class CoapReply
     \brief Represents a reply of a CoAP request.
 
-    \ingroup coap
     \inmodule libguh
+    \ingroup coap
 
     The CoapReply class contains the data and headers for a request sent with \l{Coap} client.
 

@@ -22,8 +22,8 @@
     \class CoapRequest
     \brief Represents a request to a CoAP server.
 
-    \ingroup coap
     \inmodule libguh
+    \ingroup coap
 
 */
 
@@ -75,3 +75,16 @@ CoapPdu::MessageType CoapRequest::messageType() const
 {
     return m_messageType;
 }
+
+void CoapRequest::setStatusCode(const CoapPdu::StatusCode &statusCode)
+{
+    m_statusCode = statusCode;
+}
+
+CoapPdu::StatusCode CoapRequest::statusCode()
+{
+    return m_statusCode;
+}
+
+
+
