@@ -306,12 +306,12 @@ void CoapNetworkAccessManager::processResponse(const CoapPdu &pdu, const QHostAd
     CoapTarget *target = findTarget(address);
     if (!target) {
         qCDebug(dcCoap) << "Got message without request or registered observe resource from" << address.toString() << endl << "<---" << pdu;
-        CoapPdu responsePdu;
-        responsePdu.setMessageType(CoapPdu::Reset);
-        responsePdu.setMessageId(pdu.messageId());
-        responsePdu.setToken(pdu.token());
-        qCDebug(dcCoap) << "--->" << responsePdu;
-        sendCoapPdu(address, port, responsePdu);
+        //        CoapPdu responsePdu;
+        //        responsePdu.setMessageType(CoapPdu::Reset);
+        //        responsePdu.setMessageId(pdu.messageId());
+        //        responsePdu.setToken(pdu.token());
+        //        qCDebug(dcCoap) << "--->" << responsePdu;
+        //        sendCoapPdu(address, port, responsePdu);
         return;
     }
 
@@ -791,7 +791,7 @@ void CoapNetworkAccessManager::onReadyRead()
     }
 
     CoapPdu pdu(data);
-    processResponse(pdu, hostAddress, port);
+    processResponse(pdu, QHostAddress(hostAddress.toIPv6Address()), port);
 }
 
 void CoapNetworkAccessManager::onReplyTimeout()
@@ -855,7 +855,7 @@ void CoapNetworkAccessManager::onReplyFinished()
     if (target->hasRunningObservationReply() && target->currentObservationReply() == reply) {
         target->removeReply(reply);
         reply->deleteLater();
-        qCWarning(dcCoap) << "Notification reply finished wirh error" << reply->errorString();
+        qCWarning(dcCoap) << "Notification reply (blocked) finished with error" << reply->errorString();
         return;
     }
 
