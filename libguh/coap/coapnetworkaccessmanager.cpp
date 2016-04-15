@@ -77,7 +77,7 @@
 
 Q_LOGGING_CATEGORY(dcCoap, "CoAP")
 
-/*! Constructs a coap access manager with the given \a parent and \a port. */
+/*! Constructs a coap network access manager with the given \a parent and \a port. */
 CoapNetworkAccessManager::CoapNetworkAccessManager(QObject *parent, const quint16 &port) :
     QObject(parent),
     m_port(port)
@@ -541,8 +541,6 @@ void CoapNetworkAccessManager::processNotification(CoapTarget *target, const Coa
 
     // check if it is a blockwise notification
     if (pdu.hasOption(CoapOption::Block2)) {
-
-        qCDebug(dcCoap) << "Got first part of blocked notification";
 
         // First part of the blocked notification
         // respond with ACK

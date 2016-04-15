@@ -1,6 +1,6 @@
 .\" Manpage for guhd.
 .\" Contact simon.stuerz@guh.guru to correct errors or typos.
-.TH man 1 "January 2016" "1.4" "guhd man page"
+.TH man 1 "April 2016" "1.5" "guhd man page"
 .SH NAME
 guhd \- An open source IoT (Internet of Things) server
 .SH SYNOPSIS
@@ -36,6 +36,8 @@ categories will be printed unless they are explicitly muted with "NoWarnings".
 \fBMain\ debug\ categories:\fR
 .IP \fIApplication\fR\ (default\ enabled)
 Print the debug messages from the core application.
+.IP \fICoAP\fR\ (default\ disabled)
+Print the debug messages from the CoAP sockets in guh.
 .IP \fIConnection\fR\ (default\ enabled)
 Print the debug messages from the TCP connections in guh.
 .IP \fIDeviceManager\fR\ (default\ enabled)

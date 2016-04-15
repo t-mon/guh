@@ -27,11 +27,8 @@
 #include "coappdu.h"
 #include "coapoption.h"
 
-//class CoapNetworkAccessManager;
-
 class CoapRequest
 {
-//    friend class CoapNetworkAccessManager;
 public:
     CoapRequest(const QUrl &url = QUrl());
 

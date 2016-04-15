@@ -101,6 +101,7 @@ private slots:
     void onReadyRead();
     void onReplyTimeout();
     void onReplyFinished();
+
 };
 
 #endif // COAPNETWORKACCESSMANAGER_H
