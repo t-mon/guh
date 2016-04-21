@@ -1599,7 +1599,6 @@ void TestRules::testRuleActionParams_data()
     QTest::newRow("invalid action params2") << invalidAction2 << QVariantMap() << RuleEngine::RuleErrorInvalidRuleActionParameter;
     QTest::newRow("valid action and invalid exit action params1") << action << invalidAction1 << RuleEngine::RuleErrorInvalidRuleActionParameter;
     QTest::newRow("valid action and invalid exit action params2") << action << invalidAction2 << RuleEngine::RuleErrorInvalidRuleActionParameter;
-
 }
 
 void TestRules::testRuleActionParams()

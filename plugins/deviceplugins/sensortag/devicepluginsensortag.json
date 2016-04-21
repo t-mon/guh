@@ -1,0 +1,45 @@
+{
+    "name": "SensorTag",
+    "id": "e304f6e4-5326-45d3-af62-06e131720e1f",
+    "idName": "SensorTag",
+    "vendors": [
+        {
+            "name": "Texas Instruments",
+            "id": "1b003d81-e696-4a6b-b97c-0ad103143534",
+            "deviceClasses": [
+                {
+                    "deviceClassId": "6cb4d034-1a8a-4bdf-b68c-f5c8687354d0",
+                    "idName": "sensorTag",
+                    "name": "SensorTag",
+                    "deviceIcon": "Thermometer",
+                    "basicTags": [
+                        "Device",
+                        "Sensor"
+                    ],
+                    "createMethods": ["discovery"],
+                    "paramTypes": [
+                        {
+                            "name": "name",
+                            "type": "QString",
+                            "inputType": "TextLine"
+                        },
+                        {
+                            "name": "mac address",
+                            "type": "QString",
+                            "inputType": "MacAddress"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "a81b024c-625e-4ce4-a881-70b46b0b1626",
+                            "idName": "connected",
+                            "name": "connected",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

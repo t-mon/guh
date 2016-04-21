@@ -18,37 +18,42 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifndef DEVICEPLUGINSENSORTAG_H
+#define DEVICEPLUGINSENSORTAG_H
+
 #ifdef BLUETOOTH_LE
 
-#include "commandrequest.h"
+#include "plugin/deviceplugin.h"
+#include "bluetooth/bluetoothlowenergydevice.h"
+#include "sensortag.h"
 
-CommandRequest::CommandRequest() :
-    m_service(0),
-    m_characteristic(QLowEnergyCharacteristic()),
-    m_value(QByteArray())
+class DevicePluginSensorTag : public DevicePlugin
 {
-}
+    Q_OBJECT
 
-CommandRequest::CommandRequest(QLowEnergyService *service, const QLowEnergyCharacteristic &characteristic, const QByteArray &value) :
-    m_service(service),
-    m_characteristic(characteristic),
-    m_value(value)
-{
-}
+    Q_PLUGIN_METADATA(IID "guru.guh.DevicePlugin" FILE "devicepluginsensortag.json")
+    Q_INTERFACES(DevicePlugin)
 
-QLowEnergyService *CommandRequest::service()
-{
-    return m_service;
-}
+public:
+    explicit DevicePluginSensorTag();
 
-QLowEnergyCharacteristic CommandRequest::characteristic() const
-{
-    return m_characteristic;
-}
+    DeviceManager::DeviceError discoverDevices(const DeviceClassId &deviceClassId, const ParamList &params) override;
+    DeviceManager::DeviceSetupStatus setupDevice(Device *device) override;
+    DeviceManager::HardwareResources requiredHardware() const override;
+    DeviceManager::DeviceError executeAction(Device *device, const Action &action) override;
 
-QByteArray CommandRequest::value() const
-{
-    return m_value;
-}
+    void bluetoothDiscoveryFinished(const QList<QBluetoothDeviceInfo> &deviceInfos);
+    void deviceRemoved(Device *device) override;
 
+    void guhTimer() override;
+
+private:
+    QHash<SensorTag *, Device *> m_sensors;
+
+private slots:
+    void onConnectionChanged();
+
+};
 #endif // BLUETOOTH_LE
+
+#endif // DEVICEPLUGINSENSORTAG_H
