@@ -19,37 +19,37 @@ The name of the vendor (4b46b4ed-5ec9-4aa4-afc3-92d3f80e6351)</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="80"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="95"/>
         <source>name</source>
-        <extracomment>The name of the paramType (a97d256c-e159-4aa0-bc71-6bd7cd0688b3) of Netatmo Connection</extracomment>
+        <extracomment>The name of the paramType (a97d256c-e159-4aa0-bc71-6bd7cd0688b3) of Indoor Station</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="83"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="80"/>
         <source>username</source>
         <extracomment>The name of the paramType (763c2c10-dee5-41c8-9f7e-ded741945e73) of Netatmo Connection</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="86"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="83"/>
         <source>password</source>
         <extracomment>The name of the paramType (c0d892d6-f359-4782-9d7d-8f74a3b53e3e) of Netatmo Connection</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="89"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="86"/>
         <source>available changed</source>
         <extracomment>The name of the autocreated EventType (2f79bc1d-27ed-480a-b583-728363c83ea6)</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="92"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="89"/>
         <source>available</source>
         <extracomment>The name of the ParamType of StateType (2f79bc1d-27ed-480a-b583-728363c83ea6) of DeviceClass Netatmo Connection</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="95"/>
+        <location filename="../../../../../build-guh-Desktop-Debug/plugins/deviceplugins/netatmo/plugininfo.h" line="92"/>
         <source>Indoor Station</source>
         <extracomment>The name of the DeviceClass (1c809049-04f2-4710-99f5-6ed379a2934f)</extracomment>
         <translation type="unfinished"></translation>
