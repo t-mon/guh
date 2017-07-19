@@ -36,6 +36,7 @@
 #include "websocketserver.h"
 #include "bluetoothserver.h"
 
+#include "guhdiscoveryservice.h"
 #include "cloud/cloudmanager.h"
 #include "time/timemanager.h"
 
@@ -64,6 +65,7 @@ public:
     static GuhCore* instance();
     ~GuhCore();
 
+    void run();
     void destroy();
 
     // Device handling
@@ -129,6 +131,7 @@ private:
     TimeManager *m_timeManager;
 
     NetworkManager *m_networkManager;
+    GuhDiscoveryService *m_guhDiscoveryService;
 
 #ifdef TESTING_ENABLED
     MockTcpServer *m_tcpServer;

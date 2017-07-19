@@ -111,9 +111,9 @@ GuhCore* GuhCore::s_instance = 0;
 /*! Returns a pointer to the single \l{GuhCore} instance. */
 GuhCore *GuhCore::instance()
 {
-    if (!s_instance) {
+    if (!s_instance)
         s_instance = new GuhCore();
-    }
+
     return s_instance;
 }
 
@@ -123,13 +123,18 @@ GuhCore::~GuhCore()
     m_logger->logSystemEvent(m_timeManager->currentDateTime(), false);
 }
 
+void GuhCore::run()
+{
+    m_guhDiscoveryService->enable();
+}
+
 /*! Destroyes the \l{GuhCore} instance. */
 void GuhCore::destroy()
 {
     if (s_instance)
         delete s_instance;
 
-    s_instance = 0;
+    s_instance = nullptr;
 }
 
 /*! Removes a configured \l{Device} with the given \a deviceId and \a removePolicyList. */
@@ -471,6 +476,9 @@ GuhCore::GuhCore(QObject *parent) :
 
     // Create the NetworkManager
     m_networkManager = new NetworkManager(this);
+
+    // Service to make this server discoverable
+    m_guhDiscoveryService = new GuhDiscoveryService(this);
 
     // Connect the configuration changes
     connect(m_configuration, &GuhConfiguration::cloudEnabledChanged, m_cloudManager, &CloudManager::onCloudEnabledChanged);

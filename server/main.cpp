@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 #endif
 
         // create core instance
-        GuhCore::instance();
+        GuhCore::instance()->run();
         int ret = application.exec();
         if (s_logFile.isOpen()) {
             s_logFile.close();
