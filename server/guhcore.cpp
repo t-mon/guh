@@ -125,6 +125,7 @@ GuhCore::~GuhCore()
 
 void GuhCore::run()
 {
+    qCDebug(dcApplication()) << "RUN!!!!!!!!!!!!!!!";
     m_guhDiscoveryService->enable();
 }
 

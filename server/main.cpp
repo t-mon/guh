@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
     s_loggingFilters.insert("Avahi", false);
     s_loggingFilters.insert("Cloud", true);
     s_loggingFilters.insert("NetworkManager", true);
+    s_loggingFilters.insert("DiscoveryService", true);
 
     QHash<QString, bool> loggingFiltersPlugins;
     foreach (const QJsonObject &pluginMetadata, DeviceManager::pluginsMetadata()) {
@@ -254,7 +255,8 @@ int main(int argc, char *argv[])
         qCDebug(dcApplication) << "Snap app common :" << qgetenv("SNAP_COMMON");
 #endif
 
-        // create core instance
+        // Create core instance
+        GuhCore::instance();
         GuhCore::instance()->run();
         int ret = application.exec();
         if (s_logFile.isOpen()) {

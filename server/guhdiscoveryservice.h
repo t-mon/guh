@@ -12,10 +12,10 @@ public:
 
 private:
     QUdpSocket *m_udpSocket;
-
+    quint16 m_port;
 
 private slots:
-    void sendDiscoveryResponse(const QHostAddress &address, const quint16 &port);
+    void sendDiscoveryResponse(const QHostAddress &address);
     void readData();
 
 public slots:
