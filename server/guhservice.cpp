@@ -74,7 +74,6 @@ void GuhService::start()
     qCDebug(dcApplication) << "guhd" << GUH_VERSION_STRING << "started as daemon.";
     qCDebug(dcApplication) << "=====================================";
     GuhCore::instance();
-    GuhCore::instance()->run();
 }
 
 }

@@ -65,7 +65,6 @@ public:
     static GuhCore* instance();
     ~GuhCore();
 
-    void run();
     void destroy();
 
     // Device handling

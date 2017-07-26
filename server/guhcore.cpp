@@ -123,12 +123,6 @@ GuhCore::~GuhCore()
     m_logger->logSystemEvent(m_timeManager->currentDateTime(), false);
 }
 
-void GuhCore::run()
-{
-    qCDebug(dcApplication()) << "RUN!!!!!!!!!!!!!!!";
-    m_guhDiscoveryService->enable();
-}
-
 /*! Destroyes the \l{GuhCore} instance. */
 void GuhCore::destroy()
 {
@@ -480,6 +474,7 @@ GuhCore::GuhCore(QObject *parent) :
 
     // Service to make this server discoverable
     m_guhDiscoveryService = new GuhDiscoveryService(this);
+    m_guhDiscoveryService->enable();
 
     // Connect the configuration changes
     connect(m_configuration, &GuhConfiguration::cloudEnabledChanged, m_cloudManager, &CloudManager::onCloudEnabledChanged);

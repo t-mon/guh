@@ -17,7 +17,6 @@ void GuhDiscoveryService::sendDiscoveryResponse(const QHostAddress &address)
     // TODO: create defined response with information
     qCDebug(dcDiscoveryService()) << "Sending response to client 10 times" << address.toString();
 
-
     QVariantMap dataMap;
     dataMap.insert("name", GuhCore::instance()->configuration()->serverName());
     dataMap.insert("server", "guhIO");
@@ -29,9 +28,7 @@ void GuhDiscoveryService::sendDiscoveryResponse(const QHostAddress &address)
     dataMap.insert("webServerPort", GuhCore::instance()->configuration()->webServerPort());
     dataMap.insert("webSocketServerPort", GuhCore::instance()->configuration()->webSocketPort());
 
-    for (int i = 0; i < 10; i++) {
-        m_udpSocket->writeDatagram(QJsonDocument::fromVariant(dataMap).toJson(QJsonDocument::Compact) + "\n", address, m_port);
-    }
+    m_udpSocket->writeDatagram(QJsonDocument::fromVariant(dataMap).toJson(QJsonDocument::Compact) + "\n", address, m_port);
 }
 
 void GuhDiscoveryService::readData()
@@ -44,7 +41,7 @@ void GuhDiscoveryService::readData()
         socket->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
     }
 
-    qCDebug(dcDiscoveryService()) << "Recived data from" << senderAddress.toString() << datagram;
+    qCDebug(dcDiscoveryService()) << "Received data from" << senderAddress.toString() << datagram;
     if (datagram.contains("Hello guh!"))
         sendDiscoveryResponse(senderAddress);
 
@@ -52,18 +49,22 @@ void GuhDiscoveryService::readData()
 
 void GuhDiscoveryService::enable()
 {
+    if (m_udpSocket) {
+        m_udpSocket->deleteLater();
+        m_udpSocket = nullptr;
+    }
+
     m_udpSocket = new QUdpSocket(this);
 
-    if (!m_udpSocket->bind(m_port, QAbstractSocket::ShareAddress)) {
+    if (!m_udpSocket->bind(QHostAddress::Any, m_port, QAbstractSocket::ShareAddress)) {
         qCWarning(dcDiscoveryService()) << "Could not bind to port" << m_port;
-        delete m_udpSocket;
+        m_udpSocket->deleteLater();
         m_udpSocket = nullptr;
         return;
     }
 
-    qCDebug(dcDiscoveryService) << "Started guh discovery service successfully";
-
-    connect(m_udpSocket, SIGNAL(readyRead()), this, SLOT(readData()));
+    qCDebug(dcDiscoveryService) << "Started guh discovery service successfully on port" << m_port;
+    connect(m_udpSocket, &QUdpSocket::readyRead, this, &GuhDiscoveryService::readData);
 }
 
 void GuhDiscoveryService::disable()
